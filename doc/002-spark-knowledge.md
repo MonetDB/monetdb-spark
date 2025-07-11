@@ -30,3 +30,7 @@ The Internals of Spark SQL (Apache Spark 2.4.5)<br>
 https://jaceklaskowski.gitbooks.io/mastering-spark-sql/content/<br>
 Maybe a little outdated but might be useful to understand how to work with all those API's.
 Has chapters with titles like "Datasets vs DataFrames vs RDDs".
+
+Pyspark Tutorial: Getting Started with Pyspark<br>
+https://www.datacamp.com/tutorial/pyspark-tutorial-getting-started-with-pyspark
+Also need to know more about how to do basic things with Spark.
