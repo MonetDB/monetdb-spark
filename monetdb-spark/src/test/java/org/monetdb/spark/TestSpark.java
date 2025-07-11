@@ -72,4 +72,37 @@ public class TestSpark {
 		}
 		assertFalse(rs.next());
 	}
+
+	@Test
+	public void testOverwrite() throws SQLException {
+		int n = 10;
+		connect();
+		stmt.execute("DROP TABLE IF EXISTS foo");
+
+		spark();
+
+		Dataset<Long> spine = spark.range(n);
+		Dataset<Row> df = spine
+				.withColumn("b", col("id").mod(2).equalTo(0))
+				.withColumn("t", concat(lit("x"), col("id")));
+
+		df
+				.write()
+				.format("jdbc")
+				.mode(SaveMode.Overwrite)
+				.option("url", Config.databaseUrl())
+				.option("dbtable", "foo")
+				.option("truncate", true)
+				.option("numPartitions", 1)
+				.save();
+
+		ResultSet rs = stmt.executeQuery("SELECT id, b, t FROM foo ORDER BY id");
+		for (int i = 0; i < n; i++) {
+			assertTrue(rs.next());
+			assertEquals(i, rs.getInt(1));
+			assertEquals(i % 2 == 0, rs.getBoolean(2));
+			assertEquals("x" + i, rs.getString(3));
+		}
+		assertFalse(rs.next());
+	}
 }
