@@ -22,7 +22,7 @@ Currently, it works with native Java applications, with spark-shell
 as long as the `"driver"` option is passed, and we can't get it to
 work with PySpark.
 
-For more details, see [005-dialect](../docs/005-dialect.md).
+For more details, see [005-dialect](notes/005-dialect.md).
 
 
 ## The Writer
