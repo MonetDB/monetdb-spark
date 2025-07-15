@@ -1,6 +1,6 @@
 # Dialect
 
-MonetDB-Spark provides `org.monetdb.spark.dialect.MonetDialect`,
+MonetDB-Spark provides `org.monetdb.spark.MonetDialect`,
 a custom subclass of `org.apache.spark.sql.jdbc.JdbcDialect`.
 Without it, the built-in JDBC writer can't create tables with BOOLEAN
 columns.

@@ -1,4 +1,4 @@
-package org.monetdb.spark.dialect;
+package org.monetdb.spark;
 
 import org.apache.spark.sql.jdbc.JdbcDialect;
 import org.apache.spark.sql.jdbc.JdbcType;

@@ -1,1 +1,1 @@
-org.monetdb.spark.dialect.MonetDialect
+org.monetdb.spark.MonetDialect
