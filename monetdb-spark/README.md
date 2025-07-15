@@ -18,7 +18,7 @@ In particular,
 
 Spark should automatically pick up the dialect as long as it's on the
 class path. We're having some problems with that, however.
-Currently it works with native Java applications, with spark-shell
+Currently, it works with native Java applications, with spark-shell
 as long as the `"driver"` option is passed, and we can't get it to
 work with PySpark.
 

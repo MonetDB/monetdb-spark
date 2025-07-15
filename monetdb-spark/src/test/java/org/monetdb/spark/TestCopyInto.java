@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -34,12 +35,12 @@ public class TestCopyInto {
 	}
 
 	@BeforeAll
-	public static void staticStartSpark() {
-		Config.sparkSession();
+	public static void startSpark() throws IOException {
+		Config.sparkSession().close();
 	}
 
 	@BeforeEach
-	public void startSpark() {
+	public void startSparkSession() {
 		spark = Config.sparkSession();
 	}
 

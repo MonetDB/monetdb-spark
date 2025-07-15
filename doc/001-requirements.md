@@ -47,5 +47,5 @@ form, how to access it, how to deal with type differences between the
 Spark data and the MonetDB table definition, etc. Also, MonetDB doesn't
 currently support Parquet files ON CLIENT.
 
-So for the time being we aim for the low hanging fruit of creating an
+So for the time being we aim for the low-hanging fruit of creating an
 efficient `dataframe.write` implementation for MonetDB.

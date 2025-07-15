@@ -21,7 +21,7 @@ public class DefaultSource implements TableProvider {
 	@Override
 	public boolean supportsExternalMetadata() {
 		// Return true so inferSchema() won't be called.
-		// Instead we'll look at the dataframe schema and the table schema
+		// Instead, we'll look at the dataframe schema and the table schema
 		// and see if the dataframe can be converted to something the table
 		// can hold.
 		return true;
