@@ -13,6 +13,8 @@ import java.text.MessageFormat;
 public class Collector {
 	final Conversion[] conversions;
 	final ByteArrayOutputStream[] buffers;
+	private int rowCount = 0;
+	private int totalSize = 0;
 
 	public Collector(StructField[] fields, ColumnType[] cols) throws ConversionError {
 		int n = fields.length;
@@ -33,21 +35,36 @@ public class Collector {
 		}
 	}
 
-	public void convertRow(SpecializedGetters row) {
+	public int getRowCount() {
+		return rowCount;
+	}
+
+	public int getTotalSize() {
+		return totalSize;
+	}
+
+	public int convertRow(SpecializedGetters row) {
 		try {
 			for (int i = 0; i < conversions.length; i++) {
+				int oldSize = buffers[i].size();
 				conversions[i].convert(row, i);
+				int newSize = buffers[i].size();
+				totalSize += newSize - oldSize;
 			}
 		} catch (IOException e) {
 			// Can't really happen, it's a string buffer, there is no IO
 			throw new RuntimeException(e);
 		}
+		rowCount += 1;
+		return totalSize;
 	}
 
 	public void clear() {
 		for (ByteArrayOutputStream buffer : buffers) {
 			buffer.reset();
 		}
+		rowCount = 0;
+		totalSize = 0;
 	}
 
 	public String copyStatement(String quotedTableName) {

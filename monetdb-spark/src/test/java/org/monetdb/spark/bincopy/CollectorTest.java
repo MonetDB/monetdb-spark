@@ -99,12 +99,19 @@ class CollectorTest {
 		row = new TestRow(TRUE, 3, "three");
 		col.convertRow(row);
 
+
 		// booleans are a single byte
 		assertEquals("$01$00$01", formatCollected(0));
 		// integers are 4 bytes, little endian
 		assertEquals("$01$00$00$00$02$00$00$00$03$00$00$00", formatCollected(1));
 		// strings are NUL separated
 		assertEquals("one$00two$00three$00", formatCollected(2));
+
+		assertEquals(3, col.getRowCount());
+		int col1Size = 3; // one byte per row
+		int col2Size = 12; // four bytes per row
+		int col3Size = 3 + 1 + 3 + 1 + 5 + 1;
+		assertEquals(col1Size + col2Size + col3Size, col.getTotalSize());
 	}
 
 	@Test
@@ -163,8 +170,6 @@ class CollectorTest {
 
 				assertFalse(rs.next());
 			}
-
-
 		}
 	}
 }
