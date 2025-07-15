@@ -4,7 +4,7 @@ The goal is to be able to efficiently upload data from Spark to MonetDB
 with a command similar to
 
 ```python
-df.write.format("org.monetdb.spark.MonetDBSource") \
+df.write.format("org.monetdb.spark") \
     .option("url", "jdbc:monetdb://localhost/demo") \
     .option("dbtable", "mytable") \
     .option("user", "monetdb") \

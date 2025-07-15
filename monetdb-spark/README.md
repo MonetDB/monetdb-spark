@@ -28,7 +28,7 @@ For more details, see [005-dialect](../docs/005-dialect.md).
 ## The Writer
 
 The Writer can be activated by replacing `.format("jdbc')`
-with `.format("org.monetdb.spark.MonetSource")`.
+with `.format("org.monetdb.spark")`.
 The new writer does not support all options and modes that the
 full JDBC writer supports. In particular, it only supports writing
 to existing tables (`.mode("append")`) and only the options `"url"`,
