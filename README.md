@@ -36,6 +36,22 @@ and "dbtable".
 
 This is how it can be used:
 
+## Building
+
+Run `make` in monetdb-spark/.
+
+Or `make test`, this assumes there is a database `testspark` to connect to.
+Use `make test TESTDB=bla` to target another database.
+The following are all equivalent:
+
+* `TESTDB=jdbc:monetdbs://somehost:12345/demo?user=monetdb&password=monetdb`, 
+  a full-fledged JDBC URL
+* `TESTDB=jdbc:monetdb://localhost/demo`, you can omit user and password.
+* `TESTDB=demo`, you can also omit `jdbc://localhost/`.
+
+
+
+
 
 
 [JdbcDialect]: https://spark.apache.org/docs/latest/api/java/org/apache/spark/sql/jdbc/JdbcDialect.html
