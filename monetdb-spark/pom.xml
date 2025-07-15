@@ -34,11 +34,18 @@
             <version>12.1-SNAPSHOT</version>
         </dependency>
 
-        <!-- the _2.12 suffix is due to its being built for Scala 2.12.. we don't caree -->
+        <!-- the _2.12 suffix is due to its being built for Scala 2.12.. we don't really care -->
         <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-sql_2.13</artifactId>
             <version>4.0.0</version>
+        </dependency>
+
+        <!-- used for byte order conversions -->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.19.0</version>
         </dependency>
 
         <dependency>
