@@ -14,6 +14,18 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <repositories>
+        <repository>
+            <id>central</id>
+            <name>Maven Central</name>
+            <url>https://repo1.maven.org/maven2/</url>
+        </repository>
+        <repository>
+            <id>clojars.org</id>
+            <url>https://repo.clojars.org</url>
+        </repository>
+    </repositories>
+
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -26,12 +38,11 @@
         </dependencies>
     </dependencyManagement>
 
-
     <dependencies>
         <dependency>
-            <groupId>org.monetdb</groupId>
+            <groupId>monetdb</groupId>
             <artifactId>monetdb-jdbc</artifactId>
-            <version>12.1-SNAPSHOT</version>
+            <version>12.0</version>
         </dependency>
 
         <!-- the _2.12 suffix is due to its being built for Scala 2.12.. we don't really care -->
