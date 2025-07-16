@@ -9,7 +9,7 @@ In particular,
    is that boolean columns are created with type 'BOOLEAN' instead
    of 'BIT'.
 
-2. `org.monetdb.spark.MonetSource`<br>
+2. `org.monetdb.spark`<br>
    A write-only [Spark Data Source] that allows writing to MonetDB much
    faster than Spark's built-in JDBC writer can.
 
