@@ -2,10 +2,12 @@ package org.monetdb.spark.source;
 
 import org.monetdb.jdbc.MonetConnection;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.sql.*;
 
 public class Destination implements Serializable {
+	@Serial
 	private static final long serialVersionUID = 0L;
 
 	private String url;
@@ -27,14 +29,6 @@ public class Destination implements Serializable {
 		else
 			conn =  DriverManager.getConnection(url);
 		return conn.unwrap(MonetConnection.class);
-	}
-
-	public static String quoteString(String str) {
-		return "R'" + str.replace("'", "''") + "'";
-	}
-
-	public static String quoteIdentifier(String id) {
-		return "\"" + id.replace("\"", "\"\"") + "\"";
 	}
 
 	public ColumnType[] getColumnTypes() throws SQLException {

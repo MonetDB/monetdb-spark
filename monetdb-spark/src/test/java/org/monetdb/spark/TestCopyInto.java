@@ -54,11 +54,10 @@ public class TestCopyInto {
 
 	private Dataset<Row> createTestData() {
 		Dataset<Long> spine = spark.range(N);
-		Dataset<Row> df = spine
+		return spine
 				.withColumn("b", col("id").mod(2).equalTo(0))
 				.withColumn("f", col("id").cast("Double").divide(2.0))
 				.withColumn("t", concat(lit("x"), col("id")));
-		return df;
 	}
 
 	private void verifyTestData() throws SQLException {

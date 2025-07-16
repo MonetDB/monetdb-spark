@@ -1,11 +1,13 @@
 package org.monetdb.spark.source;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.sql.JDBCType;
 import java.util.Objects;
 
 public final class ColumnType implements Serializable {
-	static final long serialVersionUID = 0L;
+	@Serial
+	private static final long serialVersionUID = 0L;
 
 	private final JDBCType type;
 	private final int precision;

@@ -14,18 +14,13 @@ import java.sql.Statement;
 
 public class MonetDataWriter implements DataWriter<InternalRow> {
 	private final Destination dest;
-	private final StructType structType;
-	private final ColumnType[] columnTypes;
 	private final Collector collector;
 
 	private MonetConnection conn;
 	private Statement stmt;
-	private boolean cancelled = false; // may be set by the upload handler
 
 	public MonetDataWriter(Destination dest, StructType structType, ColumnType[] columnTypes) {
 		this.dest = dest;
-		this.structType = structType;
-		this.columnTypes = columnTypes;
 		try {
 			collector = new Collector(structType.fields(), columnTypes);
 		} catch (ConversionError e) {
@@ -100,11 +95,6 @@ public class MonetDataWriter implements DataWriter<InternalRow> {
 			int idx = Integer.parseInt(filename);
 			OutputStream stream = handle.getStream();
 			collector.writeCollected(idx, stream);
-		}
-
-		@Override
-		public void uploadCancelled() {
-			cancelled = true;
 		}
 	}
 }

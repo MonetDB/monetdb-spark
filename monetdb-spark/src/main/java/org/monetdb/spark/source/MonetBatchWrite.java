@@ -8,12 +8,12 @@ import org.apache.spark.sql.types.StructType;
 
 /**
  * Manage the process of writing to the table.
- *
+ * <p>
  * It runs on the driver.
  * Its main job is to create a DataWriterFactory. The Factory is serializable
  * so it can be shipped to the executors where it will be used to instantiate
  * an actual DataWriter.
- *
+ * <p>
  * Exists in the driver.
  */
 public class MonetBatchWrite implements BatchWrite {

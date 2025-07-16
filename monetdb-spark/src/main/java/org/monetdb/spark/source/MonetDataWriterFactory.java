@@ -5,13 +5,15 @@ import org.apache.spark.sql.connector.write.DataWriter;
 import org.apache.spark.sql.connector.write.DataWriterFactory;
 import org.apache.spark.sql.types.StructType;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
  * Passed from driver to executors, holds everything the executors must know.
  */
 public class MonetDataWriterFactory implements DataWriterFactory, Serializable {
-	static final long serialVersionUID = 0L;
+	@Serial
+	private static final long serialVersionUID = 0L;
 
 	private final Destination dest;
 	private final StructType structType;
