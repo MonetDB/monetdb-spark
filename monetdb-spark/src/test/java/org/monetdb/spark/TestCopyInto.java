@@ -1,13 +1,10 @@
 package org.monetdb.spark;
 
-import org.apache.spark.sql.Dataset;
-import org.apache.spark.sql.Row;
-import org.apache.spark.sql.SaveMode;
-import org.apache.spark.sql.SparkSession;
-import org.junit.jupiter.api.AutoClose;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.apache.spark.sql.*;
+import org.apache.spark.sql.types.BooleanType;
+import org.apache.spark.sql.types.ByteType;
+import org.apache.spark.sql.types.DataType;
+import org.junit.jupiter.api.*;
 import org.monetdb.spark.source.ConversionError;
 
 import java.io.IOException;
@@ -15,10 +12,10 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 
 import static org.apache.spark.sql.functions.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Test Spark itself, to get to know it
@@ -102,7 +99,7 @@ public class TestCopyInto {
 				.mode(SaveMode.Append)
 				.option("url", Config.databaseUrl())
 				.option("dbtable", TABLE)
-				.option("numPartitions", 1) // first test with one partition
+				.option("numPartitions", 1) // ignored!
 				.save();
 
 		// Verify the result
@@ -137,6 +134,92 @@ public class TestCopyInto {
 		}
 
 		stmt.execute("DROP TABLE " + OTHER_TABLE);
+	}
+
+	@Test
+	public void testBooleanType() {
+		testRoundTrip(10, col("id").mod(2).equalTo(0));
+	}
+
+	@Test
+	public void testByteType() {
+		testRoundTrip(10, "Byte");
+	}
+
+	@Disabled // it maps ShortType to INTEGER, then everything falls apart
+	@Test
+	public void testShortType() {
+		testRoundTrip(10, "Short");
+	}
+
+	@Test
+	public void testIntegerType() {
+		testRoundTrip(10, "Integer");
+	}
+
+	@Test
+	public void testLongType() {
+		testRoundTrip(10, "Long");
+	}
+
+	@Test
+	public void testFloatType() {
+		testRoundTrip(10, col("id").cast("Float").divide(2.0));
+	}
+
+	@Test
+	public void testDoubleType() {
+		testRoundTrip(10, col("id").cast("Double").divide(2.0));
+	}
+
+	@Test
+	public void testStringType() {
+		testRoundTrip(10, concat(lit("x"), col("id")));
+	}
+
+	private void testRoundTrip(int n, String typeName) {
+		Column expr = col("id").cast(typeName);
+		testRoundTrip(n, expr);
+	}
+
+	private void testRoundTrip(int n, Column expr) {
+		Dataset<Row> orig = spark.range(n).withColumn("x", expr);
+		testRoundTrip(orig);
+	}
+
+	private void testRoundTrip(Dataset<Row> orig) {
+		// Create the table
+		orig
+				.filter(lit(false))
+				.write()
+				.format("jdbc")
+				.mode(SaveMode.Overwrite)
+				.option("url", Config.databaseUrl())
+				.option("dbtable", TABLE)
+				.save();
+
+		// Append the data
+		orig
+				.write()
+				.format("org.monetdb.spark")
+				.mode(SaveMode.Append)
+				.option("url", Config.databaseUrl())
+				.option("dbtable", TABLE)
+				.save();
+
+		Dataset<Row> found = spark
+				.read()
+				.format("jdbc")
+				.option("url", Config.databaseUrl())
+				.option("dbtable", TABLE)
+				.load()
+				.sort("id")
+				;
+
+		// Compare the contents
+		Row[] origRows = orig.collectAsList().toArray(new Row[0]);
+		Row[] foundRows = found.collectAsList().toArray(new Row[0]);
+		assertArrayEquals(origRows, foundRows);
 	}
 
 }

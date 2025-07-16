@@ -3,6 +3,7 @@ package org.monetdb.spark;
 import org.apache.spark.sql.jdbc.JdbcDialect;
 import org.apache.spark.sql.jdbc.JdbcType;
 import org.apache.spark.sql.types.BooleanType;
+import org.apache.spark.sql.types.ByteType;
 import org.apache.spark.sql.types.DataType;
 import scala.Option;
 
@@ -19,7 +20,11 @@ public class MonetDialect extends JdbcDialect {
 		if (dt instanceof BooleanType) {
 			JdbcType t = new JdbcType("BOOLEAN", Types.BOOLEAN);
 			return Option.apply(t);
+		} else if (dt instanceof ByteType) {
+			JdbcType t = new JdbcType("TINYINT", Types.TINYINT);
+			return Option.apply(t);
 		}
-		return super.getJDBCType(dt);
+		Option<JdbcType> t = super.getJDBCType(dt);
+		return t;
 	}
 }

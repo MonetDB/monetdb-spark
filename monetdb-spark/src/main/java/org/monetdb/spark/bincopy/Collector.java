@@ -90,6 +90,16 @@ public class Collector {
 				if (fieldType instanceof BooleanType)
 					return this::booleanFromBoolean;
 				break;
+			case TINYINT:
+				if (fieldType instanceof ByteType)
+					return this::tinyintFromByte;
+				break;
+			case SMALLINT:
+				// This doesn't work yet. Somehow it gets mapped to
+				// INTEGER rather than SMALLINT!
+				// if (fieldType instanceof ShortType)
+				// 	return this::smallintFromShort;
+				break;
 			case INTEGER:
 				if (fieldType instanceof IntegerType)
 					return this::integerFromInteger;
@@ -97,6 +107,10 @@ public class Collector {
 			case BIGINT:
 				if (fieldType instanceof LongType)
 					return this::bigintFromLong;
+				break;
+			case FLOAT:
+				if (fieldType instanceof FloatType)
+					return this::floatFromFloat;
 				break;
 			case DOUBLE:
 				if (fieldType instanceof DoubleType)
@@ -119,6 +133,16 @@ public class Collector {
 		buffers[idx].write(numeric);
 	}
 
+	private void tinyintFromByte(SpecializedGetters row, int idx) throws IOException {
+		byte b = row.getByte(idx);
+		buffers[idx].write(b);
+	}
+
+	private void smallintFromShort(SpecializedGetters row, int idx) throws IOException {
+		short n = row.getShort(idx);
+		EndianUtils.writeSwappedShort(buffers[idx], n);
+	}
+
 	private void integerFromInteger(SpecializedGetters row, int idx) throws IOException {
 		int i = row.getInt(idx);
 		EndianUtils.writeSwappedInteger(buffers[idx], i);
@@ -127,6 +151,11 @@ public class Collector {
 	private void bigintFromLong(SpecializedGetters row, int idx) throws IOException {
 		long n = row.getLong(idx);
 		EndianUtils.writeSwappedLong(buffers[idx], n);
+	}
+
+	private void floatFromFloat(SpecializedGetters row, int idx) throws IOException {
+		float d = row.getFloat(idx);
+		EndianUtils.writeSwappedFloat(buffers[idx], d);
 	}
 
 	private void doubleFromDouble(SpecializedGetters row, int idx) throws IOException {
