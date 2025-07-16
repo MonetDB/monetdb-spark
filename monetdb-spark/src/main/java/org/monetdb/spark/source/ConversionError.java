@@ -1,4 +1,4 @@
-package org.monetdb.spark.bincopy;
+package org.monetdb.spark.source;
 
 public class ConversionError extends Exception {
 	public ConversionError(String message) {

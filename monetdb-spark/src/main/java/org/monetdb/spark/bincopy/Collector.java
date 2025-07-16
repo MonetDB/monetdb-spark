@@ -4,6 +4,8 @@ import org.apache.commons.io.EndianUtils;
 import org.apache.spark.sql.catalyst.expressions.SpecializedGetters;
 import org.apache.spark.sql.types.*;
 import org.apache.spark.unsafe.types.UTF8String;
+import org.monetdb.spark.source.ColumnType;
+import org.monetdb.spark.source.ConversionError;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

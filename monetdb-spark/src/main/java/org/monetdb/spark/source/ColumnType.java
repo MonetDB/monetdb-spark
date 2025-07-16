@@ -1,4 +1,4 @@
-package org.monetdb.spark.bincopy;
+package org.monetdb.spark.source;
 
 import java.sql.JDBCType;
 

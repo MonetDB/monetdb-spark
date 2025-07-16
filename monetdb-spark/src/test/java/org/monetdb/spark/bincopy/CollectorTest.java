@@ -7,6 +7,8 @@ import org.apache.spark.unsafe.types.UTF8String;
 import org.junit.jupiter.api.Test;
 import org.monetdb.jdbc.MonetConnection;
 import org.monetdb.spark.Config;
+import org.monetdb.spark.source.ColumnType;
+import org.monetdb.spark.source.ConversionError;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
