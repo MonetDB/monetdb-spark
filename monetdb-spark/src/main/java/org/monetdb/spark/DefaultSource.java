@@ -5,11 +5,14 @@ import org.apache.spark.sql.connector.catalog.TableProvider;
 import org.apache.spark.sql.connector.expressions.Transform;
 import org.apache.spark.sql.types.StructType;
 import org.apache.spark.sql.util.CaseInsensitiveStringMap;
+import org.monetdb.spark.source.MonetTable;
 
 import java.util.Map;
 
 /**
- * Spark Data Source for efficiently writing data to MonetDB
+ * Spark Data Source for efficiently writing data to MonetDB.
+ *
+ * Only used in the driver.
  */
 public class DefaultSource implements TableProvider {
 	@Override
@@ -29,6 +32,9 @@ public class DefaultSource implements TableProvider {
 
 	@Override
 	public Table getTable(StructType structType, Transform[] partitioning, Map<String, String> map) {
-		throw new RuntimeException("not implemented yet");
+		// This function is called in the driver when a read or write is requested.
+		// It doesn't do anything by itself, just bundles up the parameters and returns
+		// them as a new object.
+		return new MonetTable(structType, partitioning, map);
 	}
 }
