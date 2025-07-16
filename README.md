@@ -34,7 +34,9 @@ full JDBC writer supports. In particular, it only supports writing
 to existing tables (`.mode("append")`) and only the options `"url"`,
 `"user"`, `"password"` and "dbtable".
 
-This is how it can be used:
+WARNING: The writer does not look at the column names yet.
+It blindly tries to write the first column to the first column, the second
+to the second, etc.
 
 ## Building
 
