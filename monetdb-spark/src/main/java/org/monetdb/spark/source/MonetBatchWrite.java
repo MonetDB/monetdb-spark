@@ -29,7 +29,6 @@ public class MonetBatchWrite implements BatchWrite {
 
 	@Override
 	public DataWriterFactory createBatchWriterFactory(PhysicalWriteInfo info) {
-		System.err.println("**** Have " + info.numPartitions() + " partitions");
 		return new MonetDataWriterFactory(dest, structType, columnTypes);
 	}
 
@@ -40,17 +39,13 @@ public class MonetBatchWrite implements BatchWrite {
 
 	@Override
 	public void onDataWriterCommit(WriterCommitMessage message) {
-		System.err.println("**** - one partition committed");
 	}
 
 	@Override
 	public void commit(WriterCommitMessage[] messages) {
-		System.err.println("**** - upload finished");
 	}
 
 	@Override
 	public void abort(WriterCommitMessage[] messages) {
-		System.err.println("**** - upload aborted");
-
 	}
 }
