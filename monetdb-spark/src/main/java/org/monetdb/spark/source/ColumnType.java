@@ -1,8 +1,9 @@
 package org.monetdb.spark.source;
 
 import java.sql.JDBCType;
+import java.util.Objects;
 
-public class ColumnType {
+public final class ColumnType {
 	private final JDBCType type;
 	private final int precision;
 	private final int scale;
@@ -33,6 +34,19 @@ public class ColumnType {
 
 	public String getTypeName() {
 		return typeName;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (o == null || getClass() != o.getClass())
+			return false;
+		ColumnType that = (ColumnType) o;
+		return precision == that.precision && scale == that.scale && type == that.type;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(type, precision, scale);
 	}
 
 	@Override
