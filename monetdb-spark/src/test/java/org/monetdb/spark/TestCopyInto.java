@@ -8,6 +8,7 @@ import org.junit.jupiter.api.AutoClose;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.monetdb.spark.source.ConversionError;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -17,6 +18,7 @@ import java.sql.Statement;
 
 import static org.apache.spark.sql.functions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Test Spark itself, to get to know it
@@ -25,6 +27,12 @@ public class TestCopyInto {
 
 	private final int N = 5;
 	private final String TABLE = "foo";
+	private final String OTHER_TABLE = "bar";
+
+	@AutoClose
+	private Connection conn;
+	@AutoClose
+	private Statement stmt;
 
 	@AutoClose
 	private SparkSession spark;
@@ -102,5 +110,34 @@ public class TestCopyInto {
 		verifyTestData();
 	}
 
+	@Test
+	public void testSchemaMismatch() throws SQLException {
+		conn = Config.connectDatabase();
+		stmt = conn.createStatement();
+
+
+		// Create dummy table with the wrong schema: f BIGINT instead of DOUBLE
+		stmt.execute("DROP TABLE IF EXISTS " + OTHER_TABLE);
+		String sql = "CREATE TABLE " + OTHER_TABLE + "(id BIGINT, b BOOLEAN, f BIGINT, t TEXT)";
+		stmt.execute(sql);
+
+		// Try to insert the data
+		Dataset<Row> df = createTestData();
+		try {
+			df
+					.write()
+					.format("org.monetdb.spark")
+					.mode(SaveMode.Append)
+					.option("url", Config.databaseUrl())
+					.option("dbtable", OTHER_TABLE)
+					.save();
+			fail("df.write() should have failed because f has the wrong type");
+		} catch (RuntimeException e) {
+			if (!(e.getCause() instanceof ConversionError))
+				throw e;
+		}
+
+		stmt.execute("DROP TABLE " + OTHER_TABLE);
+	}
 
 }

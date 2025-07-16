@@ -94,6 +94,10 @@ public class Collector {
 				if (fieldType instanceof IntegerType)
 					return this::integerFromInteger;
 				break;
+			case BIGINT:
+				if (fieldType instanceof LongType)
+					return this::bigintFromLong;
+				break;
 			case DOUBLE:
 				if (fieldType instanceof DoubleType)
 					return this::doubleFromDouble;
@@ -118,6 +122,11 @@ public class Collector {
 	private void integerFromInteger(SpecializedGetters row, int idx) throws IOException {
 		int i = row.getInt(idx);
 		EndianUtils.writeSwappedInteger(buffers[idx], i);
+	}
+
+	private void bigintFromLong(SpecializedGetters row, int idx) throws IOException {
+		long n = row.getLong(idx);
+		EndianUtils.writeSwappedLong(buffers[idx], n);
 	}
 
 	private void doubleFromDouble(SpecializedGetters row, int idx) throws IOException {

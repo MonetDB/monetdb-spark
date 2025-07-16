@@ -99,10 +99,7 @@ public class MonetTable implements Table, SupportsWrite {
 	 * Right now it only implements {@link build} which builds a {@link Write}.
 	 */
 	private class MonetWriteBuilder implements WriteBuilder {
-		private final LogicalWriteInfo logicalWriteInfo;
-
-		public MonetWriteBuilder(LogicalWriteInfo logicalWriteInfo) {
-			this.logicalWriteInfo = logicalWriteInfo;
+		public MonetWriteBuilder(LogicalWriteInfo ignored) {
 		}
 
 		@Override
@@ -115,7 +112,12 @@ public class MonetTable implements Table, SupportsWrite {
 			//         .option(...)
 			//         .save().
 			// We have now reached the save().
-			return new MonetWrite(props, structType, partitioning, logicalWriteInfo);
+			String url = getArg("url");
+			String user = getArg("url", null);
+			String password = getArg("password", null);
+			Destination dest = new Destination(url, user, password, tableName);
+
+			return new MonetWrite(dest, structType);
 		}
 	}
 }
