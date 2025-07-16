@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  */
 public class TestCopyInto {
 
-	private final int N = 5;
+	private final int N = 100_000;
 	private final String TABLE = "foo";
 	private final String OTHER_TABLE = "bar";
 

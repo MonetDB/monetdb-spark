@@ -1,8 +1,13 @@
 package org.monetdb.spark.source;
 
+import org.monetdb.jdbc.MonetConnection;
+
+import java.io.Serializable;
 import java.sql.*;
 
-public class Destination {
+public class Destination implements Serializable {
+	private static final long serialVersionUID = 0L;
+
 	private String url;
 	private String user;
 	private String password;
@@ -15,11 +20,13 @@ public class Destination {
 		this.table = table;
 	}
 
-	public Connection connect() throws SQLException {
+	public MonetConnection connect() throws SQLException {
+		Connection conn;
 		if (user != null)
-			return DriverManager.getConnection(url, user, password);
+			conn =  DriverManager.getConnection(url, user, password);
 		else
-			return DriverManager.getConnection(url);
+			conn =  DriverManager.getConnection(url);
+		return conn.unwrap(MonetConnection.class);
 	}
 
 	public static String quoteString(String str) {

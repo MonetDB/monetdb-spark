@@ -1,13 +1,11 @@
 package org.monetdb.spark.source;
 
 import org.apache.spark.sql.connector.write.BatchWrite;
-import org.apache.spark.sql.connector.write.LogicalWriteInfo;
 import org.apache.spark.sql.connector.write.Write;
 import org.apache.spark.sql.types.StructType;
 import org.monetdb.spark.bincopy.Collector;
 
 import java.sql.SQLException;
-import java.util.Map;
 
 /**
  * Everything we know about what to write where, and how.
