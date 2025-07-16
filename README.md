@@ -32,7 +32,7 @@ with `.format("org.monetdb.spark")`.
 The new writer does not support all options and modes that the
 full JDBC writer supports. In particular, it only supports writing
 to existing tables (`.mode("append")`) and only the options `"url"`,
-and "dbtable".
+`"user"`, `"password"` and "dbtable".
 
 This is how it can be used:
 
