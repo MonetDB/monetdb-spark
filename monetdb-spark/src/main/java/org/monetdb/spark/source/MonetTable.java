@@ -113,7 +113,7 @@ public class MonetTable implements Table, SupportsWrite {
 			//         .save().
 			// We have now reached the save().
 			String url = getArg("url");
-			String user = getArg("url", null);
+			String user = getArg("user", null);
 			String password = getArg("password", null);
 			Destination dest = new Destination(url, user, password, tableName);
 
