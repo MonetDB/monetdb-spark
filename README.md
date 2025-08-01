@@ -46,7 +46,7 @@ Or `make test`, this assumes there is a database `testspark` to connect to.
 Use `make test TESTDB=bla` to target another database.
 The following are all equivalent:
 
-* `TESTDB=jdbc:monetdb://somehost:12345/demo?user=monetdb&password=monetdb`, 
+* `TESTDB=jdbc:monetdb://localhost:50000/demo?user=monetdb&password=monetdb`, 
   a full-fledged JDBC URL
 * `TESTDB=jdbc:monetdb://localhost/demo`, you can omit user and password.
 * `TESTDB=demo`, you can also omit `jdbc://localhost/`.
