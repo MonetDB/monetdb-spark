@@ -12,7 +12,6 @@ public class Collector {
 	final Converter[] converters;
 	final ByteArrayOutputStream[] buffers;
 	private int rowCount = 0;
-	private int totalSize = 0;
 
 	public Collector(Converter[] converters) throws ConversionError {
 		this.converters = converters;
@@ -34,23 +33,22 @@ public class Collector {
 	}
 
 	public int getTotalSize() {
+		int totalSize = 0;
+		for (int i = 0; i < buffers.length; i++)
+			totalSize += buffers[i].size();
 		return totalSize;
 	}
 
-	public int convertRow(SpecializedGetters row) {
+	public void convertRow(SpecializedGetters row) {
 		try {
 			for (int i = 0; i < converters.length; i++) {
-				int oldSize = buffers[i].size();
 				converters[i].extract(row, i);
-				int newSize = buffers[i].size();
-				totalSize += newSize - oldSize;
 			}
 		} catch (IOException e) {
 			// Can't really happen, it's a string buffer, there is no IO
 			throw new RuntimeException(e);
 		}
 		rowCount += 1;
-		return totalSize;
 	}
 
 	public void clear() {
@@ -58,7 +56,6 @@ public class Collector {
 			buffer.reset();
 		}
 		rowCount = 0;
-		totalSize = 0;
 	}
 
 	public String copyStatement(String quotedTableName) {
