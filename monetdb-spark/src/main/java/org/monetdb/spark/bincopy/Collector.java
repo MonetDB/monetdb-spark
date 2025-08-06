@@ -1,11 +1,10 @@
 package org.monetdb.spark.bincopy;
 
-import org.apache.commons.io.EndianUtils;
 import org.apache.spark.sql.catalyst.expressions.SpecializedGetters;
 import org.apache.spark.sql.types.*;
-import org.apache.spark.unsafe.types.UTF8String;
 import org.monetdb.spark.common.ColumnType;
 import org.monetdb.spark.workerside.ConversionError;
+import org.monetdb.spark.workerside.Extractor;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -13,7 +12,7 @@ import java.io.OutputStream;
 import java.text.MessageFormat;
 
 public class Collector {
-	final Conversion[] conversions;
+	final Extractor[] extractors;
 	final ByteArrayOutputStream[] buffers;
 	private int rowCount = 0;
 	private int totalSize = 0;
@@ -23,17 +22,18 @@ public class Collector {
 		if (n != cols.length) {
 			throw new ConversionError("Dataframe has " + n + " columns, table has " + cols.length);
 		}
-		conversions = new Conversion[n];
+		extractors = new Extractor[n];
 		buffers = new ByteArrayOutputStream[n];
 		for (int i = 0; i < n; i++) {
 			buffers[i] = new ByteArrayOutputStream();
 			DataType fieldType = fields[i].dataType();
 			ColumnType colType = cols[i];
-			Conversion conv = pickConversion(fieldType, colType);
-			if (conv == null) {
+			Extractor extractor = pickExtractor(fieldType, colType);
+			if (extractor == null) {
 				throw new ConversionError(MessageFormat.format("Field {0} ({1}): can''t convert Spark type {2} to {3}", i, fields[i].name(), fieldType, colType));
 			}
-			conversions[i] = conv;
+			extractor.init(this, i);
+			extractors[i] = extractor;
 		}
 	}
 
@@ -47,9 +47,9 @@ public class Collector {
 
 	public int convertRow(SpecializedGetters row) {
 		try {
-			for (int i = 0; i < conversions.length; i++) {
+			for (int i = 0; i < extractors.length; i++) {
 				int oldSize = buffers[i].size();
-				conversions[i].convert(row, i);
+				extractors[i].extract(row, i);
 				int newSize = buffers[i].size();
 				totalSize += newSize - oldSize;
 			}
@@ -84,92 +84,44 @@ public class Collector {
 		buffers[idx].writeTo(dest);
 	}
 
-	private Conversion pickConversion(DataType fieldType, ColumnType col) {
+	private Extractor pickExtractor(DataType fieldType, ColumnType col) {
 		switch (col.getType()) {
 			case BOOLEAN:
 				if (fieldType instanceof BooleanType)
-					return this::booleanFromBoolean;
+					return new BooleanToBoolean();
 				break;
 			case TINYINT:
 				if (fieldType instanceof ByteType)
-					return this::tinyintFromByte;
+					return new ByteToTinyInt();
 				break;
 			case SMALLINT:
-				 if (fieldType instanceof ShortType)
-				 	return this::smallintFromShort;
+				if (fieldType instanceof ShortType)
+					return new ShortToSmallInt();
 				break;
 			case INTEGER:
 				if (fieldType instanceof IntegerType)
-					return this::integerFromInteger;
+					return new IntegerToInteger();
 				break;
 			case BIGINT:
 				if (fieldType instanceof LongType)
-					return this::bigintFromLong;
+					return new LongToBigInt();
 				break;
 			case FLOAT:
 				if (fieldType instanceof FloatType)
-					return this::floatFromFloat;
+					return new FloatToFloat();
 				break;
 			case DOUBLE:
 				if (fieldType instanceof DoubleType)
-					return this::doubleFromDouble;
+					return new DoubleToDouble();
 				break;
 			case CLOB:
 			case VARCHAR:
 				if (fieldType instanceof StringType)
-					return this::textFromString;
+					return new StringToText();
 				break;
 			default:
 				break;
 		}
 		return null;
-	}
-
-	private void booleanFromBoolean(SpecializedGetters row, int idx) {
-		boolean b = row.getBoolean(idx);
-		int numeric = b ? 1 : 0;
-		buffers[idx].write(numeric);
-	}
-
-	private void tinyintFromByte(SpecializedGetters row, int idx) throws IOException {
-		byte b = row.getByte(idx);
-		buffers[idx].write(b);
-	}
-
-	private void smallintFromShort(SpecializedGetters row, int idx) throws IOException {
-		short n = row.getShort(idx);
-		EndianUtils.writeSwappedShort(buffers[idx], n);
-	}
-
-	private void integerFromInteger(SpecializedGetters row, int idx) throws IOException {
-		int i = row.getInt(idx);
-		EndianUtils.writeSwappedInteger(buffers[idx], i);
-	}
-
-	private void bigintFromLong(SpecializedGetters row, int idx) throws IOException {
-		long n = row.getLong(idx);
-		EndianUtils.writeSwappedLong(buffers[idx], n);
-	}
-
-	private void floatFromFloat(SpecializedGetters row, int idx) throws IOException {
-		float d = row.getFloat(idx);
-		EndianUtils.writeSwappedFloat(buffers[idx], d);
-	}
-
-	private void doubleFromDouble(SpecializedGetters row, int idx) throws IOException {
-		double d = row.getDouble(idx);
-		EndianUtils.writeSwappedDouble(buffers[idx], d);
-	}
-
-	private void textFromString(SpecializedGetters row, int idx) throws IOException {
-		ByteArrayOutputStream s = buffers[idx];
-		UTF8String u = row.getUTF8String(idx);
-		u.writeTo(s);
-		s.write(0);
-	}
-
-	@FunctionalInterface
-	interface Conversion {
-		void convert(SpecializedGetters row, int idx) throws IOException;
 	}
 }
