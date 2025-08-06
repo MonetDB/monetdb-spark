@@ -19,12 +19,14 @@ import java.sql.Statement;
 public class MonetDataWriter implements DataWriter<InternalRow> {
 	private final Destination dest;
 	private final Collector collector;
+	private final Converter[] converters;
 
 	private MonetConnection conn;
 	private Statement stmt;
 
 	public MonetDataWriter(Destination dest, Converter[] converters) {
 		this.dest = dest;
+		this.converters = converters;
 		try {
 			collector = new Collector(converters);
 		} catch (ConversionError e) {
@@ -44,7 +46,15 @@ public class MonetDataWriter implements DataWriter<InternalRow> {
 
 	@Override
 	public void write(InternalRow row) throws IOException {
-		collector.convertRow(row);
+		try {
+			for (int i = 0; i < converters.length; i++) {
+				converters[i].extract(row, i);
+			}
+		} catch (IOException e) {
+			// Can't really happen, it's a string buffer, there is no IO
+			throw new RuntimeException(e);
+		}
+		collector.endRow();
 	}
 
 

@@ -8,8 +8,8 @@ import org.monetdb.jdbc.MonetConnection;
 import org.monetdb.spark.Config;
 import org.monetdb.spark.common.ColumnType;
 import org.monetdb.spark.workerside.ConversionError;
+import org.monetdb.spark.workerside.Converter;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.*;
@@ -27,9 +27,10 @@ class CollectorTest {
 	final ColumnType stringCol = new ColumnType(JDBCType.VARCHAR);
 
 	Collector col;
+	private Converter[] converters;
 
 	@Test
-	public void testUseCollector() throws SQLException, ConversionError {
+	public void testUseCollector() throws SQLException, ConversionError, IOException {
 		StructField[] sparkTypes = {boolField, intField, stringField};
 		ColumnType[] colTypes = {null, null, null};
 		try (Connection conn = Config.connectDatabase(); Statement stmt = conn.createStatement()) {
@@ -48,7 +49,8 @@ class CollectorTest {
 				}
 			}
 			// Collect some data
-			col = new Collector(Conversions.pickExtractors(sparkTypes, colTypes));
+			converters = Conversions.pickExtractors(sparkTypes, colTypes);
+			col = new Collector(converters);
 			MockRow row1 = new MockRow(TRUE, 1, "one");
 			MockRow row2 = new MockRow(FALSE, 2, "two");
 			MockRow row3 = new MockRow(TRUE, 3, "three");
@@ -90,7 +92,9 @@ class CollectorTest {
 		}
 	}
 
-	private void convertRow(MockRow row1) {
-		col.convertRow(row1);
+	private void convertRow(MockRow row) throws IOException {
+		for (int i = 0; i < converters.length; i++)
+			converters[i].extract(row, i);
+		col.endRow();
 	}
 }

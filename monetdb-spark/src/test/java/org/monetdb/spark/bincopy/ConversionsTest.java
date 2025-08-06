@@ -16,6 +16,7 @@ import org.apache.spark.sql.types.StructField;
 import org.junit.jupiter.api.Test;
 import org.monetdb.spark.common.ColumnType;
 import org.monetdb.spark.workerside.ConversionError;
+import org.monetdb.spark.workerside.Converter;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -34,6 +35,7 @@ class ConversionsTest {
 	final ColumnType stringCol = new ColumnType(JDBCType.VARCHAR);
 
 	Collector col;
+	private Converter[] converters;
 
 	@Test
 	public void testLengthMismatch() {
@@ -76,7 +78,8 @@ class ConversionsTest {
 	public void testCollector() throws ConversionError, IOException {
 		StructField[] sparkTypes = {boolField, intField, stringField};
 		ColumnType[] colTypes = {boolCol, intCol, stringCol};
-		col = new Collector(Conversions.pickExtractors(sparkTypes, colTypes));
+		converters = Conversions.pickExtractors(sparkTypes, colTypes);
+		col = new Collector(converters);
 		assertEquals("", formatCollected(0));
 		assertEquals("", formatCollected(1));
 		assertEquals("", formatCollected(2));
@@ -89,7 +92,6 @@ class ConversionsTest {
 
 		row = new MockRow(TRUE, 3, "three");
 		convertRow(row);
-
 
 		// booleans are a single byte
 		assertEquals("$01$00$01", formatCollected(0));
@@ -105,8 +107,9 @@ class ConversionsTest {
 		assertEquals(col1Size + col2Size + col3Size, col.getTotalSize());
 	}
 
-	private void convertRow(MockRow row) {
-		col.convertRow(row);
+	private void convertRow(MockRow row) throws IOException {
+		for (int i = 0; i < converters.length; i++)
+			converters[i].extract(row, i);
+		col.endRow();
 	}
-
 }

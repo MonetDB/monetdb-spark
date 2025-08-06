@@ -1,6 +1,5 @@
 package org.monetdb.spark.bincopy;
 
-import org.apache.spark.sql.catalyst.expressions.SpecializedGetters;
 import org.monetdb.spark.workerside.ConversionError;
 import org.monetdb.spark.workerside.Converter;
 
@@ -9,23 +8,27 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 public class Collector {
-	final Converter[] converters;
+	final int nconverters;
 	final ByteArrayOutputStream[] buffers;
 	private int rowCount = 0;
 
 	public Collector(Converter[] converters) throws ConversionError {
-		this.converters = converters;
-		buffers = new ByteArrayOutputStream[converters.length];
-		for (int i = 0; i < converters.length; i++) {
+		this.nconverters = converters.length;
+		buffers = new ByteArrayOutputStream[nconverters];
+		for (int i = 0; i < nconverters; i++) {
 			buffers[i] = new ByteArrayOutputStream();
 		}
-		for (int i = 0; i < converters.length; i++) {
+		for (int i = 0; i < nconverters; i++) {
 			converters[i].init(this, i);
 		}
 	}
 
 	public ByteArrayOutputStream getBuffer(int idx) {
 		return buffers[idx];
+	}
+
+	public void endRow() {
+		rowCount++;
 	}
 
 	public int getRowCount() {
@@ -39,18 +42,6 @@ public class Collector {
 		return totalSize;
 	}
 
-	public void convertRow(SpecializedGetters row) {
-		try {
-			for (int i = 0; i < converters.length; i++) {
-				converters[i].extract(row, i);
-			}
-		} catch (IOException e) {
-			// Can't really happen, it's a string buffer, there is no IO
-			throw new RuntimeException(e);
-		}
-		rowCount += 1;
-	}
-
 	public void clear() {
 		for (ByteArrayOutputStream buffer : buffers) {
 			buffer.reset();
@@ -61,7 +52,7 @@ public class Collector {
 	public String copyStatement(String quotedTableName) {
 		String buf = "COPY LITTLE ENDIAN BINARY INTO " + quotedTableName + " FROM ";
 		String sep = "";
-		for (int i = 0; i < buffers.length; i++) {
+		for (int i = 0; i < nconverters; i++) {
 			buf += sep + "'" + i + "'";
 			sep = ", ";
 		}
@@ -72,5 +63,4 @@ public class Collector {
 	public void writeCollected(int idx, OutputStream dest) throws IOException {
 		buffers[idx].writeTo(dest);
 	}
-
 }
