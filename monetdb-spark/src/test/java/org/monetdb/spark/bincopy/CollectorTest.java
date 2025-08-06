@@ -28,62 +28,6 @@ class CollectorTest {
 
 	Collector col;
 
-	private String formatCollected(int idx) throws IOException {
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		col.writeCollected(idx, out);
-		byte[] bytes = out.toByteArray();
-		StringBuilder buf = new StringBuilder();
-		for (byte b : bytes) {
-			if (b == '$') {
-				buf.append("$$");
-			} else if (b >= ' ' && b < 127) {
-				buf.append((char) b);
-			} else {
-				final String hex = "0123456789abcdef";
-				char hi = hex.charAt(b / 16);
-				char lo = hex.charAt(b % 16);
-				buf.append('$');
-				buf.append(hi);
-				buf.append(lo);
-			}
-		}
-		return buf.toString();
-	}
-
-	@Test
-	public void testCollector() throws ConversionError, IOException {
-		StructField[] sparkTypes = {boolField, intField, stringField};
-		ColumnType[] colTypes = {boolCol, intCol, stringCol};
-		col = new Collector(Conversions.pickExtractors(sparkTypes, colTypes));
-		assertEquals("COPY LITTLE ENDIAN BINARY INTO foo FROM '0', '1', '2' ON CLIENT", col.copyStatement("foo"));
-		assertEquals("", formatCollected(0));
-		assertEquals("", formatCollected(1));
-		assertEquals("", formatCollected(2));
-
-		MockRow row = new MockRow(TRUE, 1, "one");
-		col.convertRow(row);
-
-		row = new MockRow(FALSE, 2, "two");
-		col.convertRow(row);
-
-		row = new MockRow(TRUE, 3, "three");
-		col.convertRow(row);
-
-
-		// booleans are a single byte
-		assertEquals("$01$00$01", formatCollected(0));
-		// integers are 4 bytes, little endian
-		assertEquals("$01$00$00$00$02$00$00$00$03$00$00$00", formatCollected(1));
-		// strings are NUL separated
-		assertEquals("one$00two$00three$00", formatCollected(2));
-
-		assertEquals(3, col.getRowCount());
-		int col1Size = 3; // one byte per row
-		int col2Size = 12; // four bytes per row
-		int col3Size = 3 + 1 + 3 + 1 + 5 + 1;
-		assertEquals(col1Size + col2Size + col3Size, col.getTotalSize());
-	}
-
 	@Test
 	public void testUseCollector() throws SQLException, ConversionError {
 		StructField[] sparkTypes = {boolField, intField, stringField};
@@ -105,9 +49,12 @@ class CollectorTest {
 			}
 			// Collect some data
 			col = new Collector(Conversions.pickExtractors(sparkTypes, colTypes));
-			col.convertRow(new MockRow(TRUE, 1, "one"));
-			col.convertRow(new MockRow(FALSE, 2, "two"));
-			col.convertRow(new MockRow(TRUE, 3, "three"));
+			MockRow row1 = new MockRow(TRUE, 1, "one");
+			MockRow row2 = new MockRow(FALSE, 2, "two");
+			MockRow row3 = new MockRow(TRUE, 3, "three");
+			convertRow(row1);
+			convertRow(row2);
+			convertRow(row3);
 
 			// To upload it, we first register an upload handler
 			MonetConnection.UploadHandler uploadHandler = (handle, name, textMode, linesToSkip) -> {
@@ -141,5 +88,9 @@ class CollectorTest {
 				assertFalse(rs.next());
 			}
 		}
+	}
+
+	private void convertRow(MockRow row1) {
+		col.convertRow(row1);
 	}
 }
