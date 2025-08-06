@@ -20,12 +20,12 @@ import java.util.Set;
 
 /**
  * This class keeps track of what we know of the Monet table the user wants to read or write.
- *
+ * <p>
  * It returns capability BATCH_WRITE implements {@link SupportsWrite} to
  * indicate that it can write. It can't read.
- *
+ * <p>
  * Only used in the driver.
- *
+ * <p>
  * The constructor just takes everything that was originally passed to
  * {@link org.monetdb.spark.DefaultSource}.
  */
@@ -58,7 +58,7 @@ public class MonetTable implements Table, SupportsWrite {
 		// {@link SupportsWrite#columns} is really just {@link Table#columns},
 		// which derives it from the structType.  Not sure if that's the right
 		// thing to do for us.
-		 return SupportsWrite.super.columns();
+		return SupportsWrite.super.columns();
 	}
 
 	@Override
@@ -97,11 +97,11 @@ public class MonetTable implements Table, SupportsWrite {
 
 	/**
 	 * Helper class that extends {@link MonetTable} with information specific to writing
-	 *
+	 * <p>
 	 * In the future we can implement some helper interfaces such as
 	 * {@link org.apache.spark.sql.connector.write.SupportsOverwrite} and
 	 * {@link org.apache.spark.sql.connector.write.SupportsTruncate}.
-	 * Right now it only implements {@link build} which builds a {@link Write}.
+	 * Right now it only implements {@link #build()} which builds a {@link Write}.
 	 */
 	private class MonetWriteBuilder implements WriteBuilder {
 		public MonetWriteBuilder(LogicalWriteInfo ignored) {

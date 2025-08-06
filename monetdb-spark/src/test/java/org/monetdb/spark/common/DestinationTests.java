@@ -18,14 +18,14 @@ import java.sql.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class TestDestination {
+class DestinationTests {
 
 	private final static String USER = "sparky";
 	private final static String PASSWORD = "100%spark";
 	private final static String SCHEMA = "awk\" \"ward";
 	private final static String TABLE = "mydata";
 
-	private ColumnType[] QUALIFIED_TABLE_TYPE = new ColumnType[]{
+	private final ColumnType[] QUALIFIED_TABLE_TYPE = new ColumnType[]{
 			new ColumnType(JDBCType.BOOLEAN, 1, 0, "BOOL"),
 			new ColumnType(JDBCType.TINYINT, 3, 0, "TINYINT"),
 			new ColumnType(JDBCType.INTEGER, 10, 0, "INTEGER"),
@@ -33,7 +33,7 @@ class TestDestination {
 			new ColumnType(JDBCType.VARCHAR, 0, 0, "CLOB"),
 	};
 
-	private ColumnType[] SYS_TABLE_TYPE = new ColumnType[]{
+	private final ColumnType[] SYS_TABLE_TYPE = new ColumnType[]{
 			new ColumnType(JDBCType.INTEGER, 10, 0, "INTEGER"),
 	};
 
@@ -103,7 +103,7 @@ class TestDestination {
 		}
 	}
 
-	private String testLogin(String url, String user, String password)  throws URISyntaxException, ValidationError, SQLException {
+	private String testLogin(String url, String user, String password) throws SQLException {
 		Destination dest = new Destination(url, user, password, TABLE);
 		try (Connection conn = dest.connect()) {
 			return conn.getMetaData().getUserName();
@@ -131,7 +131,7 @@ class TestDestination {
 
 	private void testGetColumnTypes(String table, ColumnType[] expected) throws URISyntaxException, ValidationError, SQLException {
 		Destination dest = new Destination(userUrl(true), null, null, table);
-		try (Connection conn = dest.connect(); Statement stmt = conn.createStatement()) {
+		try (Connection conn = dest.connect()) {
 			ColumnType[] colTypes = dest.getColumnTypes();
 			assertArrayEquals(expected, colTypes);
 		}

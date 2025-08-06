@@ -11,7 +11,6 @@
 package org.monetdb.spark.workerside;
 
 import org.apache.spark.sql.catalyst.expressions.SpecializedGetters;
-import org.monetdb.spark.bincopy.Collector;
 
 import java.io.IOException;
 import java.io.Serializable;

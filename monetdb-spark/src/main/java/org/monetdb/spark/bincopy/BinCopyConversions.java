@@ -18,8 +18,8 @@ import org.monetdb.spark.workerside.Converter;
 
 import java.text.MessageFormat;
 
-public class Conversions {
-	public static Converter[] pickExtractors(StructField[] fields, ColumnType[] cols) throws ConversionError {
+public class BinCopyConversions {
+	public static Converter[] pickConverters(StructField[] fields, ColumnType[] cols) throws ConversionError {
 		int n = fields.length;
 		if (n != cols.length) {
 			throw new ConversionError("Dataframe has " + n + " columns, table has " + cols.length);
@@ -28,7 +28,7 @@ public class Conversions {
 		for (int i = 0; i < n; i++) {
 			DataType fieldType = fields[i].dataType();
 			ColumnType colType = cols[i];
-			Converter converter = Conversions.pickExtractor(fieldType, colType);
+			Converter converter = BinCopyConversions.pickConverter(fieldType, colType);
 			if (converter == null) {
 				throw new ConversionError(MessageFormat.format("Field {0} ({1}): can''t convert Spark type {2} to {3}", i, fields[i].name(), fieldType, colType));
 			}
@@ -37,7 +37,7 @@ public class Conversions {
 		return converters;
 	}
 
-	public static Converter pickExtractor(DataType fieldType, ColumnType col) {
+	public static Converter pickConverter(DataType fieldType, ColumnType col) {
 		switch (col.getType()) {
 			case BOOLEAN:
 				if (fieldType instanceof BooleanType)

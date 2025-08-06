@@ -10,16 +10,20 @@
 
 package org.monetdb.spark.bincopy.conversions;
 
-import org.monetdb.spark.bincopy.Collector;
+import org.monetdb.spark.workerside.Collector;
 import org.monetdb.spark.workerside.Converter;
 
 import java.io.ByteArrayOutputStream;
+import java.io.Serial;
 
 public abstract class BinCopyConversion implements Converter {
+	@Serial
+	private static final long serialVersionUID = 0L;
+
 	protected transient ByteArrayOutputStream buffer;
 
 	@Override
 	public void init(Collector collector, int idx) {
-		buffer = collector.getBuffer(idx);
+		buffer = collector.getOrCreateBuffer(idx);
 	}
 }

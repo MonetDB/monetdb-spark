@@ -11,7 +11,7 @@ import java.util.Map;
 
 /**
  * Spark Data Source for efficiently writing data to MonetDB.
- *
+ * <p>
  * Only used in the driver.
  */
 public class DefaultSource implements TableProvider {

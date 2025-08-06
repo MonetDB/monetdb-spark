@@ -1,4 +1,14 @@
-package org.monetdb.spark.bincopy;
+/*
+ * SPDX-License-Identifier: MPL-2.0
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0.  If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * Copyright MonetDB Solutions B.V.
+ */
+
+package org.monetdb.spark;
 
 import org.apache.spark.sql.catalyst.InternalRow;
 import org.apache.spark.sql.catalyst.expressions.SpecializedGetters;
@@ -25,37 +35,37 @@ public class MockRow implements SpecializedGetters {
 
 	@Override
 	public boolean getBoolean(int i) {
-		return (Boolean)values[i];
+		return (Boolean) values[i];
 	}
 
 	@Override
 	public byte getByte(int i) {
-		return (Byte)values[i];
+		return (Byte) values[i];
 	}
 
 	@Override
 	public short getShort(int i) {
-		return (Short)values[i];
+		return (Short) values[i];
 	}
 
 	@Override
 	public int getInt(int i) {
-		return (Integer)values[i];
+		return (Integer) values[i];
 	}
 
 	@Override
 	public long getLong(int i) {
-		return (Long)values[i];
+		return (Long) values[i];
 	}
 
 	@Override
 	public float getFloat(int i) {
-		return (Float)values[i];
+		return (Float) values[i];
 	}
 
 	@Override
 	public double getDouble(int i) {
-		return (Double)values[i];
+		return (Double) values[i];
 	}
 
 	@Override
@@ -65,7 +75,7 @@ public class MockRow implements SpecializedGetters {
 
 	@Override
 	public UTF8String getUTF8String(int i) {
-		String s = (String)values[i];
+		String s = (String) values[i];
 		return UTF8String.fromString(s);
 
 	}

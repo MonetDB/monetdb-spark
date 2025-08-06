@@ -1,7 +1,10 @@
 package org.monetdb.spark;
 
 import org.apache.spark.sql.*;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AutoClose;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.monetdb.spark.workerside.ConversionError;
 
 import java.io.IOException;
@@ -13,10 +16,7 @@ import java.sql.Statement;
 import static org.apache.spark.sql.functions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Test Spark itself, to get to know it
- */
-public class TestCopyInto {
+public class DataTypesTests {
 
 	private final int N = 100_000;
 	private final String TABLE = "foo";
@@ -178,12 +178,12 @@ public class TestCopyInto {
 	}
 
 	private void testRoundTrip(int n, Column expr) {
-		Dataset<Row> orig = spark.range(n).withColumn("x", expr);
-		testRoundTrip(orig);
+		Dataset<Row> data = spark.range(n).withColumn("x", expr);
+		testRoundTrip(data);
 	}
 
 	private void testRoundTrip(Dataset<Row> orig) {
-		// Create the table
+		// Create the table by Overwriting with an empty dataframe
 		orig
 				.filter(lit(false))
 				.write()
@@ -193,7 +193,7 @@ public class TestCopyInto {
 				.option("dbtable", TABLE)
 				.save();
 
-		// Append the data
+		// Append the data by Appending this dataframe
 		orig
 				.write()
 				.format("org.monetdb.spark")
@@ -208,8 +208,7 @@ public class TestCopyInto {
 				.option("url", Config.databaseUrl())
 				.option("dbtable", TABLE)
 				.load()
-				.sort("id")
-				;
+				.sort("id");
 
 		// Compare the contents
 		Row[] origRows = orig.collectAsList().toArray(new Row[0]);

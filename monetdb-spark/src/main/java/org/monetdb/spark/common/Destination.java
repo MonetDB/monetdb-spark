@@ -29,9 +29,9 @@ public class Destination implements Serializable {
 	public MonetConnection connect() throws SQLException {
 		Connection conn;
 		if (user != null)
-			conn =  DriverManager.getConnection(url, user, password);
+			conn = DriverManager.getConnection(url, user, password);
 		else
-			conn =  DriverManager.getConnection(url);
+			conn = DriverManager.getConnection(url);
 		return conn.unwrap(MonetConnection.class);
 	}
 

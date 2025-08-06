@@ -5,58 +5,36 @@
 package org.monetdb.spark.workerside;
 
 import org.apache.spark.sql.catalyst.InternalRow;
+import org.apache.spark.sql.catalyst.expressions.SpecializedGetters;
 import org.apache.spark.sql.connector.write.DataWriter;
 import org.apache.spark.sql.connector.write.WriterCommitMessage;
-import org.monetdb.jdbc.MonetConnection;
-import org.monetdb.spark.bincopy.Collector;
-import org.monetdb.spark.common.Destination;
+import org.monetdb.spark.bincopy.BinCopyUploader;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 public class MonetDataWriter implements DataWriter<InternalRow> {
-	private final Destination dest;
 	private final Collector collector;
 	private final Converter[] converters;
+	private final BinCopyUploader uploader;
 
-	private MonetConnection conn;
-	private Statement stmt;
-
-	public MonetDataWriter(Destination dest, Converter[] converters) {
-		this.dest = dest;
+	public MonetDataWriter(Collector collector, Converter[] converters, BinCopyUploader uploader) {
+		this.collector = collector;
 		this.converters = converters;
-		try {
-			collector = new Collector(converters);
-		} catch (ConversionError e) {
-			// Unlikely because {@link MonetWrite} already tried it.
-			throw new RuntimeException(e);
-		}
-
-		try {
-			conn = dest.connect();
-			conn.setAutoCommit(false);
-			conn.setUploadHandler(new Handler());
-			stmt = conn.createStatement();
-		} catch (SQLException e) {
-			throw new RuntimeException(e);
-		}
+		this.uploader = uploader;
 	}
 
 	@Override
 	public void write(InternalRow row) throws IOException {
-		try {
-			for (int i = 0; i < converters.length; i++) {
-				converters[i].extract(row, i);
-			}
-		} catch (IOException e) {
-			// Can't really happen, it's a string buffer, there is no IO
-			throw new RuntimeException(e);
+		this.processRow(row);
+	}
+
+	public void processRow(SpecializedGetters row) throws IOException {
+		for (int i = 0; i < converters.length; i++) {
+			converters[i].extract(row, i);
 		}
 		collector.endRow();
 	}
-
 
 	@Override
 	public void abort() throws IOException {
@@ -65,9 +43,9 @@ public class MonetDataWriter implements DataWriter<InternalRow> {
 
 	@Override
 	public WriterCommitMessage commit() throws IOException {
-		flushData();
 		try {
-			conn.commit();
+			uploader.uploadBatch();
+			uploader.commit();
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}
@@ -75,40 +53,13 @@ public class MonetDataWriter implements DataWriter<InternalRow> {
 		return null;
 	}
 
-	private void flushData() {
-		if (collector.getRowCount() == 0)
-			return;
-		String sql = collector.copyStatement(dest.getTable());
+	@Override
+	public void close() throws IOException {
 		try {
-			stmt.execute(sql);
+			uploader.close();
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}
-		collector.clear();
 	}
 
-
-	@Override
-	public void close() throws IOException {
-		if (stmt != null) {
-			try {
-				stmt.close();
-			} catch (SQLException ignored) {
-			}
-			stmt = null;
-		}
-		if (conn != null) {
-			conn.close();
-			conn = null;
-		}
-	}
-
-	private class Handler implements MonetConnection.UploadHandler {
-		@Override
-		public void handleUpload(MonetConnection.Upload handle, String filename, boolean textMode, long linesToSkip) throws IOException {
-			int idx = Integer.parseInt(filename);
-			OutputStream stream = handle.getStream();
-			collector.writeCollected(idx, stream);
-		}
-	}
 }

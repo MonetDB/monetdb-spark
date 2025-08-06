@@ -50,7 +50,7 @@ public final class ColumnType implements Serializable {
 		if (o == null || getClass() != o.getClass())
 			return false;
 		ColumnType that = (ColumnType) o;
-		return precision == that.precision && scale == that.scale && type == that.type;
+		return type == that.type && precision == that.precision && scale == that.scale;
 	}
 
 	@Override

@@ -4,7 +4,6 @@ import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SaveMode;
 import org.apache.spark.sql.SparkSession;
-
 import org.apache.spark.unsafe.types.UTF8String;
 import org.junit.jupiter.api.AutoClose;
 import org.junit.jupiter.api.BeforeAll;
@@ -24,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Test Spark itself, to get to know it
  */
-public class TestSpark {
+public class SparkTests {
 	@AutoClose
 	Connection conn = null;
 	@AutoClose

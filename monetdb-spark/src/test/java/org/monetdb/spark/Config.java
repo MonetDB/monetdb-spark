@@ -40,7 +40,7 @@ public class Config {
 	public static SparkSession sparkSession() {
 		String url = sparkUrl();
 		return SparkSession.builder()
-				.appName("unit tests")
+				.appName("unit_tests")
 				.config("spark.master", url)
 				.getOrCreate();
 	}

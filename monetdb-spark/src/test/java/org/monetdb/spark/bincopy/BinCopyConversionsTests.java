@@ -14,7 +14,9 @@ import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.Metadata;
 import org.apache.spark.sql.types.StructField;
 import org.junit.jupiter.api.Test;
+import org.monetdb.spark.MockRow;
 import org.monetdb.spark.common.ColumnType;
+import org.monetdb.spark.workerside.Collector;
 import org.monetdb.spark.workerside.ConversionError;
 import org.monetdb.spark.workerside.Converter;
 
@@ -24,9 +26,10 @@ import java.sql.JDBCType;
 
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class ConversionsTest {
+class BinCopyConversionsTests {
 	final StructField boolField = new StructField("b", DataTypes.BooleanType, false, Metadata.empty());
 	final StructField intField = new StructField("i", DataTypes.IntegerType, false, Metadata.empty());
 	final StructField stringField = new StructField("s", DataTypes.StringType, false, Metadata.empty());
@@ -41,20 +44,19 @@ class ConversionsTest {
 	public void testLengthMismatch() {
 		StructField[] sparkTypes = {boolField, intField, stringField};
 		ColumnType[] colTypes = {boolCol, intCol};
-		assertThrows(ConversionError.class, () -> Conversions.pickExtractors(sparkTypes, colTypes))
-		;
+		assertThrows(ConversionError.class, () -> BinCopyConversions.pickConverters(sparkTypes, colTypes));
 	}
 
 	@Test
 	public void testTypeMismatch() {
 		StructField[] sparkTypes = {boolField, intField, stringField};
 		ColumnType[] colTypes = {boolCol, stringCol, stringCol};
-		assertThrows(ConversionError.class, () -> Conversions.pickExtractors(sparkTypes, colTypes));
+		assertThrows(ConversionError.class, () -> BinCopyConversions.pickConverters(sparkTypes, colTypes));
 	}
 
 	private String formatCollected(int idx) throws IOException {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		col.writeCollected(idx, out);
+		col.getBuffer(idx).writeTo(out);
 		byte[] bytes = out.toByteArray();
 		StringBuilder buf = new StringBuilder();
 		for (byte b : bytes) {
@@ -78,8 +80,10 @@ class ConversionsTest {
 	public void testCollector() throws ConversionError, IOException {
 		StructField[] sparkTypes = {boolField, intField, stringField};
 		ColumnType[] colTypes = {boolCol, intCol, stringCol};
-		converters = Conversions.pickExtractors(sparkTypes, colTypes);
-		col = new Collector(converters);
+		converters = BinCopyConversions.pickConverters(sparkTypes, colTypes);
+		col = new Collector();
+		col.registerWithConverters(converters);
+
 		assertEquals("", formatCollected(0));
 		assertEquals("", formatCollected(1));
 		assertEquals("", formatCollected(2));
