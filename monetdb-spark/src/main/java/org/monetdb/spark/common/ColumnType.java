@@ -1,4 +1,8 @@
-package org.monetdb.spark.source;
+/*
+ * Copyright (c) MonetDB Solutions
+ */
+
+package org.monetdb.spark.common;
 
 import java.io.Serial;
 import java.io.Serializable;

@@ -1,9 +1,16 @@
-package org.monetdb.spark.source;
+/*
+ * Copyright (c) MonetDB Solutions
+ */
+
+package org.monetdb.spark.driverside;
 
 import org.apache.spark.sql.connector.write.BatchWrite;
 import org.apache.spark.sql.connector.write.Write;
 import org.apache.spark.sql.types.StructType;
 import org.monetdb.spark.bincopy.Collector;
+import org.monetdb.spark.common.ColumnType;
+import org.monetdb.spark.workerside.ConversionError;
+import org.monetdb.spark.common.Destination;
 
 import java.sql.SQLException;
 

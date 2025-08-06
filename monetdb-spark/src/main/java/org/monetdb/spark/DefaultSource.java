@@ -5,7 +5,7 @@ import org.apache.spark.sql.connector.catalog.TableProvider;
 import org.apache.spark.sql.connector.expressions.Transform;
 import org.apache.spark.sql.types.StructType;
 import org.apache.spark.sql.util.CaseInsensitiveStringMap;
-import org.monetdb.spark.source.MonetTable;
+import org.monetdb.spark.driverside.MonetTable;
 
 import java.util.Map;
 
@@ -18,7 +18,7 @@ public class DefaultSource implements TableProvider {
 	@Override
 	public StructType inferSchema(CaseInsensitiveStringMap caseInsensitiveStringMap) {
 		// Method supportsExternalMetadata() returns 'true' so this method won't be called.
-		throw new RuntimeException("inferSchema() not implemented, go away!");
+		throw new RuntimeException("not implemented");
 	}
 
 	@Override

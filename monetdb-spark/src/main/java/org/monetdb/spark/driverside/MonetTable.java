@@ -1,4 +1,8 @@
-package org.monetdb.spark.source;
+/*
+ * Copyright (c) MonetDB Solutions
+ */
+
+package org.monetdb.spark.driverside;
 
 import org.apache.spark.sql.connector.catalog.Column;
 import org.apache.spark.sql.connector.catalog.SupportsWrite;
@@ -9,6 +13,7 @@ import org.apache.spark.sql.connector.write.LogicalWriteInfo;
 import org.apache.spark.sql.connector.write.Write;
 import org.apache.spark.sql.connector.write.WriteBuilder;
 import org.apache.spark.sql.types.StructType;
+import org.monetdb.spark.common.Destination;
 
 import java.util.Map;
 import java.util.Set;

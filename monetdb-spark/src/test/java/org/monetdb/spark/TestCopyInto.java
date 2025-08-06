@@ -1,18 +1,14 @@
 package org.monetdb.spark;
 
 import org.apache.spark.sql.*;
-import org.apache.spark.sql.types.BooleanType;
-import org.apache.spark.sql.types.ByteType;
-import org.apache.spark.sql.types.DataType;
 import org.junit.jupiter.api.*;
-import org.monetdb.spark.source.ConversionError;
+import org.monetdb.spark.workerside.ConversionError;
 
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.List;
 
 import static org.apache.spark.sql.functions.*;
 import static org.junit.jupiter.api.Assertions.*;

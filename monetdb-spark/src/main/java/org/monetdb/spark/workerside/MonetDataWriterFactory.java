@@ -1,9 +1,15 @@
-package org.monetdb.spark.source;
+/*
+ * Copyright (c) MonetDB Solutions
+ */
+
+package org.monetdb.spark.workerside;
 
 import org.apache.spark.sql.catalyst.InternalRow;
 import org.apache.spark.sql.connector.write.DataWriter;
 import org.apache.spark.sql.connector.write.DataWriterFactory;
 import org.apache.spark.sql.types.StructType;
+import org.monetdb.spark.common.ColumnType;
+import org.monetdb.spark.common.Destination;
 
 import java.io.Serial;
 import java.io.Serializable;

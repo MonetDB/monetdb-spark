@@ -1,10 +1,17 @@
-package org.monetdb.spark.source;
+/*
+ * Copyright (c) MonetDB Solutions
+ */
+
+package org.monetdb.spark.driverside;
 
 import org.apache.spark.sql.connector.write.BatchWrite;
 import org.apache.spark.sql.connector.write.DataWriterFactory;
 import org.apache.spark.sql.connector.write.PhysicalWriteInfo;
 import org.apache.spark.sql.connector.write.WriterCommitMessage;
 import org.apache.spark.sql.types.StructType;
+import org.monetdb.spark.common.ColumnType;
+import org.monetdb.spark.common.Destination;
+import org.monetdb.spark.workerside.MonetDataWriterFactory;
 
 /**
  * Manage the process of writing to the table.
