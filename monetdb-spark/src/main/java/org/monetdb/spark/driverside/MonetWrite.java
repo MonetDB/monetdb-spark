@@ -7,10 +7,11 @@ package org.monetdb.spark.driverside;
 import org.apache.spark.sql.connector.write.BatchWrite;
 import org.apache.spark.sql.connector.write.Write;
 import org.apache.spark.sql.types.StructType;
-import org.monetdb.spark.bincopy.Collector;
+import org.monetdb.spark.bincopy.Factory;
 import org.monetdb.spark.common.ColumnType;
 import org.monetdb.spark.workerside.ConversionError;
 import org.monetdb.spark.common.Destination;
+import org.monetdb.spark.workerside.Extractor;
 
 import java.sql.SQLException;
 
@@ -32,18 +33,15 @@ import java.sql.SQLException;
  */
 public class MonetWrite implements Write {
 	private final Destination dest;
-	private final StructType structType;
-	private final ColumnType[] columnTypes;
+	private final Extractor[] extractors;
 
 	public MonetWrite(Destination destination, StructType structType) {
 		this.dest = destination;
-		this.structType = structType;
 
 		try {
 			// We assume it exists, get the column types
-			columnTypes = dest.getColumnTypes();
-			// Do they match the dataframe?
-			new Collector(structType.fields(), columnTypes);
+			ColumnType[] columnTypes = dest.getColumnTypes();
+			extractors = Factory.pickExtractors(structType.fields(), columnTypes);
 		} catch (SQLException | ConversionError e) {
 			// Spark doesn't allow us to throw checked exceptions
 			throw new RuntimeException(e);
@@ -52,6 +50,6 @@ public class MonetWrite implements Write {
 
 	@Override
 	public BatchWrite toBatch() {
-		return new MonetBatchWrite(dest, structType, columnTypes);
+		return new MonetBatchWrite(dest, extractors);
 	}
 }

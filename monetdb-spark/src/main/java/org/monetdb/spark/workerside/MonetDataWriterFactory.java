@@ -8,6 +8,7 @@ import org.apache.spark.sql.catalyst.InternalRow;
 import org.apache.spark.sql.connector.write.DataWriter;
 import org.apache.spark.sql.connector.write.DataWriterFactory;
 import org.apache.spark.sql.types.StructType;
+import org.monetdb.spark.bincopy.Factory;
 import org.monetdb.spark.common.ColumnType;
 import org.monetdb.spark.common.Destination;
 
@@ -22,17 +23,15 @@ public class MonetDataWriterFactory implements DataWriterFactory, Serializable {
 	private static final long serialVersionUID = 0L;
 
 	private final Destination dest;
-	private final StructType structType;
-	private final ColumnType[] columnTypes;
+	private final Extractor[] extractors;
 
-	public MonetDataWriterFactory(Destination dest, StructType structType, ColumnType[] columnTypes) {
+	public MonetDataWriterFactory(Destination dest, Extractor[] extractors) {
 		this.dest = dest;
-		this.structType = structType;
-		this.columnTypes = columnTypes;
+		this.extractors = extractors;
 	}
 
 	@Override
 	public DataWriter<InternalRow> createWriter(int partitionId, long taskId) {
-		return new MonetDataWriter(dest, structType, columnTypes);
+		return new MonetDataWriter(dest, extractors);
 	}
 }

@@ -11,6 +11,7 @@ import org.apache.spark.sql.connector.write.WriterCommitMessage;
 import org.apache.spark.sql.types.StructType;
 import org.monetdb.spark.common.ColumnType;
 import org.monetdb.spark.common.Destination;
+import org.monetdb.spark.workerside.Extractor;
 import org.monetdb.spark.workerside.MonetDataWriterFactory;
 
 /**
@@ -25,18 +26,16 @@ import org.monetdb.spark.workerside.MonetDataWriterFactory;
  */
 public class MonetBatchWrite implements BatchWrite {
 	private final Destination dest;
-	private final StructType structType;
-	private final ColumnType[] columnTypes;
+	private final Extractor[] extractors;
 
-	public MonetBatchWrite(Destination dest, StructType structType, ColumnType[] columnTypes) {
+	public MonetBatchWrite(Destination dest, Extractor[] extractors) {
 		this.dest = dest;
-		this.structType = structType;
-		this.columnTypes = columnTypes;
+		this.extractors = extractors;
 	}
 
 	@Override
 	public DataWriterFactory createBatchWriterFactory(PhysicalWriteInfo info) {
-		return new MonetDataWriterFactory(dest, structType, columnTypes);
+		return new MonetDataWriterFactory(dest, extractors);
 	}
 
 	@Override

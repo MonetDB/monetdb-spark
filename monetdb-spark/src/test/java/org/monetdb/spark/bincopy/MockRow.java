@@ -10,11 +10,11 @@ import org.apache.spark.unsafe.types.CalendarInterval;
 import org.apache.spark.unsafe.types.UTF8String;
 import org.apache.spark.unsafe.types.VariantVal;
 
-public class TestRow implements SpecializedGetters {
+public class MockRow implements SpecializedGetters {
 
 	public Object[] values;
 
-	public TestRow(Object... values) {
+	public MockRow(Object... values) {
 		this.values = values;
 	}
 

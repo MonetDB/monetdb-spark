@@ -7,10 +7,8 @@ package org.monetdb.spark.workerside;
 import org.apache.spark.sql.catalyst.InternalRow;
 import org.apache.spark.sql.connector.write.DataWriter;
 import org.apache.spark.sql.connector.write.WriterCommitMessage;
-import org.apache.spark.sql.types.StructType;
 import org.monetdb.jdbc.MonetConnection;
 import org.monetdb.spark.bincopy.Collector;
-import org.monetdb.spark.common.ColumnType;
 import org.monetdb.spark.common.Destination;
 
 import java.io.IOException;
@@ -25,10 +23,10 @@ public class MonetDataWriter implements DataWriter<InternalRow> {
 	private MonetConnection conn;
 	private Statement stmt;
 
-	public MonetDataWriter(Destination dest, StructType structType, ColumnType[] columnTypes) {
+	public MonetDataWriter(Destination dest, Extractor[] extractors) {
 		this.dest = dest;
 		try {
-			collector = new Collector(structType.fields(), columnTypes);
+			collector = new Collector(extractors);
 		} catch (ConversionError e) {
 			// Unlikely because {@link MonetWrite} already tried it.
 			throw new RuntimeException(e);

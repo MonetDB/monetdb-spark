@@ -5,10 +5,14 @@ import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SaveMode;
 import org.apache.spark.sql.SparkSession;
 
+import org.apache.spark.unsafe.types.UTF8String;
 import org.junit.jupiter.api.AutoClose;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -104,5 +108,20 @@ public class TestSpark {
 			assertEquals("x" + i, rs.getString(3));
 		}
 		assertFalse(rs.next());
+	}
+
+	@Test
+	public void testUTF8String() throws IOException {
+		String str = "AAP";
+		byte[] aapBytes = {0x41, 0x41, 0x50};
+		assertArrayEquals(aapBytes, str.getBytes(StandardCharsets.UTF_8));
+		UTF8String utf8str = UTF8String.fromString(str);
+		byte[] ubytes = utf8str.getBytes();
+		assertArrayEquals(aapBytes, ubytes);
+
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		utf8str.writeTo(out);
+		byte[] sbytes = out.toByteArray();
+		assertArrayEquals(aapBytes, sbytes);
 	}
 }
