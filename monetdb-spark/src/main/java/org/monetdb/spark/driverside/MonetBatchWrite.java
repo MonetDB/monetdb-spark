@@ -8,10 +8,8 @@ import org.apache.spark.sql.connector.write.BatchWrite;
 import org.apache.spark.sql.connector.write.DataWriterFactory;
 import org.apache.spark.sql.connector.write.PhysicalWriteInfo;
 import org.apache.spark.sql.connector.write.WriterCommitMessage;
-import org.apache.spark.sql.types.StructType;
-import org.monetdb.spark.common.ColumnType;
 import org.monetdb.spark.common.Destination;
-import org.monetdb.spark.workerside.Extractor;
+import org.monetdb.spark.workerside.Converter;
 import org.monetdb.spark.workerside.MonetDataWriterFactory;
 
 /**
@@ -26,16 +24,16 @@ import org.monetdb.spark.workerside.MonetDataWriterFactory;
  */
 public class MonetBatchWrite implements BatchWrite {
 	private final Destination dest;
-	private final Extractor[] extractors;
+	private final Converter[] converters;
 
-	public MonetBatchWrite(Destination dest, Extractor[] extractors) {
+	public MonetBatchWrite(Destination dest, Converter[] converters) {
 		this.dest = dest;
-		this.extractors = extractors;
+		this.converters = converters;
 	}
 
 	@Override
 	public DataWriterFactory createBatchWriterFactory(PhysicalWriteInfo info) {
-		return new MonetDataWriterFactory(dest, extractors);
+		return new MonetDataWriterFactory(dest, converters);
 	}
 
 	@Override

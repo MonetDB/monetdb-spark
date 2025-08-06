@@ -2,27 +2,31 @@ package org.monetdb.spark.bincopy;
 
 import org.apache.spark.sql.catalyst.expressions.SpecializedGetters;
 import org.monetdb.spark.workerside.ConversionError;
-import org.monetdb.spark.workerside.Extractor;
+import org.monetdb.spark.workerside.Converter;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
 public class Collector {
-	final Extractor[] extractors;
+	final Converter[] converters;
 	final ByteArrayOutputStream[] buffers;
 	private int rowCount = 0;
 	private int totalSize = 0;
 
-	public Collector(Extractor[] extractors) throws ConversionError {
-		this.extractors = extractors;
-		buffers = new ByteArrayOutputStream[extractors.length];
-		for (int i = 0; i < extractors.length; i++) {
+	public Collector(Converter[] converters) throws ConversionError {
+		this.converters = converters;
+		buffers = new ByteArrayOutputStream[converters.length];
+		for (int i = 0; i < converters.length; i++) {
 			buffers[i] = new ByteArrayOutputStream();
 		}
-		for (int i = 0; i < extractors.length; i++) {
-			extractors[i].init(this, i);
+		for (int i = 0; i < converters.length; i++) {
+			converters[i].init(this, i);
 		}
+	}
+
+	public ByteArrayOutputStream getBuffer(int idx) {
+		return buffers[idx];
 	}
 
 	public int getRowCount() {
@@ -35,9 +39,9 @@ public class Collector {
 
 	public int convertRow(SpecializedGetters row) {
 		try {
-			for (int i = 0; i < extractors.length; i++) {
+			for (int i = 0; i < converters.length; i++) {
 				int oldSize = buffers[i].size();
-				extractors[i].extract(row, i);
+				converters[i].extract(row, i);
 				int newSize = buffers[i].size();
 				totalSize += newSize - oldSize;
 			}

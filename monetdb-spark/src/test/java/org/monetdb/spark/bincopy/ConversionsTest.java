@@ -21,7 +21,7 @@ import java.sql.JDBCType;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class FactoryTest {
+class ConversionsTest {
 	final StructField boolField = new StructField("b", DataTypes.BooleanType, false, Metadata.empty());
 	final StructField intField = new StructField("i", DataTypes.IntegerType, false, Metadata.empty());
 	final StructField stringField = new StructField("s", DataTypes.StringType, false, Metadata.empty());
@@ -35,7 +35,7 @@ class FactoryTest {
 	public void testLengthMismatch() {
 		StructField[] sparkTypes = {boolField, intField, stringField};
 		ColumnType[] colTypes = {boolCol, intCol};
-		assertThrows(ConversionError.class, () -> Factory.pickExtractors(sparkTypes, colTypes))
+		assertThrows(ConversionError.class, () -> Conversions.pickExtractors(sparkTypes, colTypes))
 		;
 	}
 
@@ -43,7 +43,7 @@ class FactoryTest {
 	public void testTypeMismatch() {
 		StructField[] sparkTypes = {boolField, intField, stringField};
 		ColumnType[] colTypes = {boolCol, stringCol, stringCol};
-		assertThrows(ConversionError.class, () -> Factory.pickExtractors(sparkTypes, colTypes));
+		assertThrows(ConversionError.class, () -> Conversions.pickExtractors(sparkTypes, colTypes));
 	}
 
 }

@@ -54,7 +54,7 @@ class CollectorTest {
 	public void testCollector() throws ConversionError, IOException {
 		StructField[] sparkTypes = {boolField, intField, stringField};
 		ColumnType[] colTypes = {boolCol, intCol, stringCol};
-		col = new Collector(Factory.pickExtractors(sparkTypes, colTypes));
+		col = new Collector(Conversions.pickExtractors(sparkTypes, colTypes));
 		assertEquals("COPY LITTLE ENDIAN BINARY INTO foo FROM '0', '1', '2' ON CLIENT", col.copyStatement("foo"));
 		assertEquals("", formatCollected(0));
 		assertEquals("", formatCollected(1));
@@ -104,7 +104,7 @@ class CollectorTest {
 				}
 			}
 			// Collect some data
-			col = new Collector(Factory.pickExtractors(sparkTypes, colTypes));
+			col = new Collector(Conversions.pickExtractors(sparkTypes, colTypes));
 			col.convertRow(new MockRow(TRUE, 1, "one"));
 			col.convertRow(new MockRow(FALSE, 2, "two"));
 			col.convertRow(new MockRow(TRUE, 3, "three"));

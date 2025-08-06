@@ -11,33 +11,33 @@
 package org.monetdb.spark.bincopy;
 
 import org.apache.spark.sql.types.*;
+import org.monetdb.spark.bincopy.conversions.*;
 import org.monetdb.spark.common.ColumnType;
 import org.monetdb.spark.workerside.ConversionError;
-import org.monetdb.spark.workerside.Extractor;
+import org.monetdb.spark.workerside.Converter;
 
-import java.io.ByteArrayOutputStream;
 import java.text.MessageFormat;
 
-public class Factory {
-	public static Extractor[] pickExtractors(StructField[] fields, ColumnType[] cols) throws ConversionError {
+public class Conversions {
+	public static Converter[] pickExtractors(StructField[] fields, ColumnType[] cols) throws ConversionError {
 		int n = fields.length;
 		if (n != cols.length) {
 			throw new ConversionError("Dataframe has " + n + " columns, table has " + cols.length);
 		}
-		Extractor[] extractors = new Extractor[n];
+		Converter[] converters = new Converter[n];
 		for (int i = 0; i < n; i++) {
 			DataType fieldType = fields[i].dataType();
 			ColumnType colType = cols[i];
-			Extractor extractor = Factory.pickExtractor(fieldType, colType);
-			if (extractor == null) {
+			Converter converter = Conversions.pickExtractor(fieldType, colType);
+			if (converter == null) {
 				throw new ConversionError(MessageFormat.format("Field {0} ({1}): can''t convert Spark type {2} to {3}", i, fields[i].name(), fieldType, colType));
 			}
-			extractors[i] = extractor;
+			converters[i] = converter;
 		}
-		return extractors;
+		return converters;
 	}
 
-	public static Extractor pickExtractor(DataType fieldType, ColumnType col) {
+	public static Converter pickExtractor(DataType fieldType, ColumnType col) {
 		switch (col.getType()) {
 			case BOOLEAN:
 				if (fieldType instanceof BooleanType)

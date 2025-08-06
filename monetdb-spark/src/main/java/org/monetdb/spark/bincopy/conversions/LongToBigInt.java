@@ -8,16 +8,17 @@
  * Copyright MonetDB Solutions B.V.
  */
 
-package org.monetdb.spark.workerside;
+package org.monetdb.spark.bincopy.conversions;
 
+import org.apache.commons.io.EndianUtils;
 import org.apache.spark.sql.catalyst.expressions.SpecializedGetters;
-import org.monetdb.spark.bincopy.Collector;
 
 import java.io.IOException;
-import java.io.Serializable;
 
-public interface Extractor extends Serializable {
-	void init(Collector collector, int idx);
-
-	void extract(SpecializedGetters row, int idx) throws IOException;
+public class LongToBigInt extends BinCopyConversion {
+	@Override
+	public void extract(SpecializedGetters row, int idx) throws IOException {
+		long n = row.getLong(idx);
+		EndianUtils.writeSwappedLong(buffer, n);
+	}
 }

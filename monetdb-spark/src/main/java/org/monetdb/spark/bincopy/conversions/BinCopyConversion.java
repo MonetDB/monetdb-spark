@@ -8,17 +8,18 @@
  * Copyright MonetDB Solutions B.V.
  */
 
-package org.monetdb.spark.bincopy;
+package org.monetdb.spark.bincopy.conversions;
 
-import org.monetdb.spark.workerside.Extractor;
+import org.monetdb.spark.bincopy.Collector;
+import org.monetdb.spark.workerside.Converter;
 
 import java.io.ByteArrayOutputStream;
 
-public abstract class BinCopyExtractor implements Extractor {
+public abstract class BinCopyConversion implements Converter {
 	protected transient ByteArrayOutputStream buffer;
 
 	@Override
 	public void init(Collector collector, int idx) {
-		buffer = collector.buffers[idx];
+		buffer = collector.getBuffer(idx);
 	}
 }

@@ -8,17 +8,14 @@
  * Copyright MonetDB Solutions B.V.
  */
 
-package org.monetdb.spark.bincopy;
+package org.monetdb.spark.bincopy.conversions;
 
-import org.apache.commons.io.EndianUtils;
 import org.apache.spark.sql.catalyst.expressions.SpecializedGetters;
 
-import java.io.IOException;
-
-public class IntegerToInteger extends BinCopyExtractor {
+public class ByteToTinyInt extends BinCopyConversion {
 	@Override
-	public void extract(SpecializedGetters row, int idx) throws IOException {
-		int i = row.getInt(idx);
-		EndianUtils.writeSwappedInteger(buffer, i);
+	public void extract(SpecializedGetters row, int idx) {
+		byte b = row.getByte(idx);
+		buffer.write(b);
 	}
 }

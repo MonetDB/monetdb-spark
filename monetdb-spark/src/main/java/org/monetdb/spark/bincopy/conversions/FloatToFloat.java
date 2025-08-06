@@ -8,17 +8,17 @@
  * Copyright MonetDB Solutions B.V.
  */
 
-package org.monetdb.spark.bincopy;
+package org.monetdb.spark.bincopy.conversions;
 
 import org.apache.commons.io.EndianUtils;
 import org.apache.spark.sql.catalyst.expressions.SpecializedGetters;
 
 import java.io.IOException;
 
-public class ShortToSmallInt extends BinCopyExtractor {
+public class FloatToFloat extends BinCopyConversion {
 	@Override
 	public void extract(SpecializedGetters row, int idx) throws IOException {
-		short n = row.getShort(idx);
-		EndianUtils.writeSwappedShort(buffer, n);
+		float d = row.getFloat(idx);
+		EndianUtils.writeSwappedFloat(buffer, d);
 	}
 }

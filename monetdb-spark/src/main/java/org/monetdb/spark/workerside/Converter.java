@@ -8,18 +8,16 @@
  * Copyright MonetDB Solutions B.V.
  */
 
-package org.monetdb.spark.bincopy;
+package org.monetdb.spark.workerside;
 
 import org.apache.spark.sql.catalyst.expressions.SpecializedGetters;
-import org.apache.spark.unsafe.types.UTF8String;
+import org.monetdb.spark.bincopy.Collector;
 
 import java.io.IOException;
+import java.io.Serializable;
 
-public class StringToText extends BinCopyExtractor {
-	@Override
-	public void extract(SpecializedGetters row, int idx) throws IOException {
-		UTF8String u = row.getUTF8String(idx);
-		u.writeTo(buffer);
-		buffer.write(0);
-	}
+public interface Converter extends Serializable {
+	void init(Collector collector, int idx);
+
+	void extract(SpecializedGetters row, int idx) throws IOException;
 }

@@ -23,10 +23,10 @@ public class MonetDataWriter implements DataWriter<InternalRow> {
 	private MonetConnection conn;
 	private Statement stmt;
 
-	public MonetDataWriter(Destination dest, Extractor[] extractors) {
+	public MonetDataWriter(Destination dest, Converter[] converters) {
 		this.dest = dest;
 		try {
-			collector = new Collector(extractors);
+			collector = new Collector(converters);
 		} catch (ConversionError e) {
 			// Unlikely because {@link MonetWrite} already tried it.
 			throw new RuntimeException(e);
