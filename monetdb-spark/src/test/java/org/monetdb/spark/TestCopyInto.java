@@ -142,7 +142,6 @@ public class TestCopyInto {
 		testRoundTrip(10, "Byte");
 	}
 
-	@Disabled // it maps ShortType to INTEGER, then everything falls apart
 	@Test
 	public void testShortType() {
 		testRoundTrip(10, "Short");

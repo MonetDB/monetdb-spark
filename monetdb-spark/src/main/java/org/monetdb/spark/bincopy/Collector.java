@@ -95,10 +95,8 @@ public class Collector {
 					return this::tinyintFromByte;
 				break;
 			case SMALLINT:
-				// This doesn't work yet. Somehow it gets mapped to
-				// INTEGER rather than SMALLINT!
-				// if (fieldType instanceof ShortType)
-				// 	return this::smallintFromShort;
+				 if (fieldType instanceof ShortType)
+				 	return this::smallintFromShort;
 				break;
 			case INTEGER:
 				if (fieldType instanceof IntegerType)
