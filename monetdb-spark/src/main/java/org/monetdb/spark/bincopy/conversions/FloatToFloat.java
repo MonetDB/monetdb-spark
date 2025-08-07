@@ -21,4 +21,15 @@ public class FloatToFloat extends BinCopyConversion {
 		float d = row.getFloat(idx);
 		EndianUtils.writeSwappedFloat(buffer, d);
 	}
+
+	@Override
+	public byte[] buildNullRepresentation() {
+		int n = Float.floatToIntBits(Float.NaN);
+		byte[] repr = new byte[8];
+		// little endian
+		for (int i = 0; i < 4; i++) {
+			repr[i] = (byte) ((n >> 8 * i) % 256);
+		}
+		return repr;
+	}
 }

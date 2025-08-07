@@ -21,4 +21,15 @@ public class DoubleToDouble extends BinCopyConversion {
 		double d = row.getDouble(idx);
 		EndianUtils.writeSwappedDouble(buffer, d);
 	}
+
+	@Override
+	public byte[] buildNullRepresentation() {
+		long n = Double.doubleToLongBits(Double.NaN);
+		byte[] repr = new byte[8];
+		// little endian
+		for (int i = 0; i < 8; i++) {
+			repr[i] = (byte) ((n >> 8 * i) % 256);
+		}
+		return repr;
+	}
 }

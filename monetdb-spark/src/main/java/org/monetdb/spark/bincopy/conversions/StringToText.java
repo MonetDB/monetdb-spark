@@ -22,4 +22,9 @@ public class StringToText extends BinCopyConversion {
 		u.writeTo(buffer);
 		buffer.write(0);
 	}
+
+	@Override
+	public byte[] buildNullRepresentation() {
+		return new byte[] {-0x80, 0x00};
+	}
 }

@@ -1,6 +1,8 @@
 package org.monetdb.spark;
 
 import org.apache.spark.sql.*;
+import org.apache.spark.sql.types.DataType;
+import org.apache.spark.sql.types.StructField;
 import org.junit.jupiter.api.AutoClose;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -178,13 +180,22 @@ public class DataTypesTests {
 	}
 
 	private void testRoundTrip(int n, Column expr) {
+		// Create the dataframe
 		Dataset<Row> data = spark.range(n).withColumn("x", expr);
+
+		// Add a NULL value
+		DataType dataType = data.schema().fields()[1].dataType();
+		Column nullExpr = lit(null).cast(dataType);
+		Column condition = col("id").equalTo(2);
+		Column newExpr = when(condition, nullExpr).otherwise(col("x"));
+		data = data.withColumn("x", newExpr);
+
 		testRoundTrip(data);
 	}
 
-	private void testRoundTrip(Dataset<Row> orig) {
+	private void testRoundTrip(Dataset<Row> data) {
 		// Create the table by Overwriting with an empty dataframe
-		orig
+		data
 				.filter(lit(false))
 				.write()
 				.format("jdbc")
@@ -194,7 +205,7 @@ public class DataTypesTests {
 				.save();
 
 		// Append the data by Appending this dataframe
-		orig
+		data
 				.write()
 				.format("org.monetdb.spark")
 				.mode(SaveMode.Append)
@@ -211,7 +222,7 @@ public class DataTypesTests {
 				.sort("id");
 
 		// Compare the contents
-		Row[] origRows = orig.collectAsList().toArray(new Row[0]);
+		Row[] origRows = data.collectAsList().toArray(new Row[0]);
 		Row[] foundRows = found.collectAsList().toArray(new Row[0]);
 		assertArrayEquals(origRows, foundRows);
 	}

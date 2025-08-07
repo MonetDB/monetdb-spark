@@ -19,4 +19,9 @@ public class BooleanToBoolean extends BinCopyConversion {
 		int numeric = b ? 1 : 0;
 		buffer.write(numeric);
 	}
+
+	@Override
+	public byte[] buildNullRepresentation() {
+		return new byte[] { -0x80 };
+	}
 }

@@ -21,4 +21,9 @@ public class LongToBigInt extends BinCopyConversion {
 		long n = row.getLong(idx);
 		EndianUtils.writeSwappedLong(buffer, n);
 	}
+
+	@Override
+	public byte[] buildNullRepresentation() {
+		return new byte[] { 0, 0, 0, 0, /**/ 0, 0, 0, -0x80 };
+	}
 }

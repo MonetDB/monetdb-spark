@@ -21,4 +21,10 @@ public class IntegerToInteger extends BinCopyConversion {
 		int i = row.getInt(idx);
 		EndianUtils.writeSwappedInteger(buffer, i);
 	}
+
+	@Override
+	public byte[] buildNullRepresentation() {
+		return new byte[] { 0, 0, 0,  -0x80 };
+
+	}
 }

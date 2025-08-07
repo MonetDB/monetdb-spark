@@ -19,4 +19,6 @@ public interface Converter extends Serializable {
 	void init(Collector collector, int idx);
 
 	void extract(SpecializedGetters row, int idx) throws IOException;
+
+	void setNull(int idx) throws IOException;
 }

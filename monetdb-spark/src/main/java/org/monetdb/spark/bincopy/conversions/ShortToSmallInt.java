@@ -21,4 +21,10 @@ public class ShortToSmallInt extends BinCopyConversion {
 		short n = row.getShort(idx);
 		EndianUtils.writeSwappedShort(buffer, n);
 	}
+
+	@Override
+	public byte[] buildNullRepresentation() {
+		return new byte[] { 0, -0x80 };
+
+	}
 }

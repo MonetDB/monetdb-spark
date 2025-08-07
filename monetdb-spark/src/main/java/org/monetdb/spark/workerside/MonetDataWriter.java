@@ -32,9 +32,7 @@ public class MonetDataWriter implements DataWriter<InternalRow> {
 	}
 
 	public void processRow(SpecializedGetters row) throws IOException {
-		for (int i = 0; i < converters.length; i++) {
-			converters[i].extract(row, i);
-		}
+		runConverters(row);
 		collector.endRow();
 		if (collector.getRowCount() >= batchSize) {
 			try {
@@ -42,6 +40,16 @@ public class MonetDataWriter implements DataWriter<InternalRow> {
 			} catch (SQLException e) {
 				throw new IOException(e);
 			}
+		}
+	}
+
+	private void runConverters(SpecializedGetters row) throws IOException {
+		for (int i = 0; i < converters.length; i++) {
+			Converter converter = converters[i];
+			if (row.isNullAt(i))
+				converter.setNull(i);
+			else
+				converter.extract(row, i);
 		}
 	}
 

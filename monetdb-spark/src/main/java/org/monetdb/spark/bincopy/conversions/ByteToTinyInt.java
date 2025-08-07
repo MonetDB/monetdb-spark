@@ -18,4 +18,9 @@ public class ByteToTinyInt extends BinCopyConversion {
 		byte b = row.getByte(idx);
 		buffer.write(b);
 	}
+
+	@Override
+	public byte[] buildNullRepresentation() {
+		return new byte[] { -0x80 };
+	}
 }
