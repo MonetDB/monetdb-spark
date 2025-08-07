@@ -2,18 +2,39 @@ package org.monetdb.spark;
 
 import org.apache.spark.sql.SparkSession;
 
+import java.io.FileReader;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
 
 public class Config {
+	public static final String PROPERTIES_FILE_NAME = "override.properties";
 
-	private static final String DEFAULT_DB = "testspark";
+	private static final String DB_PROPERTY = "test.db";
+	private static final String DB_DEFAULT = "testspark";
 
-	private static final String DEFAULT_SPARK = "local[4]";
+	private static final String SPARK_MASTER_PROPERTY = "test.spark";
+	private static final String SPARK_MASTER_DEFAULT = "local[4]";
+
+	private static final Properties fileProperties = new Properties();
+	private static boolean filePropertiesLoaded = false;
+
+	private static String getProperty(String key, String defaultValue) {
+		synchronized (fileProperties) {
+			if (!filePropertiesLoaded) {
+				try {
+					fileProperties.load(new FileReader(PROPERTIES_FILE_NAME));
+					filePropertiesLoaded = true;
+				} catch (IOException ignored) {}
+			}
+		}
+		return fileProperties.getProperty(key, System.getProperty(key, defaultValue));
+	}
 
 	public static String databaseUrl() {
-		String db = System.getProperty("test.db", DEFAULT_DB);
+		String db = getProperty(DB_PROPERTY, DB_DEFAULT);
 		if (!db.contains("/") && !db.contains(":"))
 			db = "jdbc:monetdb://localhost/" + db;
 		if (!db.contains("user=") && !db.contains("password=")) {
@@ -34,7 +55,7 @@ public class Config {
 	}
 
 	public static String sparkUrl() {
-		return System.getProperty("test.spark", DEFAULT_SPARK);
+		return getProperty(SPARK_MASTER_PROPERTY, SPARK_MASTER_DEFAULT);
 	}
 
 	public static SparkSession sparkSession() {

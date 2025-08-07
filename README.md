@@ -51,9 +51,11 @@ The following are all equivalent:
 * `TESTDB=jdbc:monetdb://localhost/demo`, you can omit user and password.
 * `TESTDB=demo`, you can also omit `jdbc://localhost/`.
 
+Instead of passing TESTDB to `make`, you can also create a properties file
+`./monetdb-spark/override.properties`, for example containing `test.db=demo`.
 
-
-
+The set of supported properties is defined in 
+[Config.java](monetdb-spark/src/test/java/org/monetdb/spark/Config.java).
 
 
 [JdbcDialect]: https://spark.apache.org/docs/latest/api/java/org/apache/spark/sql/jdbc/JdbcDialect.html

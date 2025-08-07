@@ -1,1 +1,6 @@
+# Developer-specific properties for the unit tests.
+# For example, test.db=demo
+override.properties
+
+# This gets created during builds
 dependency-reduced-pom.xml
