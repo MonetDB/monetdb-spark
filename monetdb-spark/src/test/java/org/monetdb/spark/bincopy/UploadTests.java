@@ -66,7 +66,8 @@ public class UploadTests {
 		Collector collector = new Collector();
 		collector.registerWithConverters(converters);
 		BinCopyUploader uploader = new BinCopyUploader(dest, collector, converters);
-		MonetDataWriter dataWriter = new MonetDataWriter(collector, converters, uploader);
+		long batchSize = Long.MAX_VALUE;
+		MonetDataWriter dataWriter = new MonetDataWriter(collector, converters, uploader, batchSize);
 
 		// Write data
 		MockRow row1 = new MockRow(TRUE, 1, "one");

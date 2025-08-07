@@ -85,7 +85,8 @@ public class MonetTable implements Table, SupportsWrite {
 	}
 
 	String getArg(String key, String defaultValue) {
-		return props.getOrDefault(key, defaultValue);
+		Object x = props.getOrDefault(key, defaultValue);
+		return x == null ? null : x.toString();
 	}
 
 	@Override // SupportsWrite
@@ -120,9 +121,11 @@ public class MonetTable implements Table, SupportsWrite {
 			String url = getArg("url");
 			String user = getArg("user", null);
 			String password = getArg("password", null);
-			Destination dest = new Destination(url, user, password, tableName);
+			String batchSizeArg = getArg("batchsize", null);
+			long batchSize = batchSizeArg != null ? Long.parseLong(batchSizeArg) : Long.MAX_VALUE;
 
-			return new MonetWrite(dest, structType);
+			Destination dest = new Destination(url, user, password, tableName);
+			return new MonetWrite(dest, structType, batchSize);
 		}
 	}
 }

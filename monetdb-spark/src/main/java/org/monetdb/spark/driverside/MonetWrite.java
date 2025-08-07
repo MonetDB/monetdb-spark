@@ -34,9 +34,11 @@ import java.sql.SQLException;
 public class MonetWrite implements Write {
 	private final Destination dest;
 	private final Converter[] converters;
+	private final long batchSize;
 
-	public MonetWrite(Destination destination, StructType structType) {
+	public MonetWrite(Destination destination, StructType structType, long batchSize) {
 		this.dest = destination;
+		this.batchSize = batchSize;
 
 		try {
 			// We assume it exists, get the column types
@@ -50,6 +52,6 @@ public class MonetWrite implements Write {
 
 	@Override
 	public BatchWrite toBatch() {
-		return new MonetBatchWrite(dest, converters);
+		return new MonetBatchWrite(dest, converters, batchSize);
 	}
 }

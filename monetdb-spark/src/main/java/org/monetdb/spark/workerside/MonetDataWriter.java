@@ -17,11 +17,13 @@ public class MonetDataWriter implements DataWriter<InternalRow> {
 	private final Collector collector;
 	private final Converter[] converters;
 	private final BinCopyUploader uploader;
+	private final long batchSize;
 
-	public MonetDataWriter(Collector collector, Converter[] converters, BinCopyUploader uploader) {
+	public MonetDataWriter(Collector collector, Converter[] converters, BinCopyUploader uploader, long batchSize) {
 		this.collector = collector;
 		this.converters = converters;
 		this.uploader = uploader;
+		this.batchSize = batchSize;
 	}
 
 	@Override
@@ -34,6 +36,13 @@ public class MonetDataWriter implements DataWriter<InternalRow> {
 			converters[i].extract(row, i);
 		}
 		collector.endRow();
+		if (collector.getRowCount() >= batchSize) {
+			try {
+				uploader.uploadBatch();
+			} catch (SQLException e) {
+				throw new IOException(e);
+			}
+		}
 	}
 
 	@Override
@@ -47,7 +56,7 @@ public class MonetDataWriter implements DataWriter<InternalRow> {
 			uploader.uploadBatch();
 			uploader.commit();
 		} catch (SQLException e) {
-			throw new RuntimeException(e);
+			throw new IOException(e);
 		}
 		close();
 		return null;

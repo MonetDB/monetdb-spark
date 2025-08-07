@@ -35,10 +35,12 @@ public class BinCopyDataWriterFactory implements DataWriterFactory, Serializable
 
 	private final Destination dest;
 	private final Converter[] converters;
+	private final long batchSize;
 
-	public BinCopyDataWriterFactory(Destination dest, Converter[] converters) {
+	public BinCopyDataWriterFactory(Destination dest, Converter[] converters, long batchSize) {
 		this.dest = dest;
 		this.converters = converters;
+		this.batchSize = batchSize;
 	}
 
 	@Override
@@ -47,7 +49,7 @@ public class BinCopyDataWriterFactory implements DataWriterFactory, Serializable
 			Collector collector = new Collector();
 			collector.registerWithConverters(converters);
 			BinCopyUploader uploader = new BinCopyUploader(dest, collector, converters);
-			return new MonetDataWriter(collector, converters, uploader);
+			return new MonetDataWriter(collector, converters, uploader, batchSize);
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}

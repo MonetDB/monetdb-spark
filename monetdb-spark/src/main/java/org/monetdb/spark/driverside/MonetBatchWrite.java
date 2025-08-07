@@ -25,15 +25,17 @@ import org.monetdb.spark.workerside.Converter;
 public class MonetBatchWrite implements BatchWrite {
 	private final Destination dest;
 	private final Converter[] converters;
+	private final long batchSize;
 
-	public MonetBatchWrite(Destination dest, Converter[] converters) {
+	public MonetBatchWrite(Destination dest, Converter[] converters, long batchSize) {
 		this.dest = dest;
 		this.converters = converters;
+		this.batchSize = batchSize;
 	}
 
 	@Override
 	public DataWriterFactory createBatchWriterFactory(PhysicalWriteInfo info) {
-		return new BinCopyDataWriterFactory(dest, converters);
+		return new BinCopyDataWriterFactory(dest, converters, batchSize);
 	}
 
 	@Override
