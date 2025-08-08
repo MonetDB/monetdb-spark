@@ -98,17 +98,12 @@ public class BinCopyConversions {
 		}
 
 		int bits = DecimalSizes.bitsNeededForPrecision(precision);
-		switch (bits) {
-			case 8:
-				return new DecimalToByte();
-			case 16:
-				return new DecimalToShort();
-			case 32:
-				return new DecimalToInteger();
-			case 64:
-				return new DecimalToLong();
-			default:
-				return null;
-		}
+		return switch (bits) {
+			case 8 -> new DecimalToByte();
+			case 16 -> new DecimalToShort();
+			case 32 -> new DecimalToInteger();
+			case 64 -> new DecimalToLong();
+			default -> null;
+		};
 	}
 }

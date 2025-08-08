@@ -128,7 +128,6 @@ public class GetToKnowSpark {
 
 	@Test
 	public void testDecimal() {
-		boolean ok;
 		Decimal dec;
 
 		// Fits a long

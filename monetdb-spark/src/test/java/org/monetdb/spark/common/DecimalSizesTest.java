@@ -33,20 +33,14 @@ class DecimalSizesTest {
 	}
 
 	static int smallerSize(int bits) {
-		switch (bits) {
-			case 8:
-				throw new RuntimeException("8 is the smallest size");
-			case 16:
-				return 8;
-			case 32:
-				return 16;
-			case 64:
-				return 32;
-			case 128:
-				return 64;
-			default:
-				throw new RuntimeException("invalid size: " + bits);
-		}
+		return switch (bits) {
+			case 8 -> throw new RuntimeException("8 is the smallest size");
+			case 16 -> 8;
+			case 32 -> 16;
+			case 64 -> 32;
+			case 128 -> 64;
+			default -> throw new RuntimeException("invalid size: " + bits);
+		};
 	}
 
 	@Test

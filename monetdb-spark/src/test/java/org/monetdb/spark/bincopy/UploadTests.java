@@ -35,9 +35,6 @@ public class UploadTests {
 	final StructField boolField = new StructField("b", DataTypes.BooleanType, false, Metadata.empty());
 	final StructField intField = new StructField("i", DataTypes.IntegerType, false, Metadata.empty());
 	final StructField stringField = new StructField("s", DataTypes.StringType, false, Metadata.empty());
-	final ColumnType boolCol = new ColumnType(JDBCType.BOOLEAN);
-	final ColumnType intCol = new ColumnType(JDBCType.INTEGER);
-	final ColumnType stringCol = new ColumnType(JDBCType.VARCHAR);
 
 	@AutoClose
 	Connection conn;
