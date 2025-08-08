@@ -171,27 +171,30 @@ public class DataTypesTests {
 		testRoundTrip(10, col("id").cast("Double").divide(2.0));
 	}
 
-	@Test
-	public void testDecimalx() {
-		String type = "Decimal(8,3)";
-		Column decs = col("id").cast(type);
-		Column betterDecs = decs.plus(decs.divide(lit(10))).cast(type);
-		testRoundTrip(10, betterDecs);
-	}
-
-	@ParameterizedTest
-	@ValueSource(ints = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18})
-	public void testDecimal(int precision) {
+	private static Column decimalTestData(int precision) {
 		int scale = precision <= 3 ? precision - 1 : 3;
 		Column idecs = col("id").cast("DECIMAL");
 		Column decs = idecs.plus(idecs.divide(lit(9)));
 		// Make them fit
 		Column modulo = power(lit(10), lit(precision - scale)).cast(new DecimalType(precision - scale + 1, 0));
 		Column reduced = round(decs, scale).mod(modulo).cast(new DecimalType(precision, scale));
-
-		testRoundTrip(10, reduced);
+		return reduced;
 	}
 
+	@ParameterizedTest
+	@ValueSource(ints = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18})
+	public void testDecimal(int precision) {
+		Column data = decimalTestData(precision);
+		testRoundTrip(10, data);
+	}
+
+	@ParameterizedTest
+		@ValueSource(ints = {19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38})
+	public void testHugeDecimal(int precision) {
+		Column data = decimalTestData(precision);
+		testRoundTrip(10, data);
+	}
+	//	@ValueSource(ints = {19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38})
 	@Test
 	public void testStringType() {
 		testRoundTrip(10, concat(lit("x"), col("id")));

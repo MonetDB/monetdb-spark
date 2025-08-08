@@ -31,7 +31,7 @@ public class BinCopyConversions {
 			ColumnType colType = cols[i];
 			Converter converter = BinCopyConversions.pickConverter(fieldType, colType);
 			if (converter == null) {
-				throw new ConversionError(MessageFormat.format("Field {0} ({1}): can''t convert Spark type {2} to {3}", i, fields[i].name(), fieldType, colType));
+				throw new ConversionError(MessageFormat.format("Field {0} ({1}): don''t know how to convert Spark type {2} to SQL {3}", i, fields[i].name(), fieldType, colType));
 			}
 			converters[i] = converter;
 		}
@@ -103,6 +103,7 @@ public class BinCopyConversions {
 			case 16 -> new DecimalToShort();
 			case 32 -> new DecimalToInteger();
 			case 64 -> new DecimalToLong();
+			case 128 -> new DecimalToHuge(precision, scale);
 			default -> null;
 		};
 	}
