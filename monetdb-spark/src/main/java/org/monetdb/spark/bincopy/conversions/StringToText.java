@@ -24,7 +24,7 @@ public class StringToText extends BinCopyConversion {
 	}
 
 	@Override
-	public byte[] buildNullRepresentation() {
+	public byte[] constructNullRepresentation() {
 		return new byte[] {-0x80, 0x00};
 	}
 }

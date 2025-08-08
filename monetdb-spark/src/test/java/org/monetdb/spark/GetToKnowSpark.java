@@ -4,6 +4,7 @@ import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SaveMode;
 import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.types.Decimal;
 import org.apache.spark.unsafe.types.UTF8String;
 import org.junit.jupiter.api.AutoClose;
 import org.junit.jupiter.api.BeforeAll;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -122,5 +124,42 @@ public class GetToKnowSpark {
 		utf8str.writeTo(out);
 		byte[] sbytes = out.toByteArray();
 		assertArrayEquals(aapBytes, sbytes);
+	}
+
+	@Test
+	public void testDecimal() {
+		boolean ok;
+		Decimal dec;
+
+		// Fits a long
+		dec = Decimal.apply(1234, 8, 2);
+		assertEquals("12.34", dec.toString());
+		assertEquals(1234, dec.toUnscaledLong());
+		assertEquals(8, dec.precision());
+		assertEquals(2, dec.scale());
+
+		dec = Decimal.apply("12.34");
+		assertEquals("12.34", dec.toString());
+		assertEquals(1234, dec.toUnscaledLong());
+		assertEquals(4, dec.precision()); // fromString sets the minimum required precision
+		assertEquals(2, dec.scale());
+
+		Decimal ten = Decimal.apply(10);
+		Decimal dec10 = dec.$times(ten);
+		assertEquals("12.34", dec.toString());
+		assertEquals("123.40", dec10.toString());
+
+		Decimal big = dec;
+		for (int i = 0; i < 20; i++)
+			big = big.$times(ten);
+		assertEquals("1234000000000000000000.00", big.toString());
+
+		// big is too big to fit in a log
+		final var big2 = big;
+		assertThrows(ArithmeticException.class, () -> System.err.println(big2.toUnscaledLong()));
+		// but we can get the underlying biginteger
+		BigInteger bi = big.toJavaBigDecimal().unscaledValue();
+		// it's unscaled, so basically the decimal value with the dot stripped
+		assertEquals(big.toString().replace(".", ""), bi.toString());
 	}
 }

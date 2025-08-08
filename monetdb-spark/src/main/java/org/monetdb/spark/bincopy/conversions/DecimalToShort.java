@@ -14,21 +14,18 @@ import org.apache.spark.sql.catalyst.expressions.SpecializedGetters;
 
 import java.io.IOException;
 
-public class FloatToFloat extends BinCopyConversion {
+public class DecimalToShort extends BinCopyConversion {
+
 	@Override
 	public void extract(SpecializedGetters row, int idx) throws IOException {
-		float d = row.getFloat(idx);
-		appendLE(d);
+		// getShort gets the unscaled value but I couldn't find this documented!
+		short s = row.getShort(idx);
+		appendLE(s);
 	}
 
 	@Override
 	public byte[] constructNullRepresentation() {
-		int n = Float.floatToIntBits(Float.NaN);
-		byte[] repr = new byte[8];
-		// little endian
-		for (int i = 0; i < 4; i++) {
-			repr[i] = (byte) ((n >> 8 * i) % 256);
-		}
-		return repr;
+		return constructIntegerNullRepresentation(2);
 	}
+
 }

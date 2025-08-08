@@ -2,11 +2,13 @@ package org.monetdb.spark;
 
 import org.apache.spark.sql.*;
 import org.apache.spark.sql.types.DataType;
-import org.apache.spark.sql.types.StructField;
+import org.apache.spark.sql.types.DecimalType;
 import org.junit.jupiter.api.AutoClose;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.monetdb.spark.workerside.ConversionError;
 
 import java.io.IOException;
@@ -167,6 +169,27 @@ public class DataTypesTests {
 	@Test
 	public void testDoubleType() {
 		testRoundTrip(10, col("id").cast("Double").divide(2.0));
+	}
+
+	@Test
+	public void testDecimalx() {
+		String type = "Decimal(8,3)";
+		Column decs = col("id").cast(type);
+		Column betterDecs = decs.plus(decs.divide(lit(10))).cast(type);
+		testRoundTrip(10, betterDecs);
+	}
+
+	@ParameterizedTest
+	@ValueSource(ints = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18})
+	public void testDecimal(int precision) {
+		int scale = precision <= 3 ? precision - 1 : 3;
+		Column idecs = col("id").cast("DECIMAL");
+		Column decs = idecs.plus(idecs.divide(lit(9)));
+		// Make them fit
+		Column modulo = power(lit(10), lit(precision - scale)).cast(new DecimalType(precision - scale + 1, 0));
+		Column reduced = round(decs, scale).mod(modulo).cast(new DecimalType(precision, scale));
+
+		testRoundTrip(10, reduced);
 	}
 
 	@Test

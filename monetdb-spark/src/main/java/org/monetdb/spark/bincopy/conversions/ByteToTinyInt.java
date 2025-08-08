@@ -16,11 +16,11 @@ public class ByteToTinyInt extends BinCopyConversion {
 	@Override
 	public void extract(SpecializedGetters row, int idx) {
 		byte b = row.getByte(idx);
-		buffer.write(b);
+		appendByte(b);
 	}
 
 	@Override
-	public byte[] buildNullRepresentation() {
+	public byte[] constructNullRepresentation() {
 		return new byte[] { -0x80 };
 	}
 }

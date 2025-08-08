@@ -10,7 +10,6 @@
 
 package org.monetdb.spark.bincopy.conversions;
 
-import org.apache.commons.io.EndianUtils;
 import org.apache.spark.sql.catalyst.expressions.SpecializedGetters;
 
 import java.io.IOException;
@@ -19,12 +18,11 @@ public class ShortToSmallInt extends BinCopyConversion {
 	@Override
 	public void extract(SpecializedGetters row, int idx) throws IOException {
 		short n = row.getShort(idx);
-		EndianUtils.writeSwappedShort(buffer, n);
+		appendLE(n);
 	}
 
 	@Override
-	public byte[] buildNullRepresentation() {
-		return new byte[] { 0, -0x80 };
-
+	public byte[] constructNullRepresentation() {
+		return constructIntegerNullRepresentation(2);
 	}
 }

@@ -10,6 +10,8 @@
 
 package org.monetdb.spark.bincopy.conversions;
 
+import org.apache.commons.io.EndianUtils;
+import org.jetbrains.annotations.NotNull;
 import org.monetdb.spark.workerside.Collector;
 import org.monetdb.spark.workerside.Converter;
 
@@ -24,10 +26,16 @@ public abstract class BinCopyConversion implements Converter {
 	protected transient ByteArrayOutputStream buffer;
 	protected transient byte[] nullRepresentation;
 
+	protected static byte @NotNull [] constructIntegerNullRepresentation(int n) {
+		byte[] repr = new byte[n];
+		repr[n - 1] = -0x80;
+		return repr;
+	}
+
 	@Override
 	public void init(Collector collector, int idx) {
 		buffer = collector.getOrCreateBuffer(idx);
-		nullRepresentation = buildNullRepresentation();
+		nullRepresentation = constructNullRepresentation();
 	}
 
 	@Override
@@ -35,5 +43,37 @@ public abstract class BinCopyConversion implements Converter {
 		buffer.write(nullRepresentation);
 	}
 
-	public abstract byte[] buildNullRepresentation();
+	public abstract byte[] constructNullRepresentation();
+
+	void appendByte(byte b) {
+		buffer.write(b);
+	}
+
+	protected void appendByte(int numeric) {
+		appendByte((byte) numeric);
+	}
+
+	protected void appendBytes(byte[] bytes) throws IOException {
+		buffer.write(bytes);
+	}
+
+	protected void appendLE(short n) throws IOException {
+		EndianUtils.writeSwappedShort(buffer, n);
+	}
+
+	protected void appendLE(int i) throws IOException {
+		EndianUtils.writeSwappedInteger(buffer, i);
+	}
+
+	protected void appendLE(long n) throws IOException {
+		EndianUtils.writeSwappedLong(buffer, n);
+	}
+
+	protected void appendLE(float d) throws IOException {
+		EndianUtils.writeSwappedFloat(buffer, d);
+	}
+
+	protected void appendLE(double d) throws IOException {
+		EndianUtils.writeSwappedDouble(buffer, d);
+	}
 }

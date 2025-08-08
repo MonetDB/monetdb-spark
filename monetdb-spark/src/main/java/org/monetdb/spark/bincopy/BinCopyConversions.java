@@ -13,6 +13,7 @@ package org.monetdb.spark.bincopy;
 import org.apache.spark.sql.types.*;
 import org.monetdb.spark.bincopy.conversions.*;
 import org.monetdb.spark.common.ColumnType;
+import org.monetdb.spark.common.DecimalSizes;
 import org.monetdb.spark.workerside.ConversionError;
 import org.monetdb.spark.workerside.Converter;
 
@@ -72,9 +73,42 @@ public class BinCopyConversions {
 				if (fieldType instanceof StringType)
 					return new StringToText();
 				break;
+			case DECIMAL:
+				return pickDecimalConverter(fieldType, col);
 			default:
 				break;
 		}
 		return null;
+	}
+
+	private static Converter pickDecimalConverter(DataType fieldType, ColumnType col) {
+		int precision = col.getPrecision();
+		int scale = col.getScale();
+
+		if (!(fieldType instanceof DecimalType decType))
+			return null;
+
+		if (decType.precision() > precision) {
+			// field is wider, potential overflow
+			return null;
+		}
+		if (decType.scale() > scale) {
+			// field is has more decimal digits, potential loss of information
+			return null;
+		}
+
+		int bits = DecimalSizes.bitsNeededForPrecision(precision);
+		switch (bits) {
+			case 8:
+				return new DecimalToByte();
+			case 16:
+				return new DecimalToShort();
+			case 32:
+				return new DecimalToInteger();
+			case 64:
+				return new DecimalToLong();
+			default:
+				return null;
+		}
 	}
 }

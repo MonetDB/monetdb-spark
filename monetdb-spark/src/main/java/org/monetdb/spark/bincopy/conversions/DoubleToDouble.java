@@ -10,7 +10,6 @@
 
 package org.monetdb.spark.bincopy.conversions;
 
-import org.apache.commons.io.EndianUtils;
 import org.apache.spark.sql.catalyst.expressions.SpecializedGetters;
 
 import java.io.IOException;
@@ -19,11 +18,11 @@ public class DoubleToDouble extends BinCopyConversion {
 	@Override
 	public void extract(SpecializedGetters row, int idx) throws IOException {
 		double d = row.getDouble(idx);
-		EndianUtils.writeSwappedDouble(buffer, d);
+		appendLE(d);
 	}
 
 	@Override
-	public byte[] buildNullRepresentation() {
+	public byte[] constructNullRepresentation() {
 		long n = Double.doubleToLongBits(Double.NaN);
 		byte[] repr = new byte[8];
 		// little endian

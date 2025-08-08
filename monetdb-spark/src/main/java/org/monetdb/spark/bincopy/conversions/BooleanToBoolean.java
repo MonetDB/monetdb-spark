@@ -17,11 +17,11 @@ public class BooleanToBoolean extends BinCopyConversion {
 	public void extract(SpecializedGetters row, int idx) {
 		boolean b = row.getBoolean(idx);
 		int numeric = b ? 1 : 0;
-		buffer.write(numeric);
+		appendByte(numeric);
 	}
 
 	@Override
-	public byte[] buildNullRepresentation() {
+	public byte[] constructNullRepresentation() {
 		return new byte[] { -0x80 };
 	}
 }
