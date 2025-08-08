@@ -207,7 +207,7 @@ public class DataTypesTests {
 
 	private void testRoundTrip(int n, Column expr) {
 		// Create the dataframe
-		Dataset<Row> data = spark.range(n).withColumn("x", expr);
+		Dataset<Row> data = spark.range(-2, n).withColumn("x", expr);
 
 		// Add a NULL value
 		DataType dataType = data.schema().fields()[1].dataType();
