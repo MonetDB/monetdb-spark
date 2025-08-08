@@ -217,6 +217,10 @@ public class DataTypesTests {
 	}
 
 	private void testRoundTrip(Dataset<Row> data) {
+		int maxPartitions = Config.sparkPartitions();
+		if (maxPartitions > 0)
+			data = data.coalesce(maxPartitions);
+
 		// Create the table by Overwriting with an empty dataframe
 		data
 				.filter(lit(false))

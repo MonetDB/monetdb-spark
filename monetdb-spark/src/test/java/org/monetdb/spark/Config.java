@@ -18,6 +18,9 @@ public class Config {
 	private static final String SPARK_MASTER_PROPERTY = "test.spark";
 	private static final String SPARK_MASTER_DEFAULT = "local[4]";
 
+	private static final String SPARK_PARTITTIONS_PROPERTY = "test.partitions";
+	private static final String SPARK_PARTITTIONS_DEFAULT = "-1";
+
 	private static final Properties fileProperties = new Properties();
 	private static boolean filePropertiesLoaded = false;
 
@@ -64,5 +67,16 @@ public class Config {
 				.appName("unit_tests")
 				.config("spark.master", url)
 				.getOrCreate();
+	}
+
+	/**
+	 * Used to reduce the number of partitions when writing.
+	 * Only some tests obey this
+	 * @return maximum number of partitions to use, or -1 if not set.
+	 */
+	public static int sparkPartitions() {
+		String num = getProperty(SPARK_PARTITTIONS_PROPERTY, SPARK_PARTITTIONS_DEFAULT);
+		int n = Integer.parseInt(num);
+		return n;
 	}
 }
