@@ -2,12 +2,10 @@ package org.monetdb.spark;
 
 import org.apache.spark.sql.jdbc.JdbcDialect;
 import org.apache.spark.sql.jdbc.JdbcType;
-import org.apache.spark.sql.types.BooleanType;
-import org.apache.spark.sql.types.ByteType;
-import org.apache.spark.sql.types.DataType;
-import org.apache.spark.sql.types.ShortType;
+import org.apache.spark.sql.types.*;
 import scala.Option;
 
+import java.sql.JDBCType;
 import java.sql.Types;
 
 public class MonetDialect extends JdbcDialect {
@@ -30,5 +28,17 @@ public class MonetDialect extends JdbcDialect {
 		}
 		Option<JdbcType> t = super.getJDBCType(dt);
 		return t;
+	}
+
+	@Override
+	public Option<DataType> getCatalystType(int sqlType, String typeName, int size, MetadataBuilder md) {
+		DataType type;
+		switch (JDBCType.valueOf(sqlType)) {
+			case SMALLINT -> type = DataTypes.ShortType;
+			default -> {
+				return super.getCatalystType(sqlType, typeName, size, md);
+			}
+		}
+		return Option.apply(type);
 	}
 }

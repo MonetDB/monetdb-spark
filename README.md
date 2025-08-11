@@ -4,10 +4,8 @@ MonetDB-Spark adds some MonetDB-specific functionality to Spark.
 In particular,
 
 1. `org.monetdb.spark.MonetDialect`<br>
-   A [JdbcDialect] that teaches Spark's JDBC bindings about MonetDB's
-   syntax and data types. So far, the only difference with the default
-   is that boolean columns are created with type 'BOOLEAN' instead
-   of 'BIT'.
+   A [JdbcDialect] that tweaks the mapping between  Spark's JDBC bindings
+   and MonetDB's data types.
 
 2. `org.monetdb.spark`<br>
    A write-only [Spark Data Source] that allows writing to MonetDB much
