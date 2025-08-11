@@ -17,6 +17,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.List;
 
 import static java.util.Collections.singletonList;
@@ -64,14 +65,26 @@ class MonetDialectTest {
 		assertEquals(decimalValue.toJavaBigDecimal(), row.getDecimal(0));
 	}
 
+	@Test
+	public void testDate() throws SQLException {
+		LocalDate ld = LocalDate.of(2025, 8, 11);
+		Date d = Date.valueOf(ld);
+		putData(DataTypes.DateType, d);
+		assertEquals(JDBCType.DATE, jdbcType);
+		assertEquals(DataTypes.DateType, getData());
+		assertEquals(d, row.getDate(0));
+	}
+
 	private void putData(DataType dataType, Object value) throws SQLException {
 		StructField structField = DataTypes.createStructField("x", dataType, false);
 		StructType structType = DataTypes.createStructType(singletonList(structField));
 		Row row = RowFactory.create(value);
 		List<Row> rows = singletonList(row);
 		Dataset<Row> df = spark.createDataFrame(rows, structType);
+//		System.out.println("============================================");
 //		df.printSchema();
 //		df.show();
+//		System.out.println("============================================");
 
 		df
 				.write()
@@ -101,8 +114,8 @@ class MonetDialectTest {
 				.option("dbtable", TABLE)
 				.load();
 		DataType foundType = df.schema().fields()[0].dataType();
-		df.printSchema();
-		df.show();
+//		df.printSchema();
+//		df.show();
 
 		List<Row> rows = df.collectAsList();
 		row = rows.get(0);
