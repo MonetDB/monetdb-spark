@@ -1,8 +1,12 @@
 package org.monetdb.spark;
 
 import org.apache.spark.sql.*;
+import org.apache.spark.sql.execution.datasources.jdbc.JdbcUtils;
+import org.apache.spark.sql.jdbc.JdbcDialect;
+import org.apache.spark.sql.jdbc.JdbcDialects;
 import org.apache.spark.sql.types.DataType;
 import org.apache.spark.sql.types.DecimalType;
+import org.apache.spark.sql.types.StructField;
 import org.junit.jupiter.api.AutoClose;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,6 +37,8 @@ public class DataTypesTests {
 
 	@AutoClose
 	private SparkSession spark;
+	private int nrows;
+	private String forceType;
 
 	@BeforeAll
 	public static void checkMonetDBReachable() throws SQLException {
@@ -45,8 +51,10 @@ public class DataTypesTests {
 	}
 
 	@BeforeEach
-	public void startSparkSession() {
+	public void setUp() {
 		spark = Config.sparkSession();
+		nrows = 10;
+		forceType = null;
 	}
 
 	private Dataset<Row> createTestData() {
@@ -138,37 +146,40 @@ public class DataTypesTests {
 
 	@Test
 	public void testBooleanType() {
-		testRoundTrip(10, col("id").mod(2).equalTo(0));
+		testRoundTrip(col("id").mod(2).equalTo(0));
 	}
 
 	@Test
 	public void testByteType() {
-		testRoundTrip(10, "Byte");
+		forceType = "TINYINT"; // by default it becomes SMALLINT
+		testRoundTrip("Byte");
 	}
 
 	@Test
 	public void testShortType() {
-		testRoundTrip(10, "Short");
+		forceType = "SMALLINT"; // by default it becomes INT
+		testRoundTrip("Short");
 	}
 
 	@Test
 	public void testIntegerType() {
-		testRoundTrip(10, "Integer");
+		forceType = "INTEGER"; // by default it becomes BIGINT
+		testRoundTrip("Integer");
 	}
 
 	@Test
 	public void testLongType() {
-		testRoundTrip(10, "Long");
+		testRoundTrip("Long");
 	}
 
 	@Test
 	public void testFloatType() {
-		testRoundTrip(10, col("id").cast("Float").divide(2.0));
+		testRoundTrip(col("id").cast("Float").divide(2.0));
 	}
 
 	@Test
 	public void testDoubleType() {
-		testRoundTrip(10, col("id").cast("Double").divide(2.0));
+		testRoundTrip(col("id").cast("Double").divide(2.0));
 	}
 
 	private static Column decimalTestData(int precision) {
@@ -185,29 +196,29 @@ public class DataTypesTests {
 	@ValueSource(ints = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18})
 	public void testDecimal(int precision) {
 		Column data = decimalTestData(precision);
-		testRoundTrip(10, data);
+		testRoundTrip(data);
 	}
 
 	@ParameterizedTest
 		@ValueSource(ints = {19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38})
 	public void testHugeDecimal(int precision) {
 		Column data = decimalTestData(precision);
-		testRoundTrip(10, data);
+		testRoundTrip(data);
 	}
 	//	@ValueSource(ints = {19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38})
 	@Test
 	public void testStringType() {
-		testRoundTrip(10, concat(lit("x"), col("id")));
+		testRoundTrip(concat(lit("x"), col("id")));
 	}
 
-	private void testRoundTrip(int n, String typeName) {
+	private void testRoundTrip(String typeName) {
 		Column expr = col("id").cast(typeName);
-		testRoundTrip(n, expr);
+		testRoundTrip(expr);
 	}
 
-	private void testRoundTrip(int n, Column expr) {
+	private void testRoundTrip(Column expr) {
 		// Create the dataframe
-		Dataset<Row> data = spark.range(-2, n).withColumn("x", expr);
+		Dataset<Row> data = spark.range(-2, nrows - 2).withColumn("x", expr);
 
 		// Add a NULL value
 		DataType dataType = data.schema().fields()[1].dataType();
@@ -220,19 +231,30 @@ public class DataTypesTests {
 	}
 
 	private void testRoundTrip(Dataset<Row> data) {
+		// Create the table
+		StructField idfield = data.schema().fields()[0];
+		assertEquals("id", idfield.name());
+		StructField xfield = data.schema().fields()[1];
+		assertEquals("x", xfield.name());
+
+		JdbcDialect dialect = JdbcDialects.get(Config.databaseUrl());
+		String idSql = JdbcUtils.getJdbcType(idfield.dataType(), dialect).databaseTypeDefinition();
+		String xSql = forceType != null ? forceType : JdbcUtils
+				.getJdbcType(xfield.dataType(), dialect)
+				.databaseTypeDefinition();
+		String qTable = dialect.quoteIdentifier(TABLE);
+		String sql = "DROP TABLE IF EXISTS " + qTable + "; CREATE TABLE " + qTable + "(id " + idSql + "" +
+				"" +
+				", x " + xSql + ")";
+		try (Connection conn = Config.connectDatabase(); Statement stmt = conn.createStatement()) {
+			stmt.execute(sql);
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
+
 		int maxPartitions = Config.sparkPartitions();
 		if (maxPartitions > 0)
 			data = data.coalesce(maxPartitions);
-
-		// Create the table by Overwriting with an empty dataframe
-		data
-				.filter(lit(false))
-				.write()
-				.format("jdbc")
-				.mode(SaveMode.Overwrite)
-				.option("url", Config.databaseUrl())
-				.option("dbtable", TABLE)
-				.save();
 
 		// Append the data by Appending this dataframe
 		data
