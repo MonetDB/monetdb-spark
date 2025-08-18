@@ -43,6 +43,7 @@
             <groupId>monetdb</groupId>
             <artifactId>monetdb-jdbc</artifactId>
             <version>12.0</version>
+            <scope>provided</scope>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.postgresql/postgresql -->
