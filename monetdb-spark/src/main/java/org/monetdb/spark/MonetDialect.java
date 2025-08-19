@@ -39,7 +39,7 @@ public class MonetDialect extends JdbcDialect {
 		} else if (dt instanceof TimestampType) {
 			// In Spark, TimestampType is time zone aware
 			type = new JdbcType("TIMESTAMP WITH TIME ZONE", Types.TIMESTAMP_WITH_TIMEZONE);
-		} else if (dt instanceof TimestampType) {
+		} else if (dt instanceof TimestampNTZType) {
 			// In Spark, TimestampNTZType is not time zone aware
 			type = new JdbcType("TIMESTAMP", Types.TIMESTAMP);
 		}
