@@ -1,61 +1,117 @@
 # MonetDB-Spark
 
-MonetDB-Spark adds some MonetDB-specific functionality to Spark.
-In particular,
+MonetDB-Spark adds some MonetDB-specific functionality to Spark. In
+particular,
 
-1. `org.monetdb.spark.MonetDialect`<br>
-   A [JdbcDialect] that tweaks the mapping between  Spark's JDBC bindings
-   and MonetDB's data types.
+1. It provides a [Dialect] that tweaks the mapping between Spark's data
+   types and MonetDB's data types. This is mostly used when
+   `spark.read.format("jdbc").load()` needs to pick the column types of
+   the resulting data frame, and when
+   `dataframe.write.mode("overwrite").format("jdbc").save()` needs to
+   pick the column types of the table it creates.
 
-2. `org.monetdb.spark`<br>
-   A write-only [Spark Data Source] that allows writing to MonetDB much
-   faster than Spark's built-in JDBC writer can.
+2. A custom MonetDB-specific [Spark Data Source]. This data source
+   cannot read data, you should use the JDBC data source for that.
+   However, it can write data to MonetDB much faster than the JDBC data
+   source can.
 
-
-## The Dialect
-
-Spark should automatically pick up the dialect as long as it's on the
-class path. We're having some problems with that, however.
-Currently, it works with native Java applications, with spark-shell
-as long as the `"driver"` option is passed, and we can't get it to
-work with PySpark.
-
-For more details, see [005-dialect](notes/005-dialect.md).
+For more information on how the [Dialect] maps the types, see
+[notes/005-dialect.md](notes/005-dialect.md).
 
 
-## The Writer
+## Installation and use
 
-The Writer can be activated by replacing `.format("jdbc')`
-with `.format("org.monetdb.spark")`.
-The new writer does not support all options and modes that the
-full JDBC writer supports. In particular, it only supports writing
-to existing tables (`.mode("append")`) and only the options `"url"`,
-`"user"`, `"password"` and "dbtable".
+Place the monetdb-jdbc jar and the monetdb-spark jars on the classpath.
+It should work with monetdb-jdbc version 3.2 and later but has only been
+tested with 12.0.
 
-WARNING: The writer does not look at the column names yet.
-It blindly tries to write the first column to the first column, the second
-to the second, etc.
+For example,
+
+```shell
+» pyspark --jars $HOME/jars/monetdb-jdbc-12.0.jar,$HOME/jars/monetdb-spark-0.1.1-fat.jar
+```
+
+The dialect should automatically be picked up. Note that the JDBC Data
+Source needs the "driver" option, otherwise it won't be able to load the
+JDBC driver. For example, in pyspark:
+
+```python
+from pyspark.sql.functions import col
+df = spark.range(5).withColumn('b', col('id') % 2 == 0)
+df.write \
+   .format("jdbc") \
+   .mode("overwrite") \
+   .option("driver", "org.monetdb.jdbc.MonetDriver") \
+   .option("url", "jdbc:monetdb:///demo") \
+   .option("user", "monetdb") \
+   .option("password", "monetdb") \
+   .option("dbtable", "foo") \
+   .save()
+```
+If the above works, this is proof the dialect has been detected. We know
+this because the default dialect doesn't create BOOLEAN columns in the
+right way.
+
+To use the custom data source to write data, replace `.format("jdbc")`
+with `.format("org.monetdb.spark")`. The custom data source does not
+support all options supported by the JDBC data source.
+
+At this moment, the MonetDB data source only supports appending data to
+an existing table (mode Append). We will implement truncate and overwrite
+mode later on.
+
+For example,
+
+```python
+from pyspark.sql.functions import col
+df = spark.range(5).withColumn('b', col('id') % 2 == 0)
+df.write \
+   .format("org.monetdb.spark") \
+   .mode("append") \
+   .option("url", "jdbc:monetdb://localhost:44001/demo") \
+   .option("user", "monetdb") \
+   .option("password", "monetdb") \
+   .option("dbtable", "foo") \
+   .save()
+```
+
 
 ## Building
 
-Run `make` in monetdb-spark/.
+To build, simply run `make`. This will create `monetdb-spark-X.Y.Z-fat.jar`
+in the directory `monetdb-spark/target`.
 
-Or `make test`, this assumes there is a database `testspark` to connect to.
-Use `make test TESTDB=bla` to target another database.
-The following are all equivalent:
+This fat jar contains all needed dependencies but not the MonetDB JDBC
+driver.
 
-* `TESTDB=jdbc:monetdb://localhost:50000/demo?user=monetdb&password=monetdb`, 
-  a full-fledged JDBC URL
-* `TESTDB=jdbc:monetdb://localhost/demo`, you can omit user and password.
-* `TESTDB=demo`, you can also omit `jdbc://localhost/`.
+To test, run `make test`. The tests assume they can connect to and
+freely modify a database `monetdb:///localhost/testspark`. This database
+needs to be created beforehand, or a different database must be configured
+as explained below.
 
-Instead of passing TESTDB to `make`, you can also create a properties file
-`./monetdb-spark/override.properties`, for example containing `test.db=demo`.
+The following settings are available:
 
-The set of supported properties is defined in 
-[Config.java](monetdb-spark/src/test/java/org/monetdb/spark/Config.java).
+* **test.db**. JDBC url to connect to. If **test.db** contains no
+  slashes and colons, it's assumed to be just a database name and
+  `jdbc:monetdb://localhost/` is prepended. If no `user=` and
+  `password=` parameters are detected, they are automatically appended
+  and set to 'monetdb'.
+
+* **test.spark**. Spark cluster to connect to. Defaults to `local[4]`.
+  Non-local sparks are unlikely to work but this setting could be used
+  to tweak the number of workers.
+
+* **test.partitions**. Some tests (only SOME tests!) use this setting to
+  control the number of partitions in the their test data. This can be
+  useful while debugging.
+
+The most convenient way to change these settings is by creating a
+properties file `override.properties` in the monetdb-spark subdirectory.
+It is also possible to pass them as `-D` flags to Maven. In particular,
+if 'make' is invoked as `make test TESTDB=demo`, 'make' will run
+`./mvnw test -Dtest.db=demo`.
 
 
-[JdbcDialect]: https://spark.apache.org/docs/latest/api/java/org/apache/spark/sql/jdbc/JdbcDialect.html
+[Dialect]: https://spark.apache.org/docs/latest/api/java/org/apache/spark/sql/jdbc/JdbcDialect.html
 
 [Spark Data Source]: https://spark.apache.org/docs/latest/sql-data-sources.html
