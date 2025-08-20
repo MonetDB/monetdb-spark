@@ -8,20 +8,17 @@
  * Copyright MonetDB Solutions B.V.
  */
 
-package org.monetdb.spark.bincopy.conversions;
+package org.monetdb.spark.common.steps;
 
 import org.apache.spark.sql.catalyst.expressions.SpecializedGetters;
 
-public class BooleanToBoolean extends BinCopyConversion {
-	@Override
-	public void extract(SpecializedGetters row, int idx) {
-		boolean b = row.getBoolean(idx);
-		int numeric = b ? 1 : 0;
-		appendByte(numeric);
+public class LongExtractor extends IntLikeExtractor {
+	public LongExtractor(int index) {
+		super(index);
 	}
 
 	@Override
-	public byte[] constructNullRepresentation() {
-		return new byte[] { -0x80 };
+	protected long doExtract(SpecializedGetters row) {
+		return row.getLong(index);
 	}
 }

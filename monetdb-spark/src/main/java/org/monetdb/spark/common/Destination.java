@@ -35,7 +35,7 @@ public class Destination implements Serializable {
 		return conn.unwrap(MonetConnection.class);
 	}
 
-	public ColumnType[] getColumnTypes() throws SQLException {
+	public ColumnDescr[] getColumnTypes() throws SQLException {
 		// Connection databasemetadata is too tricky, it allows patterns,
 		// works across schemas, how do we have to quote, etc?
 		// Instead we just look at the types of SELECT * FROM table.
@@ -44,13 +44,13 @@ public class Destination implements Serializable {
 			try (ResultSet rs = stmt.executeQuery(sql)) {
 				ResultSetMetaData md = rs.getMetaData();
 				int n = md.getColumnCount();
-				ColumnType[] ret = new ColumnType[n];
+				ColumnDescr[] ret = new ColumnDescr[n];
 				for (int i = 1; i <= n; i++) {
 					JDBCType jdbcType = JDBCType.valueOf(md.getColumnType(i));
 					int precision = md.getPrecision(i);
 					int scale = md.getScale(i);
 					String typeName = md.getColumnTypeName(i);
-					ret[i - 1] = new ColumnType(jdbcType, precision, scale, typeName);
+					ret[i - 1] = new ColumnDescr(jdbcType, precision, scale, typeName);
 				}
 				return ret;
 			}

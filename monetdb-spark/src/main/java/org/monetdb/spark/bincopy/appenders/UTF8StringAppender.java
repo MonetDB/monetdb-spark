@@ -8,21 +8,24 @@
  * Copyright MonetDB Solutions B.V.
  */
 
-package org.monetdb.spark.bincopy.conversions;
+package org.monetdb.spark.bincopy.appenders;
 
 import org.apache.spark.sql.catalyst.expressions.SpecializedGetters;
 
 import java.io.IOException;
 
-public class ShortToSmallInt extends BinCopyConversion {
-	@Override
-	public void extract(SpecializedGetters row, int idx) throws IOException {
-		short n = row.getShort(idx);
-		appendLE(n);
+public class UTF8StringAppender extends Appender {
+	public UTF8StringAppender(int index) {
+		super(index);
 	}
 
 	@Override
-	public byte[] constructNullRepresentation() {
-		return constructIntegerNullRepresentation(2);
+	public void exec(SpecializedGetters ignored) throws IOException {
+		if (collector.scratchNull) {
+			buffer.write(-0x80);
+		} else {
+			collector.scratchUTF8String.writeTo(buffer);
+		}
+		buffer.write(0);
 	}
 }

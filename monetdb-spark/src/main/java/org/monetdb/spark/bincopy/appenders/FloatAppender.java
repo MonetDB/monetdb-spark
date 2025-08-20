@@ -8,27 +8,26 @@
  * Copyright MonetDB Solutions B.V.
  */
 
-package org.monetdb.spark.bincopy.conversions;
+package org.monetdb.spark.bincopy.appenders;
 
 import org.apache.spark.sql.catalyst.expressions.SpecializedGetters;
 
 import java.io.IOException;
 
-public class FloatToFloat extends BinCopyConversion {
-	@Override
-	public void extract(SpecializedGetters row, int idx) throws IOException {
-		float d = row.getFloat(idx);
-		appendLE(d);
+public class FloatAppender extends Appender {
+	public FloatAppender(int index) {
+		super(index);
 	}
 
 	@Override
-	public byte[] constructNullRepresentation() {
-		int n = Float.floatToIntBits(Float.NaN);
-		byte[] repr = new byte[8];
-		// little endian
+	public void exec(SpecializedGetters row) throws IOException {
+		float f = collector.scratchNull ? Float.NaN : (float) collector.scratchDouble;
+		int n = Float.floatToIntBits(f);
+		byte[] scratch = collector.scratchBuffer;
 		for (int i = 0; i < 4; i++) {
-			repr[i] = (byte) ((n >> 8 * i) % 256);
+			scratch[i] = (byte) n;
+			n >>= 8;
 		}
-		return repr;
+		buffer.write(scratch, 0, 4);
 	}
 }

@@ -19,8 +19,8 @@ import org.apache.spark.sql.connector.write.DataWriter;
 import org.apache.spark.sql.connector.write.DataWriterFactory;
 import org.monetdb.spark.common.Destination;
 import org.monetdb.spark.workerside.Collector;
-import org.monetdb.spark.workerside.Converter;
 import org.monetdb.spark.workerside.MonetDataWriter;
+import org.monetdb.spark.workerside.Step;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -34,12 +34,14 @@ public class BinCopyDataWriterFactory implements DataWriterFactory, Serializable
 	private static final long serialVersionUID = 0L;
 
 	private final Destination dest;
-	private final Converter[] converters;
+	private final int ncolumns;
+	private final Step[] steps;
 	private final long batchSize;
 
-	public BinCopyDataWriterFactory(Destination dest, Converter[] converters, long batchSize) {
+	public BinCopyDataWriterFactory(Destination dest, int ncolumns, Step[] steps, long batchSize) {
 		this.dest = dest;
-		this.converters = converters;
+		this.ncolumns = ncolumns;
+		this.steps = steps;
 		this.batchSize = batchSize;
 	}
 
@@ -47,9 +49,9 @@ public class BinCopyDataWriterFactory implements DataWriterFactory, Serializable
 	public DataWriter<InternalRow> createWriter(int partitionId, long taskId) {
 		try {
 			Collector collector = new Collector();
-			collector.registerWithConverters(converters);
-			BinCopyUploader uploader = new BinCopyUploader(dest, collector, converters);
-			return new MonetDataWriter(collector, converters, uploader, batchSize);
+			BinCopyUploader uploader = new BinCopyUploader(dest, collector, ncolumns);
+			collector.registerWithConverters(steps);
+			return new MonetDataWriter(collector, steps, uploader, batchSize);
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}

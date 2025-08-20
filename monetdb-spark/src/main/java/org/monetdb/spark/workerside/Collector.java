@@ -10,24 +10,33 @@
 
 package org.monetdb.spark.workerside;
 
+import org.apache.spark.unsafe.types.UTF8String;
 import org.monetdb.jdbc.MonetConnection;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.math.BigInteger;
 import java.util.ArrayList;
 
 public final class Collector implements MonetConnection.UploadHandler {
 	final ArrayList<ByteArrayOutputStream> buffers;
 	private int rowCount = 0;
 
+	public boolean scratchNull;
+	public long scratchLong;
+	public double scratchDouble;
+	public BigInteger scratchBigInteger;
+	public UTF8String scratchUTF8String;
+	public byte[] scratchBuffer = new byte[16];
+
 	public Collector() {
 		buffers = new ArrayList<>();
 	}
 
-	public void registerWithConverters(Converter[] converters) {
-		for (int i = 0; i < converters.length; i++) {
-			converters[i].init(this, i);
+	public void registerWithConverters(Step[] steps) {
+		for (Step step : steps) {
+			step.init(this);
 		}
 	}
 

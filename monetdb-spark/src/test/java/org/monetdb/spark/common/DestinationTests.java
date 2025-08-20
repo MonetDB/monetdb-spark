@@ -25,16 +25,15 @@ class DestinationTests {
 	private final static String SCHEMA = "awk\" \"ward";
 	private final static String TABLE = "mydata";
 
-	private final ColumnType[] QUALIFIED_TABLE_TYPE = new ColumnType[]{
-			new ColumnType(JDBCType.BOOLEAN, 1, 0, "BOOL"),
-			new ColumnType(JDBCType.TINYINT, 3, 0, "TINYINT"),
-			new ColumnType(JDBCType.INTEGER, 10, 0, "INTEGER"),
-			new ColumnType(JDBCType.VARCHAR, 8, 0, "VARCHAR"),
-			new ColumnType(JDBCType.VARCHAR, 0, 0, "CLOB"),
+	private final ColumnDescr[] QUALIFIED_TABLE_TYPE = new ColumnDescr[]{
+			new ColumnDescr(JDBCType.BOOLEAN, 1, 0, "BOOL"),
+			new ColumnDescr(JDBCType.TINYINT, 3, 0, "TINYINT"),
+			new ColumnDescr(JDBCType.INTEGER, 10, 0, "INTEGER"),
+			new ColumnDescr(JDBCType.VARCHAR, 8, 0, "VARCHAR"),
+			new ColumnDescr(JDBCType.VARCHAR, 0, 0, "CLOB"),
 	};
 
-	private final ColumnType[] SYS_TABLE_TYPE = new ColumnType[]{
-			new ColumnType(JDBCType.INTEGER, 10, 0, "INTEGER"),
+	private final ColumnDescr[] SYS_TABLE_TYPE = new ColumnDescr[]{new ColumnDescr(JDBCType.INTEGER, 10, 0, "INTEGER"),
 	};
 
 	private static String quoteId(String id) {
@@ -129,10 +128,10 @@ class DestinationTests {
 		assertNotEquals(USER, actualUser);
 	}
 
-	private void testGetColumnTypes(String table, ColumnType[] expected) throws URISyntaxException, ValidationError, SQLException {
+	private void testGetColumnTypes(String table, ColumnDescr[] expected) throws URISyntaxException, ValidationError, SQLException {
 		Destination dest = new Destination(userUrl(true), null, null, table);
 		try (Connection conn = dest.connect()) {
-			ColumnType[] colTypes = dest.getColumnTypes();
+			ColumnDescr[] colTypes = dest.getColumnTypes();
 			assertArrayEquals(expected, colTypes);
 		}
 	}

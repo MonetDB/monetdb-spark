@@ -15,10 +15,10 @@ import org.apache.spark.sql.types.Metadata;
 import org.apache.spark.sql.types.StructField;
 import org.junit.jupiter.api.Test;
 import org.monetdb.spark.MockRow;
-import org.monetdb.spark.common.ColumnType;
+import org.monetdb.spark.common.ColumnDescr;
 import org.monetdb.spark.workerside.Collector;
 import org.monetdb.spark.workerside.ConversionError;
-import org.monetdb.spark.workerside.Converter;
+import org.monetdb.spark.workerside.Step;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -33,25 +33,25 @@ class BinCopyConversionsTests {
 	final StructField boolField = new StructField("b", DataTypes.BooleanType, false, Metadata.empty());
 	final StructField intField = new StructField("i", DataTypes.IntegerType, false, Metadata.empty());
 	final StructField stringField = new StructField("s", DataTypes.StringType, false, Metadata.empty());
-	final ColumnType boolCol = new ColumnType(JDBCType.BOOLEAN);
-	final ColumnType intCol = new ColumnType(JDBCType.INTEGER);
-	final ColumnType stringCol = new ColumnType(JDBCType.VARCHAR);
+	final ColumnDescr boolCol = new ColumnDescr(JDBCType.BOOLEAN);
+	final ColumnDescr intCol = new ColumnDescr(JDBCType.INTEGER);
+	final ColumnDescr stringCol = new ColumnDescr(JDBCType.VARCHAR);
 
 	Collector col;
-	private Converter[] converters;
+	private Step[] steps;
 
 	@Test
 	public void testLengthMismatch() {
 		StructField[] sparkTypes = {boolField, intField, stringField};
-		ColumnType[] colTypes = {boolCol, intCol};
-		assertThrows(ConversionError.class, () -> BinCopyConversions.pickConverters(sparkTypes, colTypes));
+		ColumnDescr[] colTypes = {boolCol, intCol};
+		assertThrows(ConversionError.class, () -> PlanCompiler.compile(sparkTypes, colTypes));
 	}
 
 	@Test
 	public void testTypeMismatch() {
 		StructField[] sparkTypes = {boolField, intField, stringField};
-		ColumnType[] colTypes = {boolCol, stringCol, stringCol};
-		assertThrows(ConversionError.class, () -> BinCopyConversions.pickConverters(sparkTypes, colTypes));
+		ColumnDescr[] colTypes = {boolCol, stringCol, stringCol};
+		assertThrows(ConversionError.class, () -> PlanCompiler.compile(sparkTypes, colTypes));
 	}
 
 	private String formatCollected(int idx) throws IOException {
@@ -79,10 +79,10 @@ class BinCopyConversionsTests {
 	@Test
 	public void testCollector() throws ConversionError, IOException {
 		StructField[] sparkTypes = {boolField, intField, stringField};
-		ColumnType[] colTypes = {boolCol, intCol, stringCol};
-		converters = BinCopyConversions.pickConverters(sparkTypes, colTypes);
+		ColumnDescr[] colTypes = {boolCol, intCol, stringCol};
+		steps = PlanCompiler.compile(sparkTypes, colTypes);
 		col = new Collector();
-		col.registerWithConverters(converters);
+		col.registerWithConverters(steps);
 
 		assertEquals("", formatCollected(0));
 		assertEquals("", formatCollected(1));
@@ -112,8 +112,8 @@ class BinCopyConversionsTests {
 	}
 
 	private void convertRow(MockRow row) throws IOException {
-		for (int i = 0; i < converters.length; i++)
-			converters[i].extract(row, i);
+		for (Step step : steps)
+			step.exec(row);
 		col.endRow();
 	}
 }

@@ -9,7 +9,7 @@ import java.io.Serializable;
 import java.sql.JDBCType;
 import java.util.Objects;
 
-public final class ColumnType implements Serializable {
+public final class ColumnDescr implements Serializable {
 	@Serial
 	private static final long serialVersionUID = 0L;
 
@@ -18,14 +18,14 @@ public final class ColumnType implements Serializable {
 	private final int scale;
 	private final String typeName;
 
-	public ColumnType(JDBCType type, int precision, int scale, String typeName) {
+	public ColumnDescr(JDBCType type, int precision, int scale, String typeName) {
 		this.type = type;
 		this.precision = precision;
 		this.scale = scale;
 		this.typeName = typeName;
 	}
 
-	public ColumnType(JDBCType type) {
+	public ColumnDescr(JDBCType type) {
 		this(type, 0, 0, type.name());
 	}
 
@@ -49,7 +49,7 @@ public final class ColumnType implements Serializable {
 	public boolean equals(Object o) {
 		if (o == null || getClass() != o.getClass())
 			return false;
-		ColumnType that = (ColumnType) o;
+		ColumnDescr that = (ColumnDescr) o;
 		return type == that.type && precision == that.precision && scale == that.scale;
 	}
 

@@ -8,24 +8,23 @@
  * Copyright MonetDB Solutions B.V.
  */
 
-package org.monetdb.spark.bincopy.conversions;
+package org.monetdb.spark.common.steps;
 
 import org.apache.spark.sql.catalyst.expressions.SpecializedGetters;
 
 import java.io.IOException;
 
-public class DecimalToInteger extends BinCopyConversion {
-
-	@Override
-	public void extract(SpecializedGetters row, int idx) throws IOException {
-		// getInt gets the unscaled value but I couldn't find this documented!
-		int i = row.getInt(idx);
-		appendLE(i);
+public class StringExtractor extends Extractor {
+	public StringExtractor(int index) {
+		super(index);
 	}
 
 	@Override
-	public byte[] constructNullRepresentation() {
-		return constructIntegerNullRepresentation(4);
+	public void exec(SpecializedGetters row) throws IOException {
+		collector.scratchNull = row.isNullAt(index);
+		if (collector.scratchNull)
+			return;
+		collector.scratchUTF8String = row.getUTF8String(index);
 	}
 
 }

@@ -8,24 +8,25 @@
  * Copyright MonetDB Solutions B.V.
  */
 
-package org.monetdb.spark.bincopy.conversions;
+package org.monetdb.spark.common.steps;
 
 import org.apache.spark.sql.catalyst.expressions.SpecializedGetters;
+import org.monetdb.spark.workerside.Collector;
+import org.monetdb.spark.workerside.Step;
 
 import java.io.IOException;
 
-public class DecimalToShort extends BinCopyConversion {
+public class BigIntToLongConversion implements Step {
+
+	private Collector collector;
 
 	@Override
-	public void extract(SpecializedGetters row, int idx) throws IOException {
-		// getShort gets the unscaled value but I couldn't find this documented!
-		short s = row.getShort(idx);
-		appendLE(s);
+	public void init(Collector collector) {
+		this.collector = collector;
 	}
 
 	@Override
-	public byte[] constructNullRepresentation() {
-		return constructIntegerNullRepresentation(2);
+	public void exec(SpecializedGetters ignored) throws IOException {
+		collector.scratchLong = collector.scratchBigInteger.longValue();
 	}
-
 }

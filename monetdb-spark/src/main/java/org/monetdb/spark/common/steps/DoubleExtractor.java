@@ -8,23 +8,23 @@
  * Copyright MonetDB Solutions B.V.
  */
 
-package org.monetdb.spark.bincopy.conversions;
+package org.monetdb.spark.common.steps;
 
 import org.apache.spark.sql.catalyst.expressions.SpecializedGetters;
-import org.apache.spark.unsafe.types.UTF8String;
 
 import java.io.IOException;
 
-public class StringToText extends BinCopyConversion {
-	@Override
-	public void extract(SpecializedGetters row, int idx) throws IOException {
-		UTF8String u = row.getUTF8String(idx);
-		u.writeTo(buffer);
-		buffer.write(0);
+public class DoubleExtractor extends Extractor {
+	public DoubleExtractor(int index) {
+		super(index);
 	}
 
 	@Override
-	public byte[] constructNullRepresentation() {
-		return new byte[] {-0x80, 0x00};
+	public void exec(SpecializedGetters row) throws IOException {
+		collector.scratchNull = row.isNullAt(index);
+		if (collector.scratchNull)
+			return;
+		collector.scratchDouble = row.getDouble(index);
 	}
+
 }

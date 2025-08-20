@@ -17,12 +17,12 @@ import org.junit.jupiter.api.AutoClose;
 import org.junit.jupiter.api.Test;
 import org.monetdb.spark.Config;
 import org.monetdb.spark.MockRow;
-import org.monetdb.spark.common.ColumnType;
+import org.monetdb.spark.common.ColumnDescr;
 import org.monetdb.spark.common.Destination;
 import org.monetdb.spark.workerside.Collector;
 import org.monetdb.spark.workerside.ConversionError;
-import org.monetdb.spark.workerside.Converter;
 import org.monetdb.spark.workerside.MonetDataWriter;
+import org.monetdb.spark.workerside.Step;
 
 import java.io.IOException;
 import java.sql.*;
@@ -52,19 +52,19 @@ public class UploadTests {
 
 		// Check the column types are as exoected
 		Destination dest = new Destination(Config.databaseUrl(), null, null, "foo");
-		ColumnType[] colTypes = dest.getColumnTypes();
+		ColumnDescr[] colTypes = dest.getColumnTypes();
 		assertEquals(JDBCType.BOOLEAN, colTypes[0].getType());
 		assertEquals(JDBCType.INTEGER, colTypes[1].getType());
 		assertEquals(JDBCType.VARCHAR, colTypes[2].getType());
 
 		// Create the DataWriter
 		StructField[] sparkTypes = {boolField, intField, stringField};
-		Converter[] converters = BinCopyConversions.pickConverters(sparkTypes, colTypes);
+		Step[] steps = PlanCompiler.compile(sparkTypes, colTypes);
 		Collector collector = new Collector();
-		collector.registerWithConverters(converters);
-		BinCopyUploader uploader = new BinCopyUploader(dest, collector, converters);
+		collector.registerWithConverters(steps);
+		BinCopyUploader uploader = new BinCopyUploader(dest, collector, colTypes.length);
 		long batchSize = Long.MAX_VALUE;
-		MonetDataWriter dataWriter = new MonetDataWriter(collector, converters, uploader, batchSize);
+		MonetDataWriter dataWriter = new MonetDataWriter(collector, steps, uploader, batchSize);
 
 		// Write data
 		MockRow row1 = new MockRow(TRUE, 1, "one");

@@ -15,13 +15,13 @@ import java.sql.SQLException;
 
 public class MonetDataWriter implements DataWriter<InternalRow> {
 	private final Collector collector;
-	private final Converter[] converters;
+	private final Step[] steps;
 	private final BinCopyUploader uploader;
 	private final long batchSize;
 
-	public MonetDataWriter(Collector collector, Converter[] converters, BinCopyUploader uploader, long batchSize) {
+	public MonetDataWriter(Collector collector, Step[] steps, BinCopyUploader uploader, long batchSize) {
 		this.collector = collector;
-		this.converters = converters;
+		this.steps = steps;
 		this.uploader = uploader;
 		this.batchSize = batchSize;
 	}
@@ -32,7 +32,7 @@ public class MonetDataWriter implements DataWriter<InternalRow> {
 	}
 
 	public void processRow(SpecializedGetters row) throws IOException {
-		runConverters(row);
+		runSteps(row);
 		collector.endRow();
 		if (collector.getRowCount() >= batchSize) {
 			try {
@@ -43,13 +43,9 @@ public class MonetDataWriter implements DataWriter<InternalRow> {
 		}
 	}
 
-	private void runConverters(SpecializedGetters row) throws IOException {
-		for (int i = 0; i < converters.length; i++) {
-			Converter converter = converters[i];
-			if (row.isNullAt(i))
-				converter.setNull(i);
-			else
-				converter.extract(row, i);
+	private void runSteps(SpecializedGetters row) throws IOException {
+		for (Step step : steps) {
+			step.exec(row);
 		}
 	}
 
