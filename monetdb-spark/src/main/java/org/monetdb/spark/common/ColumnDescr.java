@@ -12,13 +12,14 @@ import java.util.Objects;
 public final class ColumnDescr implements Serializable {
 	@Serial
 	private static final long serialVersionUID = 0L;
-
+	private final String name;
 	private final JDBCType type;
 	private final int precision;
 	private final int scale;
 	private final String typeName;
 
-	public ColumnDescr(JDBCType type, int precision, int scale, String typeName) {
+	public ColumnDescr(String name, JDBCType type, int precision, int scale, String typeName) {
+		this.name = name;
 		this.type = type;
 		this.precision = precision;
 		this.scale = scale;
@@ -26,8 +27,10 @@ public final class ColumnDescr implements Serializable {
 	}
 
 	public ColumnDescr(JDBCType type) {
-		this(type, 0, 0, type.name());
+		this(null, type, 0, 0, type.name());
 	}
+
+	public String getName() { return name; }
 
 	public JDBCType getType() {
 		return type;

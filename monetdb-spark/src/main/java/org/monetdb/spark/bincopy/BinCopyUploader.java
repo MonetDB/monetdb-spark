@@ -22,19 +22,32 @@ public class BinCopyUploader {
 	private final MonetConnection conn;
 	private final PreparedStatement stmt;
 
-	public BinCopyUploader(Destination dest, Collector collector, int ncolumns) throws SQLException {
+	public BinCopyUploader(Destination dest, Collector collector, String[] columns) throws SQLException {
+		String sep;
 		this.collector = collector;
 		this.conn = dest.connect();
 		conn.setAutoCommit(false);
 		conn.setUploadHandler(collector);
 
-		String sql = "COPY LITTLE ENDIAN BINARY INTO " + dest.getTable() + " FROM ";
-		String sep = "";
-		for (int i = 0; i < ncolumns; i++) {
-			sql += sep + "'" + i + "'";
+		StringBuilder sb = new StringBuilder("COPY LITTLE ENDIAN BINARY INTO ");
+		sb.append(dest.getTable());
+		sb.append(" (");
+		sep = "";
+		for (String col: columns) {
+			sb.append(sep);
 			sep = ", ";
+			sb.append("\"").append(col.replace("\"", "\"\"")).append("\"");
 		}
-		sql += " ON CLIENT";
+		sb.append(")\nFROM ");
+		sep = "";
+		for (int i = 0; i < columns.length; i++) {
+			sb.append(sep);
+			sep = ", ";
+			sb.append("'").append(i).append("'");
+		}
+		sb.append("\nON CLIENT");
+
+		String sql = sb.toString();
 		stmt = conn.prepareStatement(sql);
 	}
 

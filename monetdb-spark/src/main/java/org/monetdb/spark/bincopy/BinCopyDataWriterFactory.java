@@ -34,13 +34,13 @@ public class BinCopyDataWriterFactory implements DataWriterFactory, Serializable
 	private static final long serialVersionUID = 0L;
 
 	private final Destination dest;
-	private final int ncolumns;
+	private final String[] columns;
 	private final Step[] steps;
 	private final long batchSize;
 
-	public BinCopyDataWriterFactory(Destination dest, int ncolumns, Step[] steps, long batchSize) {
+	public BinCopyDataWriterFactory(Destination dest, String[] columns, Step[] steps, long batchSize) {
 		this.dest = dest;
-		this.ncolumns = ncolumns;
+		this.columns = columns;
 		this.steps = steps;
 		this.batchSize = batchSize;
 	}
@@ -49,7 +49,7 @@ public class BinCopyDataWriterFactory implements DataWriterFactory, Serializable
 	public DataWriter<InternalRow> createWriter(int partitionId, long taskId) {
 		try {
 			Collector collector = new Collector();
-			BinCopyUploader uploader = new BinCopyUploader(dest, collector, ncolumns);
+			BinCopyUploader uploader = new BinCopyUploader(dest, collector, columns);
 			collector.registerWithConverters(steps);
 			return new MonetDataWriter(collector, steps, uploader, batchSize);
 		} catch (SQLException e) {

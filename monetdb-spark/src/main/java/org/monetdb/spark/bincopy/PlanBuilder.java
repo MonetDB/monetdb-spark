@@ -24,24 +24,56 @@ import java.sql.JDBCType;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 
-public class PlanCompiler {
-	public static Step[] compile(StructField[] fields, ColumnDescr[] cols) throws ConversionError {
-		int n = fields.length;
-		if (n != cols.length) {
-			throw new ConversionError("Dataframe has " + n + " columns, table has " + cols.length);
+public class PlanBuilder {
+	private final HashMap<String, ColumnDescr> schema;
+	private final ArrayList<Step> plan;
+	private final ArrayList<String> columns;
+
+	public PlanBuilder(ColumnDescr[] tableColumns) {
+		schema = new HashMap<>();
+		for (var col: tableColumns) {
+			schema.put(col.getName(), col);
 		}
-
-		ArrayList<Step> res = new ArrayList<>();
-		for (int i = 0; i < n; i++) {
-			var sub = compileOne(i, fields[i], cols[i]);
-			Collections.addAll(res, sub);
-		}
-
-		return res.toArray(new Step[0]);
+		plan = new ArrayList<>();
+		columns = new ArrayList<>();
 	}
 
-	public static Step[] compileOne(int i, StructField sparkField, ColumnDescr columnDescr) throws ConversionError {
+	public static Step[] compile(StructField[] sparkTypes, ColumnDescr[] colTypes) throws ConversionError {
+		PlanBuilder builder = new PlanBuilder(colTypes);
+		builder.plan(sparkTypes);
+		return builder.getPlan();
+
+	}
+
+	public void plan(StructType structType) throws ConversionError {
+		plan(structType.fields());
+	}
+
+	public void plan(StructField[] fields) throws ConversionError {
+		for (int i = 0; i < fields.length; i++) {
+			StructField field = fields[i];
+			String name = field.name();
+			ColumnDescr columnDescr = schema.get(name);
+			if (columnDescr == null) {
+				throw new ConversionError("The table has no column \"" + name + "\"");
+			}
+			Step[] steps = planOne(i, field, columnDescr);
+			Collections.addAll(plan, steps);
+			columns.add(name);
+		}
+	}
+
+	public Step[] getPlan() {
+		return plan.toArray(new Step[0]);
+	}
+
+	public String[] getColumns() {
+		return columns.toArray(new String[0]);
+	}
+
+	private Step[] planOne(int i, StructField sparkField, ColumnDescr columnDescr) throws ConversionError {
 		Step[] steps;
 
 		steps = compileIntegerLikeTypes(i, sparkField, columnDescr);

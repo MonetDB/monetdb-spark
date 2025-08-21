@@ -161,4 +161,52 @@ public class TestsToLearnSpark {
 		// it's unscaled, so basically the decimal value with the dot stripped
 		assertEquals(big.toString().replace(".", ""), bi.toString());
 	}
+
+	@Test
+	public void testIfOrderMatters() throws SQLException {
+		connect();
+		spark();
+		stmt.execute("DROP TABLE IF EXISTS foo; CREATE TABLE foo(y TEXT, x INT)");
+
+		Dataset<Long> spine = spark.range(5);
+		Dataset<Row> df = spine
+				.withColumn("x", col("id").cast("INTEGER"))
+				.withColumn("y", concat(lit("x"), col("id")))
+				.drop(col("id"))
+				.repartition(1);
+
+		// Write to a table that has its columns in a different order
+		df
+				.write()
+				.format("jdbc")
+				.mode(SaveMode.Append)
+				.option("url", Config.databaseUrl())
+				.option("dbtable", "foo")
+				.save();
+	}
+
+	@Test
+	public void testOmittedColumns() throws SQLException {
+		connect();
+		spark();
+		stmt.execute("DROP TABLE IF EXISTS foo; CREATE TABLE foo(x INT, y TEXT, z INT)");
+
+		Dataset<Long> spine = spark.range(5);
+		Dataset<Row> df = spine
+				.withColumn("x", col("id").cast("INTEGER"))
+				.withColumn("y", concat(lit("x"), col("id")))
+				.drop(col("id"))
+				.repartition(1);
+
+		// Write to a table that has its columns in a different order
+		df
+				.write()
+				.format("jdbc")
+				.mode(SaveMode.Append)
+				.option("url", Config.databaseUrl())
+				.option("dbtable", "foo")
+				.save();
+
+		stmt.execute("SELECT * FROM foo");
+	}
 }

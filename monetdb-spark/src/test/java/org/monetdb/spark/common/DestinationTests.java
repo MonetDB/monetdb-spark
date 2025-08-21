@@ -26,14 +26,14 @@ class DestinationTests {
 	private final static String TABLE = "mydata";
 
 	private final ColumnDescr[] QUALIFIED_TABLE_TYPE = new ColumnDescr[]{ //
-			new ColumnDescr(JDBCType.BOOLEAN, 1, 0, "BOOL"), //
-			new ColumnDescr(JDBCType.TINYINT, 3, 0, "TINYINT"), //
-			new ColumnDescr(JDBCType.INTEGER, 10, 0, "INTEGER"), //
-			new ColumnDescr(JDBCType.VARCHAR, 8, 0, "VARCHAR"), //
-			new ColumnDescr(JDBCType.VARCHAR, 0, 0, "CLOB"), //
+			new ColumnDescr("boo", JDBCType.BOOLEAN, 1, 0, "BOOL"), //
+			new ColumnDescr("bt", JDBCType.TINYINT, 3, 0, "TINYINT"), //
+			new ColumnDescr("i", JDBCType.INTEGER, 10, 0, "INTEGER"), //
+			new ColumnDescr("v", JDBCType.VARCHAR, 8, 0, "VARCHAR"), //
+			new ColumnDescr("c", JDBCType.VARCHAR, 0, 0, "CLOB"), //
 	};
 
-	private final ColumnDescr[] SYS_TABLE_TYPE = new ColumnDescr[]{new ColumnDescr(JDBCType.INTEGER, 10, 0, "INTEGER"),};
+	private final ColumnDescr[] SYS_TABLE_TYPE = new ColumnDescr[]{new ColumnDescr("huh", JDBCType.INTEGER, 10, 0, "INTEGER"),};
 
 	private static String quoteId(String id) {
 		return "\"" + id.replace("\"", "\"\"") + "\"";
@@ -127,23 +127,23 @@ class DestinationTests {
 		assertNotEquals(USER, actualUser);
 	}
 
-	private void testGetColumnTypes(String table, ColumnDescr[] expected) throws URISyntaxException, ValidationError, SQLException {
+	private void testGetColumns(String table, ColumnDescr[] expected) throws URISyntaxException, ValidationError, SQLException {
 		Destination dest = new Destination(userUrl(true), null, null, table);
 		try (Connection conn = dest.connect()) {
-			ColumnDescr[] colTypes = dest.getColumnTypes();
+			ColumnDescr[] colTypes = dest.getColumns();
 			assertArrayEquals(expected, colTypes);
 		}
 	}
 
 	@Test
-	public void testGetColumnTypes_qualified() throws SQLException, URISyntaxException, ValidationError {
+	public void testGetColumns_qualified() throws SQLException, URISyntaxException, ValidationError {
 		String qname = quoteId(SCHEMA) + "." + quoteId(TABLE);
-		testGetColumnTypes(qname, QUALIFIED_TABLE_TYPE);
+		testGetColumns(qname, QUALIFIED_TABLE_TYPE);
 	}
 
 	@Test
-	public void testGetColumnTypes_implied() throws SQLException, URISyntaxException, ValidationError {
+	public void testGetColumns_implied() throws SQLException, URISyntaxException, ValidationError {
 		String qname = quoteId(TABLE);
-		testGetColumnTypes(qname, SYS_TABLE_TYPE);
+		testGetColumns(qname, SYS_TABLE_TYPE);
 	}
 }

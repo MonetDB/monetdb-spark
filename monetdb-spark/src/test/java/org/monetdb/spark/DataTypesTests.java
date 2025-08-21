@@ -277,4 +277,33 @@ public class DataTypesTests {
 		assertArrayEquals(origRows, foundRows);
 	}
 
+	@Test
+	public void testDifferentOrder() throws SQLException {
+		conn = Config.connectDatabase();
+		stmt = conn.createStatement();
+
+		stmt.execute("DROP TABLE IF EXISTS foo");
+		// The types match but the columns are in a different order:
+		stmt.execute("CREATE TABLE foo(z INT, y TEXT, x INT)");
+
+		Dataset<Long> spine = spark.range(5);
+		Dataset<Row> df = spine
+				.withColumn("x", col("id").cast("INTEGER"))
+				.withColumn("y", concat(lit("x"), col("id")))
+				.drop(col("id"))
+				.repartition(1);
+
+
+		// Write to a table that has its columns in the wrong order
+		df
+				.write()
+				.format("org.monetdb.spark")
+				.mode(SaveMode.Append)
+				.option("url", Config.databaseUrl())
+				.option("dbtable", "foo")
+				.save();
+
+
+	}
+
 }

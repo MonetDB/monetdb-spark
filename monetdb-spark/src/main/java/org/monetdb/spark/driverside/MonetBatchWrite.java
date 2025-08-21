@@ -24,20 +24,20 @@ import org.monetdb.spark.workerside.Step;
  */
 public class MonetBatchWrite implements BatchWrite {
 	private final Destination dest;
-	private final int ncolumns;
+	private final String[] columns;
 	private final Step[] steps;
 	private final long batchSize;
 
-	public MonetBatchWrite(Destination dest, int ncolumns, Step[] steps, long batchSize) {
+	public MonetBatchWrite(Destination dest, String[] columns, Step[] steps, long batchSize) {
 		this.dest = dest;
-		this.ncolumns = ncolumns;
+		this.columns = columns;
 		this.steps = steps;
 		this.batchSize = batchSize;
 	}
 
 	@Override
 	public DataWriterFactory createBatchWriterFactory(PhysicalWriteInfo info) {
-		return new BinCopyDataWriterFactory(dest, ncolumns, steps, batchSize);
+		return new BinCopyDataWriterFactory(dest, columns, steps, batchSize);
 	}
 
 	@Override

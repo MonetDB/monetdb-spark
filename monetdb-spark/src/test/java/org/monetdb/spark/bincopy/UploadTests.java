@@ -52,17 +52,19 @@ public class UploadTests {
 
 		// Check the column types are as exoected
 		Destination dest = new Destination(Config.databaseUrl(), null, null, "foo");
-		ColumnDescr[] colTypes = dest.getColumnTypes();
+		ColumnDescr[] colTypes = dest.getColumns();
 		assertEquals(JDBCType.BOOLEAN, colTypes[0].getType());
 		assertEquals(JDBCType.INTEGER, colTypes[1].getType());
 		assertEquals(JDBCType.VARCHAR, colTypes[2].getType());
 
 		// Create the DataWriter
 		StructField[] sparkTypes = {boolField, intField, stringField};
-		Step[] steps = PlanCompiler.compile(sparkTypes, colTypes);
+		PlanBuilder builder = new PlanBuilder(colTypes);
+		builder.plan(sparkTypes);
+		Step[] steps = builder.getPlan();
 		Collector collector = new Collector();
 		collector.registerWithConverters(steps);
-		BinCopyUploader uploader = new BinCopyUploader(dest, collector, colTypes.length);
+		BinCopyUploader uploader = new BinCopyUploader(dest, collector, builder.getColumns());
 		long batchSize = Long.MAX_VALUE;
 		MonetDataWriter dataWriter = new MonetDataWriter(collector, steps, uploader, batchSize);
 

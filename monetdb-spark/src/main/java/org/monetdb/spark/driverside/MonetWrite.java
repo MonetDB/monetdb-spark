@@ -7,7 +7,7 @@ package org.monetdb.spark.driverside;
 import org.apache.spark.sql.connector.write.BatchWrite;
 import org.apache.spark.sql.connector.write.Write;
 import org.apache.spark.sql.types.StructType;
-import org.monetdb.spark.bincopy.PlanCompiler;
+import org.monetdb.spark.bincopy.PlanBuilder;
 import org.monetdb.spark.common.ColumnDescr;
 import org.monetdb.spark.common.Destination;
 import org.monetdb.spark.workerside.ConversionError;
@@ -33,8 +33,8 @@ import java.sql.SQLException;
 public class MonetWrite implements Write {
 	private final Destination dest;
 	private final int ncolumns;
-	private final Step[] steps;
 	private final long batchSize;
+	private final PlanBuilder builder;
 
 	public MonetWrite(Destination destination, StructType structType, long batchSize) {
 		this.dest = destination;
@@ -43,8 +43,9 @@ public class MonetWrite implements Write {
 
 		try {
 			// We assume it exists, get the column types
-			ColumnDescr[] columnDescrs = dest.getColumnTypes();
-			steps = PlanCompiler.compile(structType.fields(), columnDescrs);
+			ColumnDescr[] columnDescrs = dest.getColumns();
+			builder = new PlanBuilder(columnDescrs);
+			builder.plan(structType);
 		} catch (SQLException | ConversionError e) {
 			// Spark doesn't allow us to throw checked exceptions
 			throw new RuntimeException(e);
@@ -53,6 +54,6 @@ public class MonetWrite implements Write {
 
 	@Override
 	public BatchWrite toBatch() {
-		return new MonetBatchWrite(dest, ncolumns, steps, batchSize);
+		return new MonetBatchWrite(dest, builder.getColumns(), builder.getPlan(), batchSize);
 	}
 }
