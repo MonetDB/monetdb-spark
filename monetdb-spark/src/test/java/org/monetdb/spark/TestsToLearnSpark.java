@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Test Spark itself, to get to know it
  */
-public class GetToKnowSpark {
+public class TestsToLearnSpark {
 	@AutoClose
 	Connection conn = null;
 	@AutoClose

@@ -50,6 +50,16 @@ public class DataTypesTests {
 		Config.sparkSession().close();
 	}
 
+	private static Column decimalTestData(int precision) {
+		int scale = precision <= 3 ? precision - 1 : 3;
+		Column idecs = col("id").cast("DECIMAL");
+		Column decs = idecs.plus(idecs.divide(lit(9)));
+		// Make them fit
+		Column modulo = power(lit(10), lit(precision - scale)).cast(new DecimalType(precision - scale + 1, 0));
+		Column reduced = round(decs, scale).mod(modulo).cast(new DecimalType(precision, scale));
+		return reduced;
+	}
+
 	@BeforeEach
 	public void setUp() {
 		spark = Config.sparkSession();
@@ -151,19 +161,19 @@ public class DataTypesTests {
 
 	@Test
 	public void testByteType() {
-		forceType = "TINYINT"; // by default it becomes SMALLINT
+		forceType = "TINYINT"; // by default, it becomes SMALLINT
 		testRoundTrip("Byte");
 	}
 
 	@Test
 	public void testShortType() {
-		forceType = "SMALLINT"; // by default it becomes INT
+		forceType = "SMALLINT"; // by default, it becomes INT
 		testRoundTrip("Short");
 	}
 
 	@Test
 	public void testIntegerType() {
-		forceType = "INTEGER"; // by default it becomes BIGINT
+		forceType = "INTEGER"; // by default, it becomes BIGINT
 		testRoundTrip("Integer");
 	}
 
@@ -182,16 +192,6 @@ public class DataTypesTests {
 		testRoundTrip(col("id").cast("Double").divide(2.0));
 	}
 
-	private static Column decimalTestData(int precision) {
-		int scale = precision <= 3 ? precision - 1 : 3;
-		Column idecs = col("id").cast("DECIMAL");
-		Column decs = idecs.plus(idecs.divide(lit(9)));
-		// Make them fit
-		Column modulo = power(lit(10), lit(precision - scale)).cast(new DecimalType(precision - scale + 1, 0));
-		Column reduced = round(decs, scale).mod(modulo).cast(new DecimalType(precision, scale));
-		return reduced;
-	}
-
 	@ParameterizedTest
 	@ValueSource(ints = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18})
 	public void testDecimal(int precision) {
@@ -200,7 +200,7 @@ public class DataTypesTests {
 	}
 
 	@ParameterizedTest
-		@ValueSource(ints = {19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38})
+	@ValueSource(ints = {19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38})
 	public void testHugeDecimal(int precision) {
 		Column data = decimalTestData(precision);
 		testRoundTrip(data);
@@ -243,9 +243,7 @@ public class DataTypesTests {
 				.getJdbcType(xfield.dataType(), dialect)
 				.databaseTypeDefinition();
 		String qTable = dialect.quoteIdentifier(TABLE);
-		String sql = "DROP TABLE IF EXISTS " + qTable + "; CREATE TABLE " + qTable + "(id " + idSql + "" +
-				"" +
-				", x " + xSql + ")";
+		String sql = "DROP TABLE IF EXISTS " + qTable + "; CREATE TABLE " + qTable + "(id " + idSql + ", x " + xSql + ")";
 		try (Connection conn = Config.connectDatabase(); Statement stmt = conn.createStatement()) {
 			stmt.execute(sql);
 		} catch (SQLException e) {

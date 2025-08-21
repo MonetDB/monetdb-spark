@@ -13,8 +13,6 @@ package org.monetdb.spark.common.steps;
 import org.apache.spark.sql.catalyst.expressions.SpecializedGetters;
 import org.monetdb.spark.workerside.ConversionError;
 
-import java.io.IOException;
-
 public abstract class IntLikeExtractor extends Extractor {
 
 	public IntLikeExtractor(int index) {
@@ -32,7 +30,7 @@ public abstract class IntLikeExtractor extends Extractor {
 	}
 
 	@Override
-	public final void exec(SpecializedGetters row) throws IOException {
+	public final void exec(SpecializedGetters row) {
 		collector.scratchNull = row.isNullAt(index);
 		if (!collector.scratchNull)
 			collector.scratchLong = doExtract(row);

@@ -15,7 +15,6 @@ import org.monetdb.spark.common.Range;
 import org.monetdb.spark.workerside.Collector;
 import org.monetdb.spark.workerside.Step;
 
-import java.io.IOException;
 import java.math.BigInteger;
 
 import static java.math.BigInteger.ONE;
@@ -42,7 +41,7 @@ public class BigIntRangeCheck implements Step {
 	}
 
 	@Override
-	public void exec(SpecializedGetters row) throws IOException {
+	public void exec(SpecializedGetters row) {
 		if (collector.scratchNull)
 			return;
 		BigInteger bi = collector.scratchBigInteger;

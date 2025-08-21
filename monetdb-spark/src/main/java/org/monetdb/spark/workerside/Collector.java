@@ -28,7 +28,7 @@ public final class Collector implements MonetConnection.UploadHandler {
 	public double scratchDouble;
 	public BigInteger scratchBigInteger;
 	public UTF8String scratchUTF8String;
-	public byte[] scratchBuffer = new byte[16];
+	public final byte[] scratchBuffer = new byte[16];
 
 	public Collector() {
 		buffers = new ArrayList<>();

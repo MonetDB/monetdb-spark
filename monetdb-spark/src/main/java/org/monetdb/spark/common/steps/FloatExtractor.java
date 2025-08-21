@@ -12,15 +12,13 @@ package org.monetdb.spark.common.steps;
 
 import org.apache.spark.sql.catalyst.expressions.SpecializedGetters;
 
-import java.io.IOException;
-
 public class FloatExtractor extends Extractor {
 	public FloatExtractor(int index) {
 		super(index);
 	}
 
 	@Override
-	public void exec(SpecializedGetters row) throws IOException {
+	public void exec(SpecializedGetters row) {
 		collector.scratchNull = row.isNullAt(index);
 		if (collector.scratchNull)
 			return;

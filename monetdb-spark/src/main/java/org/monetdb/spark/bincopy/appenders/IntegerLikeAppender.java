@@ -12,8 +12,6 @@ package org.monetdb.spark.bincopy.appenders;
 
 import org.apache.spark.sql.catalyst.expressions.SpecializedGetters;
 
-import java.io.IOException;
-
 public abstract class IntegerLikeAppender extends Appender {
 
 	public IntegerLikeAppender(int index) {
@@ -34,7 +32,7 @@ public abstract class IntegerLikeAppender extends Appender {
 	protected abstract int sizeInBytes();
 
 	@Override
-	public void exec(SpecializedGetters ignored) throws IOException {
+	public void exec(SpecializedGetters ignored) {
 		int n = sizeInBytes();
 		byte[] scratch = collector.scratchBuffer;
 		long value = collector.scratchLong;

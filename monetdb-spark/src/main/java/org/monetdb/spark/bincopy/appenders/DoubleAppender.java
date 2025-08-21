@@ -12,15 +12,13 @@ package org.monetdb.spark.bincopy.appenders;
 
 import org.apache.spark.sql.catalyst.expressions.SpecializedGetters;
 
-import java.io.IOException;
-
 public class DoubleAppender extends Appender {
 	public DoubleAppender(int index) {
 		super(index);
 	}
 
 	@Override
-	public void exec(SpecializedGetters row) throws IOException {
+	public void exec(SpecializedGetters row) {
 		double d = collector.scratchNull ? Double.NaN : collector.scratchDouble;
 		long n = Double.doubleToLongBits(d);
 		byte[] scratch = collector.scratchBuffer;

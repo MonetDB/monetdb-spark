@@ -12,8 +12,6 @@ package org.monetdb.spark.common.steps;
 
 import org.apache.spark.sql.catalyst.expressions.SpecializedGetters;
 
-import java.io.IOException;
-
 public class HugeDecimalExtractor extends Extractor {
 	private final int precision;
 	private final int scale;
@@ -25,7 +23,7 @@ public class HugeDecimalExtractor extends Extractor {
 	}
 
 	@Override
-	public void exec(SpecializedGetters row) throws IOException {
+	public void exec(SpecializedGetters row) {
 		collector.scratchNull = row.isNullAt(index);
 		if (collector.scratchNull)
 			return;

@@ -14,7 +14,6 @@ import org.apache.spark.sql.catalyst.expressions.SpecializedGetters;
 import org.monetdb.spark.workerside.Collector;
 import org.monetdb.spark.workerside.Step;
 
-import java.io.IOException;
 import java.math.BigInteger;
 
 public class LongToBigIntConversion implements Step {
@@ -27,7 +26,7 @@ public class LongToBigIntConversion implements Step {
 	}
 
 	@Override
-	public void exec(SpecializedGetters ignored) throws IOException {
+	public void exec(SpecializedGetters ignored) {
 		collector.scratchBigInteger = BigInteger.valueOf(collector.scratchLong);
 	}
 }

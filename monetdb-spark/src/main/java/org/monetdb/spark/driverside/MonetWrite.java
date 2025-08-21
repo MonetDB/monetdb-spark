@@ -20,13 +20,12 @@ import java.sql.SQLException;
  * <p>
  * Constructed in the driver when save() is finally called when writing a dataframe.
  * <p>
- * If we would support truncate and overwrite (creating a new table), we'd
+ * When we add support for truncate and overwrite (creating a new table), we will
  * do it here. For now, we just check if the dataframe type is suitable
  * to be converted to the column types of the existing table.
  * <p>
- * If we want to supoprt more than one way of uploading, for example COPY INTO
+ * If we want to support more than one way of uploading, for example COPY INTO
  * in addition to COPY BINARY INTO, this is where we'd decide what to use.
- * For now, we simply use org.monetdb.spark.workerside.Collector}.
  * <p>
  * The most important method is toBatch, which starts the actual
  * uploading of the data.

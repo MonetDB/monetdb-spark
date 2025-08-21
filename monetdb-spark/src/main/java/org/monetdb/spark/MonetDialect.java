@@ -99,7 +99,7 @@ public class MonetDialect extends JdbcDialect {
 		// Unfortunately, Spark has already decided to retrieve the timestamp from JDBC as a
 		// java.sql.Timestamp. That involves an enormous amount of unnecessary
 		// work to determine a time zone object which we will not use.
-		// It also holds correct year, hour, etc fields.
+		// It also holds correct year, hour, etc. fields.
 		// Calling .toLocalDateTime extracts these.
 		//
 		// The superclass implementation did something much more complicated

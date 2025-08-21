@@ -22,7 +22,7 @@ import org.apache.spark.unsafe.types.VariantVal;
 
 public class MockRow implements SpecializedGetters {
 
-	public Object[] values;
+	public final Object[] values;
 
 	public MockRow(Object... values) {
 		this.values = values;

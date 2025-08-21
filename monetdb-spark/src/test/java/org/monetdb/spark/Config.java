@@ -18,8 +18,8 @@ public class Config {
 	private static final String SPARK_MASTER_PROPERTY = "test.spark";
 	private static final String SPARK_MASTER_DEFAULT = "local[4]";
 
-	private static final String SPARK_PARTITTIONS_PROPERTY = "test.partitions";
-	private static final String SPARK_PARTITTIONS_DEFAULT = "-1";
+	private static final String SPARK_PARTITIONS_PROPERTY = "test.partitions";
+	private static final String SPARK_PARTITIONS_DEFAULT = "-1";
 
 	private static final Properties fileProperties = new Properties();
 	private static boolean filePropertiesLoaded = false;
@@ -30,7 +30,8 @@ public class Config {
 				try {
 					fileProperties.load(new FileReader(PROPERTIES_FILE_NAME));
 					filePropertiesLoaded = true;
-				} catch (IOException ignored) {}
+				} catch (IOException ignored) {
+				}
 			}
 		}
 		return fileProperties.getProperty(key, System.getProperty(key, defaultValue));
@@ -63,19 +64,17 @@ public class Config {
 
 	public static SparkSession sparkSession() {
 		String url = sparkUrl();
-		return SparkSession.builder()
-				.appName("unit_tests")
-				.config("spark.master", url)
-				.getOrCreate();
+		return SparkSession.builder().appName("unit_tests").config("spark.master", url).getOrCreate();
 	}
 
 	/**
 	 * Used to reduce the number of partitions when writing.
 	 * Only some tests obey this
+	 *
 	 * @return maximum number of partitions to use, or -1 if not set.
 	 */
 	public static int sparkPartitions() {
-		String num = getProperty(SPARK_PARTITTIONS_PROPERTY, SPARK_PARTITTIONS_DEFAULT);
+		String num = getProperty(SPARK_PARTITIONS_PROPERTY, SPARK_PARTITIONS_DEFAULT);
 		int n = Integer.parseInt(num);
 		return n;
 	}

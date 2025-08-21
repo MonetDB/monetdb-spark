@@ -25,16 +25,15 @@ class DestinationTests {
 	private final static String SCHEMA = "awk\" \"ward";
 	private final static String TABLE = "mydata";
 
-	private final ColumnDescr[] QUALIFIED_TABLE_TYPE = new ColumnDescr[]{
-			new ColumnDescr(JDBCType.BOOLEAN, 1, 0, "BOOL"),
-			new ColumnDescr(JDBCType.TINYINT, 3, 0, "TINYINT"),
-			new ColumnDescr(JDBCType.INTEGER, 10, 0, "INTEGER"),
-			new ColumnDescr(JDBCType.VARCHAR, 8, 0, "VARCHAR"),
-			new ColumnDescr(JDBCType.VARCHAR, 0, 0, "CLOB"),
+	private final ColumnDescr[] QUALIFIED_TABLE_TYPE = new ColumnDescr[]{ //
+			new ColumnDescr(JDBCType.BOOLEAN, 1, 0, "BOOL"), //
+			new ColumnDescr(JDBCType.TINYINT, 3, 0, "TINYINT"), //
+			new ColumnDescr(JDBCType.INTEGER, 10, 0, "INTEGER"), //
+			new ColumnDescr(JDBCType.VARCHAR, 8, 0, "VARCHAR"), //
+			new ColumnDescr(JDBCType.VARCHAR, 0, 0, "CLOB"), //
 	};
 
-	private final ColumnDescr[] SYS_TABLE_TYPE = new ColumnDescr[]{new ColumnDescr(JDBCType.INTEGER, 10, 0, "INTEGER"),
-	};
+	private final ColumnDescr[] SYS_TABLE_TYPE = new ColumnDescr[]{new ColumnDescr(JDBCType.INTEGER, 10, 0, "INTEGER"),};
 
 	private static String quoteId(String id) {
 		return "\"" + id.replace("\"", "\"\"") + "\"";
@@ -122,7 +121,7 @@ class DestinationTests {
 	}
 
 	@Test
-	public void testLoginAsAdmin() throws URISyntaxException, ValidationError, SQLException {
+	public void testLoginAsAdmin() throws SQLException {
 		String actualUser = testLogin(Config.databaseUrl(), null, null);
 		// Most likely 'monetdb' but we can't be sure what the user configured
 		assertNotEquals(USER, actualUser);

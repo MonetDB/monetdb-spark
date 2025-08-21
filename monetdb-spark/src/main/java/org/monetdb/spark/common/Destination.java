@@ -37,8 +37,8 @@ public class Destination implements Serializable {
 
 	public ColumnDescr[] getColumnTypes() throws SQLException {
 		// Connection databasemetadata is too tricky, it allows patterns,
-		// works across schemas, how do we have to quote, etc?
-		// Instead we just look at the types of SELECT * FROM table.
+		// works across schemas, how do we have to quote, etc.?
+		// Instead, we just look at the types of SELECT * FROM table.
 		try (Connection conn = connect(); Statement stmt = conn.createStatement()) {
 			String sql = "SELECT * FROM " + table + " WHERE FALSE";
 			try (ResultSet rs = stmt.executeQuery(sql)) {

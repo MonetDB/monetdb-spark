@@ -14,8 +14,6 @@ import org.apache.spark.sql.catalyst.expressions.SpecializedGetters;
 import org.monetdb.spark.workerside.Collector;
 import org.monetdb.spark.workerside.Step;
 
-import java.io.IOException;
-
 public abstract class Extractor implements Step {
 	protected final int index;
 	protected Collector collector;
@@ -34,5 +32,5 @@ public abstract class Extractor implements Step {
 	}
 
 	@Override
-	public abstract void exec(SpecializedGetters row) throws IOException;
+	public abstract void exec(SpecializedGetters row);
 }

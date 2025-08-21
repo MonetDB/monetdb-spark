@@ -15,8 +15,6 @@ import org.monetdb.spark.common.Range;
 import org.monetdb.spark.workerside.Collector;
 import org.monetdb.spark.workerside.Step;
 
-import java.io.IOException;
-
 public class LongRangeCheck implements Step {
 	private final long lo;
 	private final long hi;
@@ -38,7 +36,7 @@ public class LongRangeCheck implements Step {
 	}
 
 	@Override
-	public void exec(SpecializedGetters row) throws IOException {
+	public void exec(SpecializedGetters row) {
 		if (collector.scratchNull)
 			return;
 		if (collector.scratchLong >= lo && collector.scratchLong <= hi)

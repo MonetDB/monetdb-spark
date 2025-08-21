@@ -71,7 +71,7 @@ public class MonetDataWriter implements DataWriter<InternalRow> {
 		try {
 			uploader.close();
 		} catch (SQLException e) {
-			throw new RuntimeException(e);
+			throw new IOException(e);
 		}
 	}
 

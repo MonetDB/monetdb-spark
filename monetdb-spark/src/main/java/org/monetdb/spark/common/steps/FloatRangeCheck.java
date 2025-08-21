@@ -14,8 +14,6 @@ import org.apache.spark.sql.catalyst.expressions.SpecializedGetters;
 import org.monetdb.spark.workerside.Collector;
 import org.monetdb.spark.workerside.Step;
 
-import java.io.IOException;
-
 public class FloatRangeCheck implements Step {
 	private Collector collector;
 
@@ -25,7 +23,7 @@ public class FloatRangeCheck implements Step {
 	}
 
 	@Override
-	public void exec(SpecializedGetters row) throws IOException {
+	public void exec(SpecializedGetters row) {
 		if (collector.scratchNull)
 			return;
 		double d = collector.scratchDouble;

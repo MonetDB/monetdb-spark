@@ -18,8 +18,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.monetdb.spark.Config;
 
-import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.*;
 import java.time.Duration;
 import java.time.Instant;
@@ -37,7 +37,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Test the mapping between Spark- and SQL types.
  * <p>
  * In particular, the mappings listed in
- * <a href="https://spark.apache.org/docs/4.0.0/sql-ref-datatypes.html#data-types">the Spark datatypes reference.</a>.
+ * <a href="https://spark.apache.org/docs/4.0.0/sql-ref-datatypes.html#data-types">the Spark datatypes reference</a>.
  * <p>
  * Also learn which methods to call to extract a value of those types from a
  * {@link Row}.
@@ -255,7 +255,7 @@ public class DialectTypesTest {
 		DecimalType expectedType = DataTypes.createDecimalType(8, 3);
 		assertEquals(expectedType, sparkType);
 		BigDecimal dec = fetchedRow.getDecimal(0);
-		BigDecimal expected = BigDecimal.valueOf(1234).scaleByPowerOfTen(-2).setScale(3);
+		BigDecimal expected = BigDecimal.valueOf(1234).scaleByPowerOfTen(-2).setScale(3, RoundingMode.DOWN);
 		assertEquals("12.340", dec.toString());
 		assertEquals(expected, dec);
 	}
@@ -324,7 +324,7 @@ public class DialectTypesTest {
 	}
 
 	@Test
-	public void testLoadTIMESTAMP() throws SQLException, IOException {
+	public void testLoadTIMESTAMP() throws SQLException {
 		// SQL TIMESTAMP maps to Spark TimeStampNTZ.
 		// By setting the customizer we change the time zone used by Spark to
 		// something really weird. The connection used to create the table is
@@ -350,7 +350,7 @@ public class DialectTypesTest {
 	}
 
 	@Test
-	public void testLoadTIMESTAMPTZ() throws SQLException, IOException {
+	public void testLoadTIMESTAMPTZ() throws SQLException {
 		// SQL TIMESTAMPTZ maps to Spark TimeStamp, so it's session time zone aware.
 
 		// timestamp including time zone. In Berlin it was 23:52:00+01:00.
