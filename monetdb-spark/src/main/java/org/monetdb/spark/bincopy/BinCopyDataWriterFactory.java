@@ -48,8 +48,9 @@ public class BinCopyDataWriterFactory implements DataWriterFactory, Serializable
 	@Override
 	public DataWriter<InternalRow> createWriter(int partitionId, long taskId) {
 		try {
+			String identifier = "part" + partitionId + "-task" + taskId;
 			Collector collector = new Collector();
-			BinCopyUploader uploader = new BinCopyUploader(dest, collector, columns);
+			BinCopyUploader uploader = new BinCopyUploader(dest, collector, identifier, columns);
 			collector.registerWithConverters(steps);
 			return new MonetDataWriter(collector, steps, uploader, batchSize);
 		} catch (SQLException e) {

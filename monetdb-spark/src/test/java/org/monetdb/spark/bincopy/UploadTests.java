@@ -64,7 +64,7 @@ public class UploadTests {
 		Step[] steps = builder.getPlan();
 		Collector collector = new Collector();
 		collector.registerWithConverters(steps);
-		BinCopyUploader uploader = new BinCopyUploader(dest, collector, builder.getColumns());
+		BinCopyUploader uploader = new BinCopyUploader(dest, collector, "uploadtest", builder.getColumns());
 		long batchSize = Long.MAX_VALUE;
 		MonetDataWriter dataWriter = new MonetDataWriter(collector, steps, uploader, batchSize);
 
