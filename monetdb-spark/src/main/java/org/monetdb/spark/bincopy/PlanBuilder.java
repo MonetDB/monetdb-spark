@@ -11,10 +11,7 @@
 package org.monetdb.spark.bincopy;
 
 import org.apache.spark.sql.types.*;
-import org.monetdb.spark.bincopy.appenders.Appender;
-import org.monetdb.spark.bincopy.appenders.DoubleAppender;
-import org.monetdb.spark.bincopy.appenders.FloatAppender;
-import org.monetdb.spark.bincopy.appenders.UTF8StringAppender;
+import org.monetdb.spark.bincopy.appenders.*;
 import org.monetdb.spark.common.ColumnDescr;
 import org.monetdb.spark.common.steps.*;
 import org.monetdb.spark.workerside.ConversionError;
@@ -73,23 +70,6 @@ public class PlanBuilder {
 		return columns.toArray(new String[0]);
 	}
 
-	private Step[] planOne(int i, StructField sparkField, ColumnDescr columnDescr) throws ConversionError {
-		Step[] steps;
-
-		steps = compileIntegerLikeTypes(i, sparkField, columnDescr);
-		if (steps != null)
-			return steps;
-		steps = compileStringTypes(i, sparkField, columnDescr);
-		if (steps != null)
-			return steps;
-		steps = compileFloatTypes(i, sparkField, columnDescr);
-		if (steps != null)
-			return steps;
-
-		String msg = MessageFormat.format("Field {0} \"{1}\": Don''t know how to convert Spark {2} to SQL type {3}", i, sparkField.name(), sparkField.dataType(), columnDescr);
-		throw new ConversionError(msg);
-	}
-
 	/**
 	 * Compile conversions between various integer sizes, boolean and
 	 * DECIMAL(x,y) for x up to 18.
@@ -100,7 +80,7 @@ public class PlanBuilder {
 	 * @return the Steps that must be executed to convert one field.
 	 * @throws ConversionError
 	 */
-	private static Step[] compileIntegerLikeTypes(int index, StructField sparkField, ColumnDescr columnDescr) throws ConversionError {
+	private Step[] planIntegerLikeTypes(int index, StructField sparkField, ColumnDescr columnDescr) throws ConversionError {
 		DataType sparkType = sparkField.dataType();
 
 		// Are they at least somewhat integer-shaped?
@@ -164,7 +144,7 @@ public class PlanBuilder {
 		return steps.toArray(new Step[0]);
 	}
 
-	private static Step[] compileStringTypes(int i, StructField sparkField, ColumnDescr columnDescr) {
+	private Step[] planStringTypes(int i, StructField sparkField, ColumnDescr columnDescr) {
 		switch (columnDescr.getType()) {
 			case VARCHAR:
 			case CLOB:
@@ -178,8 +158,7 @@ public class PlanBuilder {
 		return null;
 	}
 
-
-	private static Step[] compileFloatTypes(int i, StructField sparkField, ColumnDescr columnDescr) {
+	private Step[] planFloatTypes(int i, StructField sparkField, ColumnDescr columnDescr) {
 		DataType sparkType = sparkField.dataType();
 		JDBCType colType = columnDescr.getType();
 
@@ -198,5 +177,41 @@ public class PlanBuilder {
 			return null;
 
 		return new Step[]{extractor, new FloatRangeCheck(), appender};
+	}
+
+	private Step[] planTemporalTypes(int i, StructField sparkField, ColumnDescr columnDescr) {
+		DataType sparkType = sparkField.dataType();
+		JDBCType colType = columnDescr.getType();
+		final Extractor extractor;
+		final Appender appender;
+
+		if (sparkType instanceof DateType && colType == JDBCType.DATE) {
+			extractor = new IntegerExtractor(i);
+			appender = new DateAppender(i);
+		} else {
+			return null;
+		}
+
+		return new Step[]{extractor, appender};
+	}
+
+	private Step[] planOne(int i, StructField sparkField, ColumnDescr columnDescr) throws ConversionError {
+		Step[] steps;
+
+		steps = planIntegerLikeTypes(i, sparkField, columnDescr);
+		if (steps != null)
+			return steps;
+		steps = planStringTypes(i, sparkField, columnDescr);
+		if (steps != null)
+			return steps;
+		steps = planFloatTypes(i, sparkField, columnDescr);
+		if (steps != null)
+			return steps;
+		steps = planTemporalTypes(i, sparkField, columnDescr);
+		if (steps != null)
+			return steps;
+
+		String msg = MessageFormat.format("Field {0} \"{1}\": Don''t know how to convert Spark {2} to SQL type {3}", i, sparkField.name(), sparkField.dataType(), columnDescr);
+		throw new ConversionError(msg);
 	}
 }

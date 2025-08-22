@@ -211,6 +211,11 @@ public class DataTypesTests {
 		testRoundTrip(concat(lit("x"), col("id")));
 	}
 
+	@Test
+	public void testDateType() {
+		testRoundTrip(current_date().plus(col("id").cast("INTERVAL DAY")));
+	}
+
 	private void testRoundTrip(String typeName) {
 		Column expr = col("id").cast(typeName);
 		testRoundTrip(expr);
@@ -231,6 +236,8 @@ public class DataTypesTests {
 	}
 
 	private void testRoundTrip(Dataset<Row> data) {
+		data.show();
+		data.printSchema();
 		// Create the table
 		StructField idfield = data.schema().fields()[0];
 		assertEquals("id", idfield.name());
