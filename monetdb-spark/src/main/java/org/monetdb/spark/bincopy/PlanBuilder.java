@@ -189,7 +189,23 @@ public class PlanBuilder {
 			extractor = new IntegerExtractor(i);
 			appender = new DateAppender(i);
 		} else {
-			return null;
+			// regardless of WITH/WITHOUT TIMESTAMP, timestamps come in as a long.
+			if (sparkType instanceof TimestampNTZType || sparkType instanceof TimestampType)
+				extractor = new LongExtractor(i);
+			else
+				extractor = null;
+
+			// - If there's no time zone, the timestamp is encoded AS IF the zone
+			//   is UTC so the UTCTimestampAppender is appropriate.
+			// - If there is a timezone, we can still use the UTCTimestampAppender
+			//   because binary representation is always interpreted as UTC.
+			appender = switch (colType) {
+				case TIMESTAMP, TIMESTAMP_WITH_TIMEZONE -> new UTCTimestampAppender(i);
+				default -> null;
+			};
+
+			if (extractor == null || appender == null)
+				return null;
 		}
 
 		return new Step[]{extractor, appender};

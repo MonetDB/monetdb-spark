@@ -34,6 +34,8 @@ public class DataTypesTests {
 	private Connection conn;
 	@AutoClose
 	private Statement stmt;
+	private String extraInitialization;
+
 
 	@AutoClose
 	private SparkSession spark;
@@ -65,6 +67,7 @@ public class DataTypesTests {
 		spark = Config.sparkSession();
 		nrows = 10;
 		forceType = null;
+		extraInitialization = null;
 	}
 
 	private Dataset<Row> createTestData() {
@@ -213,7 +216,20 @@ public class DataTypesTests {
 
 	@Test
 	public void testDateType() {
-		testRoundTrip(current_date().plus(col("id").cast("INTERVAL DAY")));
+		Column base = make_date(lit(2025), lit(8), lit(21));
+		testRoundTrip(base.plus(col("id").cast("INTERVAL DAY")));
+	}
+
+	@Test
+	public void testTimestampNTZType() {
+		Column base = make_timestamp_ntz(lit(2025), lit(8), lit(21), lit(1), lit(23), lit(45));
+		testRoundTrip(base.plus(col("id").cast("INTERVAL HOUR")));
+	}
+
+	@Test
+	public void testTimestampLTZType() {
+		Column base = make_timestamp_ltz(lit(2025), lit(8), lit(21), lit(1), lit(23), lit(45));
+		testRoundTrip(base.plus(col("id").cast("INTERVAL HOUR")));
 	}
 
 	private void testRoundTrip(String typeName) {
@@ -270,11 +286,14 @@ public class DataTypesTests {
 				.option("dbtable", TABLE)
 				.save();
 
+		// Execute the retrieval in a weird time zone to flush out
+		// time zone issues
 		Dataset<Row> found = spark
 				.read()
 				.format("jdbc")
 				.option("url", Config.databaseUrl())
 				.option("dbtable", TABLE)
+				.option("sessionInitStatement", "SET TIME ZONE INTERVAL '01:23' HOUR TO MINUTE")
 				.load()
 				.sort("id");
 
