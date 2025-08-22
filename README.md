@@ -51,6 +51,16 @@ If the above works, it proves the dialect has been detected.
 This is because the default dialect fails when it tries to create
 boolean columns.
 
+> **IMPORTANT** It is recommended to not enable [Speculative Execution]
+> while writing to MonetDB, both with regular JDBC and with the custom
+> data source.
+>
+> Speculative Execution means that Spark may spawn additional tasks to
+> commit the same partition, commiting the one that completes first and
+> rolling back the others.
+> These rollbacks can cause 'holes' in the internal structure of the table
+> which may slow down subsequent queries on that table.
+
 
 ## Writing data with the custom Data Source
 
@@ -147,3 +157,5 @@ if 'make' is invoked as `make test TESTDB=demo`, 'make' will run
 [Spark Data Source]: https://spark.apache.org/docs/latest/sql-data-sources.html
 
 [COPY BINARY]: https://www.monetdb.org/documentation/user-guide/sql-manual/data-loading/binary-loading/
+
+[Speculative Execution]: https://kb.databricks.com/scala/understanding-speculative-execution
