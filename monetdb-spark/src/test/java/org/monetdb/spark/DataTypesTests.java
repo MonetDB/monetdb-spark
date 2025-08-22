@@ -293,7 +293,6 @@ public class DataTypesTests {
 				.drop(col("id"))
 				.repartition(1);
 
-
 		// Write to a table that has its columns in the wrong order
 		df
 				.write()
@@ -302,8 +301,5 @@ public class DataTypesTests {
 				.option("url", Config.databaseUrl())
 				.option("dbtable", "foo")
 				.save();
-
-
 	}
-
 }

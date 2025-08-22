@@ -8,7 +8,7 @@
  * Copyright MonetDB Solutions B.V.
  */
 
-package org.monetdb.spark.dialect;
+package org.monetdb.spark;
 
 import org.apache.spark.sql.*;
 import org.apache.spark.sql.types.*;
@@ -16,7 +16,6 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.monetdb.spark.Config;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -46,7 +45,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * not our own MonetDB specific one.
  */
 @TestInstance(Lifecycle.PER_CLASS)
-public class DialectTypesTest {
+public class MonetDialectTest {
 	private final static String TABLE = "foo";
 	private final byte YEAR = 0;
 	private final byte MONTH = 1;
