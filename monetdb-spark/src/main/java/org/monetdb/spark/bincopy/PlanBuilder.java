@@ -22,6 +22,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Objects;
 
 public class PlanBuilder {
 	private final HashMap<String, ColumnDescr> schema;
@@ -204,7 +205,7 @@ public class PlanBuilder {
 			// - If there's no time zone, the timestamp is encoded AS IF the zone
 			//   is UTC so the UTCTimestampAppender is appropriate.
 			// - If there is a timezone, we can still use the UTCTimestampAppender
-			//   because binary representation is always interpreted as UTC.
+			//   because MonetDB always interprets the binary representation as UTC.
 			appender = switch (colType) {
 				case TIMESTAMP, TIMESTAMP_WITH_TIMEZONE -> new UTCTimestampAppender(i);
 				default -> null;
@@ -212,6 +213,26 @@ public class PlanBuilder {
 
 			if (extractor == null || appender == null)
 				return null;
+		}
+
+		return new Step[]{extractor, appender};
+	}
+
+	private Step[] planBinaryTypes(int i, StructField sparkField, ColumnDescr columnDescr) {
+		final Extractor extractor;
+		final Appender appender;
+
+		DataType sparkType = sparkField.dataType();
+		if (sparkType instanceof BinaryType)
+			extractor = new BinaryExtractor(i);
+		else
+			return null;
+
+		switch (columnDescr.getType()) {
+			case BLOB, VARBINARY -> appender = new BinaryAppender(i);
+			default -> {
+				return null;
+			}
 		}
 
 		return new Step[]{extractor, appender};
@@ -230,6 +251,9 @@ public class PlanBuilder {
 		if (steps != null)
 			return steps;
 		steps = planTemporalTypes(i, sparkField, columnDescr);
+		if (steps != null)
+			return steps;
+		steps = planBinaryTypes(i, sparkField, columnDescr);
 		if (steps != null)
 			return steps;
 

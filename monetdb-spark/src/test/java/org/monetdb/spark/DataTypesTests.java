@@ -215,6 +215,11 @@ public class DataTypesTests {
 	}
 
 	@Test
+	public void testBinaryType() {
+		testRoundTrip(col("id").cast("STRING").cast("BINARY"));
+	}
+
+	@Test
 	public void testDateType() {
 		Column base = make_date(lit(2025), lit(8), lit(21));
 		testRoundTrip(base.plus(col("id").cast("INTERVAL DAY")));
