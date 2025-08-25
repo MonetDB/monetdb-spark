@@ -62,6 +62,25 @@ boolean columns.
 > which may slow down subsequent queries on that table.
 
 
+## Using it from a Jupyter notebook
+
+The SparkSession needs to be created with the "spark.jars" property set
+to a comma-separated list of jar files to put on the class path.
+For example,
+
+```python
+from glob import glob
+SPARK_JARS = glob('/home/jvr/work/2025/monetdb-spark/jars/*')
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import *
+spark = SparkSession.builder \
+    .appName('sparknotebook') \
+    .config('spark.jars', ','.join(SPARK_JARS)) \
+    .getOrCreate()
+```
+
+See also [notes/009-jupyter-notebook.ipynb](notes/009-jupyter-notebook.ipynb)
+
 ## Writing data with the custom Data Source
 
 To use the custom data source to write data, replace `.format("jdbc")`
