@@ -26,8 +26,8 @@ public final class ColumnDescr implements Serializable {
 		this.typeName = typeName;
 	}
 
-	public ColumnDescr(JDBCType type) {
-		this(null, type, 0, 0, type.name());
+	public ColumnDescr(String name, JDBCType type) {
+		this(name, type, 0, 0, type.name());
 	}
 
 	public String getName() { return name; }

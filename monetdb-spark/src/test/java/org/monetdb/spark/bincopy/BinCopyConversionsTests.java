@@ -32,10 +32,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class BinCopyConversionsTests {
 	final StructField boolField = new StructField("b", DataTypes.BooleanType, false, Metadata.empty());
 	final StructField intField = new StructField("i", DataTypes.IntegerType, false, Metadata.empty());
-	final StructField stringField = new StructField("s", DataTypes.StringType, false, Metadata.empty());
-	final ColumnDescr boolCol = new ColumnDescr(JDBCType.BOOLEAN);
-	final ColumnDescr intCol = new ColumnDescr(JDBCType.INTEGER);
-	final ColumnDescr stringCol = new ColumnDescr(JDBCType.VARCHAR);
+	final StructField stringField = new StructField("t", DataTypes.StringType, false, Metadata.empty());
+	final ColumnDescr boolCol = new ColumnDescr("b", JDBCType.BOOLEAN);
+	final ColumnDescr intCol = new ColumnDescr("i", JDBCType.INTEGER);
+	final ColumnDescr stringCol = new ColumnDescr("t", JDBCType.VARCHAR);
 
 	Collector col;
 	private Step[] steps;

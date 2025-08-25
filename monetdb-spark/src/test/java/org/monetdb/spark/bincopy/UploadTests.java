@@ -34,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class UploadTests {
 	final StructField boolField = new StructField("b", DataTypes.BooleanType, false, Metadata.empty());
 	final StructField intField = new StructField("i", DataTypes.IntegerType, false, Metadata.empty());
-	final StructField stringField = new StructField("s", DataTypes.StringType, false, Metadata.empty());
+	final StructField stringField = new StructField("t", DataTypes.StringType, false, Metadata.empty());
 
 	@AutoClose
 	Connection conn;
