@@ -252,9 +252,10 @@ public class DataTypesTests {
 	}
 
 	private void testRoundTrip(Dataset<Row> data) {
-		//data.show();
-		//data.printSchema();
-
+		if (Config.verbose()) {
+			data.show();
+			data.printSchema();
+		}
 		// Create the table
 		StructField idfield = data.schema().fields()[0];
 		assertEquals("id", idfield.name());

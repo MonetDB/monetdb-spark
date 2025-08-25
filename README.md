@@ -164,6 +164,9 @@ The following settings are available:
   debugging it's occasionally useful to force all data into a single
   partition.
 
+* **test.verbose**. Some tests write more information to stdout if this
+  is set to 'true'.
+
 The most convenient way to change these settings is by creating a
 properties file `override.properties` in the monetdb-spark subdirectory.
 It is also possible to pass them as `-D` flags to Maven. In particular,

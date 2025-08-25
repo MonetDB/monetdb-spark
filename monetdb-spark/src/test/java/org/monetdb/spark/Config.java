@@ -21,6 +21,9 @@ public class Config {
 	private static final String SPARK_PARTITIONS_PROPERTY = "test.partitions";
 	private static final String SPARK_PARTITIONS_DEFAULT = "-1";
 
+	private static final String VERBOSE_PROPERTY = "test.verbose";
+	private static final String VERBOSE_DEFAULT = "false";
+
 	private static final Properties fileProperties = new Properties();
 	private static boolean filePropertiesLoaded = false;
 
@@ -77,5 +80,11 @@ public class Config {
 		String num = getProperty(SPARK_PARTITIONS_PROPERTY, SPARK_PARTITIONS_DEFAULT);
 		int n = Integer.parseInt(num);
 		return n;
+	}
+
+	public static boolean verbose() {
+		String boolval = getProperty(VERBOSE_PROPERTY, VERBOSE_DEFAULT);
+		boolean b = Boolean.parseBoolean(boolval);
+		return b;
 	}
 }
