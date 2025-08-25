@@ -145,17 +145,23 @@ public class PlanBuilder {
 	}
 
 	private Step[] planStringTypes(int i, StructField sparkField, ColumnDescr columnDescr) {
+		final StringExtractor extractor;
+		final UTF8StringAppender appender;
+
+		DataType sparkType = sparkField.dataType();
+		if (sparkType instanceof StringType || sparkType instanceof VarcharType || sparkType instanceof CharType)
+			extractor = new StringExtractor(i);
+		else
+			return null;
+
 		switch (columnDescr.getType()) {
-			case VARCHAR:
-			case CLOB:
-				if (sparkField.dataType() instanceof StringType) {
-					StringExtractor extractor = new StringExtractor(i);
-					UTF8StringAppender appender = new UTF8StringAppender(i);
-					return new Step[]{extractor, appender};
-				}
-				break;
+			case VARCHAR, CLOB, CHAR -> appender = new UTF8StringAppender(i);
+			default -> {
+				return null;
+			}
 		}
-		return null;
+
+		return new Step[]{extractor, appender};
 	}
 
 	private Step[] planFloatTypes(int i, StructField sparkField, ColumnDescr columnDescr) {
