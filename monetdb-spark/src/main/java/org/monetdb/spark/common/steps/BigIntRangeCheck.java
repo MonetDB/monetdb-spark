@@ -10,10 +10,7 @@
 
 package org.monetdb.spark.common.steps;
 
-import org.apache.spark.sql.catalyst.expressions.SpecializedGetters;
 import org.monetdb.spark.common.Range;
-import org.monetdb.spark.workerside.Collector;
-import org.monetdb.spark.workerside.Step;
 
 import java.math.BigInteger;
 
@@ -24,12 +21,14 @@ public class BigIntRangeCheck extends RangeCheck {
 	private final BigInteger hi;
 	private final BigInteger lo;
 
-	public BigIntRangeCheck(int precision) {
+	public BigIntRangeCheck(boolean allowOverflow, int precision) {
+		super(allowOverflow);
 		hi = TEN.pow(precision).subtract(ONE);
 		lo = hi.negate();
 	}
 
-	public BigIntRangeCheck(Range range) {
+	public BigIntRangeCheck(boolean allowOverflow, Range range) {
+		super(allowOverflow);
 		hi = BigInteger.valueOf(range.hi);
 		lo = BigInteger.valueOf(range.lo);
 	}

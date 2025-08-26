@@ -10,21 +10,20 @@
 
 package org.monetdb.spark.common.steps;
 
-import org.apache.spark.sql.catalyst.expressions.SpecializedGetters;
 import org.monetdb.spark.common.Range;
-import org.monetdb.spark.workerside.Collector;
-import org.monetdb.spark.workerside.Step;
 
 public class LongRangeCheck extends RangeCheck {
 	private final long lo;
 	private final long hi;
 
-	public LongRangeCheck(long lo, long hi) {
+	public LongRangeCheck(boolean allowOverflow, long lo, long hi) {
+		super(allowOverflow);
 		this.lo = lo;
 		this.hi = hi;
 	}
 
-	public LongRangeCheck(Range range) {
+	public LongRangeCheck(boolean allowOverflow, Range range) {
+		super(allowOverflow);
 		this.lo = range.lo;
 		this.hi = range.hi;
 	}

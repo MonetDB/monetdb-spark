@@ -59,7 +59,7 @@ public class UploadTests {
 
 		// Create the DataWriter
 		StructField[] sparkTypes = {boolField, intField, stringField};
-		PlanBuilder builder = new PlanBuilder(colTypes);
+		PlanBuilder builder = new PlanBuilder(colTypes, false);
 		builder.plan(sparkTypes);
 		Step[] steps = builder.getPlan();
 		Collector collector = new Collector();

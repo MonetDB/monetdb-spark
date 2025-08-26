@@ -133,6 +133,11 @@ JDBC data source. The following configuration options are supported:
   the data. For now the default is to issue one COPY BINARY per
   partition but this may change in the future.
 
+* **allowoverflow**: determines what happens if a value is outside the range
+  of the destination column. If true, overflowing values are replaced with
+  NULL, if false an exception is thrown and processing is aborted.
+  The default is 'true'.
+
 
 ## Building
 

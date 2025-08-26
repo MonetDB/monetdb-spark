@@ -25,10 +25,12 @@ import java.util.HashMap;
 
 public class PlanBuilder {
 	private final HashMap<String, ColumnDescr> schema;
+	private final boolean allowOverflow;
 	private final ArrayList<Step> plan;
 	private final ArrayList<String> columns;
 
-	public PlanBuilder(ColumnDescr[] tableColumns) {
+	public PlanBuilder(ColumnDescr[] tableColumns, boolean allowOverflow) {
+		this.allowOverflow = allowOverflow;
 		schema = new HashMap<>();
 		for (var col: tableColumns) {
 			schema.put(col.getName(), col);
@@ -105,12 +107,12 @@ public class PlanBuilder {
 					// no check needed
 					rangeCheck = null;
 				else {
-					rangeCheck = new BigIntRangeCheck(dst.decimalPrecision);
+					rangeCheck = new BigIntRangeCheck(allowOverflow, dst.decimalPrecision);
 				}
 				conversion = null;
 			} else {
 				// src is huge (decimal) and dst is not
-				rangeCheck = new BigIntRangeCheck(dst.range);
+				rangeCheck = new BigIntRangeCheck(allowOverflow, dst.range);
 				conversion = new BigIntToLongConversion();
 			}
 		} else {
@@ -123,7 +125,7 @@ public class PlanBuilder {
 				if (dst.range.contains(src.range)) {
 					rangeCheck = null;
 				} else {
-					rangeCheck = new LongRangeCheck(dst.range);
+					rangeCheck = new LongRangeCheck(allowOverflow, dst.range);
 				}
 				conversion = null;
 			}
@@ -175,7 +177,7 @@ public class PlanBuilder {
 		if (extractor == null || appender == null)
 			return null;
 
-		return new Step[]{extractor, new FloatRangeCheck(), appender};
+		return new Step[]{extractor, new FloatRangeCheck(allowOverflow), appender};
 	}
 
 	private Step[] planTemporalTypes(int i, StructField sparkField, ColumnDescr columnDescr) {

@@ -123,9 +123,11 @@ public class MonetTable implements Table, SupportsWrite {
 			String password = getArg("password", null);
 			String batchSizeArg = getArg("batchsize", null);
 			long batchSize = batchSizeArg != null ? Long.parseLong(batchSizeArg) : Long.MAX_VALUE;
+			String allowOverflowArg = getArg("allowoverflow", "true");
+			boolean allowOverflow = Boolean.parseBoolean(allowOverflowArg);
 
 			Destination dest = new Destination(url, user, password, tableName);
-			return new MonetWrite(dest, structType, batchSize);
+			return new MonetWrite(dest, structType, batchSize, allowOverflow);
 		}
 	}
 }

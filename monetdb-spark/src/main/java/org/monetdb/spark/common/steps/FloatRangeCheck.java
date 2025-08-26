@@ -10,11 +10,11 @@
 
 package org.monetdb.spark.common.steps;
 
-import org.apache.spark.sql.catalyst.expressions.SpecializedGetters;
-import org.monetdb.spark.workerside.Collector;
-import org.monetdb.spark.workerside.Step;
-
 public class FloatRangeCheck extends RangeCheck {
+	public FloatRangeCheck(boolean allowOverflow) {
+		super(allowOverflow);
+	}
+
 	@Override
 	public boolean isInRange() {
 		double d = collector.scratchDouble;

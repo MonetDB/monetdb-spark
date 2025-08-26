@@ -44,7 +44,7 @@ class BinCopyConversionsTests {
 	public void testLengthMismatch() {
 		StructField[] sparkTypes = {boolField, intField, stringField};
 		ColumnDescr[] colTypes = {boolCol, intCol};
-		PlanBuilder builder = new PlanBuilder(colTypes);
+		PlanBuilder builder = new PlanBuilder(colTypes, false);
 		assertThrows(ConversionError.class, () -> builder.plan(sparkTypes));
 	}
 
@@ -52,7 +52,7 @@ class BinCopyConversionsTests {
 	public void testTypeMismatch() {
 		StructField[] sparkTypes = {boolField, intField, stringField};
 		ColumnDescr[] colTypes = {boolCol, stringCol, stringCol};
-		PlanBuilder builder = new PlanBuilder(colTypes);
+		PlanBuilder builder = new PlanBuilder(colTypes, false);
 		assertThrows(ConversionError.class, () -> builder.plan(sparkTypes));
 	}
 
@@ -82,7 +82,7 @@ class BinCopyConversionsTests {
 	public void testCollector() throws ConversionError, IOException {
 		StructField[] sparkTypes = {boolField, intField, stringField};
 		ColumnDescr[] colTypes = {boolCol, intCol, stringCol};
-		PlanBuilder builder = new PlanBuilder(colTypes);
+		PlanBuilder builder = new PlanBuilder(colTypes, false);
 		builder.plan(sparkTypes);
 
 		steps = builder.getPlan();

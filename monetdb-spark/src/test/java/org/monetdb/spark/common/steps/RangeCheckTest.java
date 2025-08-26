@@ -10,6 +10,7 @@
 
 package org.monetdb.spark.common.steps;
 
+import org.apache.spark.SparkException;
 import org.apache.spark.sql.*;
 import org.junit.jupiter.api.Test;
 import org.monetdb.spark.Config;
@@ -22,8 +23,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import static org.apache.spark.sql.functions.lit;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class RangeCheckTest {
 	@Test
@@ -41,16 +41,20 @@ class RangeCheckTest {
 	}
 
 	public void assertInRange(Object value, String sparkType, String sqlType) throws SQLException, IOException {
-		boolean wasNull = tryToConvert(value, sparkType, sqlType);
+		boolean wasNull = tryToConvert(value, sparkType, sqlType, true);
 		assertFalse(wasNull);
 	}
 
 	public void assertNotInRange(Object value, String sparkType, String sqlType) throws SQLException, IOException {
-		boolean wasNull = tryToConvert(value, sparkType, sqlType);
+		boolean wasNull = tryToConvert(value, sparkType, sqlType, true);
 		assertTrue(wasNull);
+		SparkException exception = assertThrows(SparkException.class, () -> tryToConvert(value, sparkType, sqlType, false));
+		Throwable cause = exception.getCause();
+		assertInstanceOf(RuntimeException.class, cause);
+		assertTrue(cause.toString().contains("out of range"));
 	}
 
-	private static boolean tryToConvert(Object value, String sparkType, String sqlType) throws SQLException, IOException {
+	private static boolean tryToConvert(Object value, String sparkType, String sqlType, boolean allowOverflow) throws SQLException, IOException {
 		try (Connection conn = Config.connectDatabase(); Statement stmt = conn.createStatement()) {
 			stmt.execute("DROP TABLE IF EXISTS foo");
 			String sql = "CREATE TABLE foo(x " + sqlType + ")";
@@ -63,6 +67,7 @@ class RangeCheckTest {
 						.mode(SaveMode.Append)
 						.option("url", Config.databaseUrl())
 						.option("dbtable", "foo")
+						.option("allowoverflow", allowOverflow)
 						.save();
 			}
 

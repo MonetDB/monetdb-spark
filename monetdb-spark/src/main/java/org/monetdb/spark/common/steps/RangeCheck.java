@@ -15,7 +15,12 @@ import org.monetdb.spark.workerside.Collector;
 import org.monetdb.spark.workerside.Step;
 
 public abstract class RangeCheck implements Step {
+	private final boolean allowOverflow;
 	protected Collector collector;
+
+	protected RangeCheck(boolean allowOverflow) {
+		this.allowOverflow = allowOverflow;
+	}
 
 	@Override
 	public void init(Collector collector) {
@@ -28,7 +33,10 @@ public abstract class RangeCheck implements Step {
 			return;
 		if (isInRange())
 			return;
-		collector.scratchNull = true;
+		if (allowOverflow)
+			collector.scratchNull = true;
+		else
+			throw new RuntimeException("Value out of range");
 	}
 
 	protected abstract boolean isInRange();

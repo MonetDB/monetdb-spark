@@ -11,7 +11,6 @@ import org.monetdb.spark.bincopy.PlanBuilder;
 import org.monetdb.spark.common.ColumnDescr;
 import org.monetdb.spark.common.Destination;
 import org.monetdb.spark.workerside.ConversionError;
-import org.monetdb.spark.workerside.Step;
 
 import java.sql.SQLException;
 
@@ -35,16 +34,18 @@ public class MonetWrite implements Write {
 	private final int ncolumns;
 	private final long batchSize;
 	private final PlanBuilder builder;
+	private final boolean allowOverflow;
 
-	public MonetWrite(Destination destination, StructType structType, long batchSize) {
+	public MonetWrite(Destination destination, StructType structType, long batchSize, boolean allowOverflow) {
 		this.dest = destination;
 		this.ncolumns = structType.fields().length;
 		this.batchSize = batchSize;
+		this.allowOverflow = allowOverflow;
 
 		try {
 			// We assume it exists, get the column types
 			ColumnDescr[] columnDescrs = dest.getColumns();
-			builder = new PlanBuilder(columnDescrs);
+			builder = new PlanBuilder(columnDescrs, allowOverflow);
 			builder.plan(structType);
 		} catch (SQLException | ConversionError e) {
 			// Spark doesn't allow us to throw checked exceptions
