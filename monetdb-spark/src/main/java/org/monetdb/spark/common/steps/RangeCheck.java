@@ -11,26 +11,25 @@
 package org.monetdb.spark.common.steps;
 
 import org.apache.spark.sql.catalyst.expressions.SpecializedGetters;
-import org.monetdb.spark.common.Range;
 import org.monetdb.spark.workerside.Collector;
 import org.monetdb.spark.workerside.Step;
 
-public class LongRangeCheck extends RangeCheck {
-	private final long lo;
-	private final long hi;
+public abstract class RangeCheck implements Step {
+	protected Collector collector;
 
-	public LongRangeCheck(long lo, long hi) {
-		this.lo = lo;
-		this.hi = hi;
-	}
-
-	public LongRangeCheck(Range range) {
-		this.lo = range.lo;
-		this.hi = range.hi;
+	@Override
+	public void init(Collector collector) {
+		this.collector = collector;
 	}
 
 	@Override
-	public boolean isInRange() {
-		return lo <= collector.scratchLong && collector.scratchLong <= hi;
+	public void exec(SpecializedGetters row) {
+		if (collector.scratchNull)
+			return;
+		if (isInRange())
+			return;
+		collector.scratchNull = true;
 	}
+
+	protected abstract boolean isInRange();
 }

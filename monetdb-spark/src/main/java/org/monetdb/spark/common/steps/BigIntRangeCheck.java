@@ -20,10 +20,9 @@ import java.math.BigInteger;
 import static java.math.BigInteger.ONE;
 import static java.math.BigInteger.TEN;
 
-public class BigIntRangeCheck implements Step {
+public class BigIntRangeCheck extends RangeCheck {
 	private final BigInteger hi;
 	private final BigInteger lo;
-	private Collector collector;
 
 	public BigIntRangeCheck(int precision) {
 		hi = TEN.pow(precision).subtract(ONE);
@@ -36,22 +35,10 @@ public class BigIntRangeCheck implements Step {
 	}
 
 	@Override
-	public void init(Collector collector) {
-		this.collector = collector;
-	}
-
-	@Override
-	public void exec(SpecializedGetters row) {
-		if (collector.scratchNull)
-			return;
+	protected boolean isInRange() {
 		BigInteger bi = collector.scratchBigInteger;
 		int cmp1 = lo.compareTo(bi);
 		int cmp2 = bi.compareTo(hi);
-		if (cmp1 < 0 && cmp2 < 0)
-			return;
-
-		// Overflow!
-		// TODO add a setting to switch between throwing an error and setting it to NULL.
-		collector.scratchNull = true;
+		return cmp1 <= 0 && cmp2 <= 0;
 	}
 }

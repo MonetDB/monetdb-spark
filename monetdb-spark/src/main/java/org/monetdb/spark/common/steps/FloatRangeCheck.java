@@ -14,24 +14,10 @@ import org.apache.spark.sql.catalyst.expressions.SpecializedGetters;
 import org.monetdb.spark.workerside.Collector;
 import org.monetdb.spark.workerside.Step;
 
-public class FloatRangeCheck implements Step {
-	private Collector collector;
-
+public class FloatRangeCheck extends RangeCheck {
 	@Override
-	public void init(Collector collector) {
-		this.collector = collector;
-	}
-
-	@Override
-	public void exec(SpecializedGetters row) {
-		if (collector.scratchNull)
-			return;
+	public boolean isInRange() {
 		double d = collector.scratchDouble;
-		if (Double.isFinite(d))
-			return;
-
-		// Not representable in MonetDB,
-		// TODO add a setting to switch between throwing an error and setting it to NULL.
-		collector.scratchNull = true;
+		return Double.isFinite(d);
 	}
 }
