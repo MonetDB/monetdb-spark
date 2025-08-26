@@ -22,7 +22,6 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Objects;
 
 public class PlanBuilder {
 	private final HashMap<String, ColumnDescr> schema;
@@ -36,13 +35,6 @@ public class PlanBuilder {
 		}
 		plan = new ArrayList<>();
 		columns = new ArrayList<>();
-	}
-
-	public static Step[] compile(StructField[] sparkTypes, ColumnDescr[] colTypes) throws ConversionError {
-		PlanBuilder builder = new PlanBuilder(colTypes);
-		builder.plan(sparkTypes);
-		return builder.getPlan();
-
 	}
 
 	public void plan(StructType structType) throws ConversionError {
