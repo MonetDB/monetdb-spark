@@ -54,19 +54,12 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- the _2.12 suffix is due to its being built for Scala 2.12, we don't really care -->
+        <!-- the _2.13 suffix is due to its being built for Scala 2.13, we don't really care -->
         <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-sql_2.13</artifactId>
             <version>4.0.0</version>
             <scope>provided</scope>
-        </dependency>
-
-        <!-- used for byte order conversions -->
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>2.19.0</version>
         </dependency>
 
         <dependency>
