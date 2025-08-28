@@ -81,6 +81,13 @@ public class MonetDialectTest {
 		fetchedRow = null;
 	}
 
+	@Test
+	public void testGetVersion() {
+		String version = MonetDialect.getVersion();
+		assertFalse(version.contains("unknown"));
+		assertTrue(version.contains("."));
+	}
+
 	private JDBCType save(DataType sparkType) throws SQLException {
 		StructField structField = DataTypes.createStructField("x", sparkType, false);
 		StructType structType = DataTypes.createStructType(singletonList(structField));

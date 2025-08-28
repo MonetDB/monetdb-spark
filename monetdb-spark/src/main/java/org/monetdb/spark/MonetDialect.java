@@ -3,14 +3,38 @@ package org.monetdb.spark;
 import org.apache.spark.sql.jdbc.JdbcDialect;
 import org.apache.spark.sql.jdbc.JdbcType;
 import org.apache.spark.sql.types.*;
+import org.monetdb.jdbc.MonetDriver;
 import scala.Option;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.JDBCType;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.time.LocalDateTime;
+import java.util.Properties;
 
 public class MonetDialect extends JdbcDialect {
+	private final static String DIALECT_PROPERTIES_RESOURCE = "dialect.properties";
+	private final static String versionString;
+
+	static {
+		String v = "unknown-version";
+		// It's essential that DIALECT_PROPERTIES_RESOURCE is only the file name, not a path
+		try (InputStream stream = MonetDialect.class.getResourceAsStream(DIALECT_PROPERTIES_RESOURCE)) {
+			if (stream != null) {
+				Properties props = new Properties();
+				props.load(stream);
+				v = props.getProperty("version");
+			}
+		} catch (IOException ignored) {}
+		versionString = v;
+	}
+
+	public static String getVersion() {
+		return versionString;
+	}
+
 	@Override
 	public boolean canHandle(String url) {
 		return url.startsWith("jdbc:monetdb:") || url.startsWith("jdbc:monetdbs:");
