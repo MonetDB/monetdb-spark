@@ -1,0 +1,31 @@
+name: make test
+
+on:
+    push:
+    pull_request:
+
+jobs:
+
+    make_test:
+        runs-on: ubuntu-latest
+        services:
+            monetdb:
+                image: monetdb/dev-builds:Mar2025
+                env:
+                    MDB_CREATE_DBS: demo
+                    MDB_DB_ADMIN_PASS: monetdb
+                ports:
+                    - 50000:50000
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: actions/setup-java@v4
+              with:
+                java-version: 17
+                distribution: temurin
+                cache: maven
+
+            - run: make
+
+            - run: make test TESTDB=jdbc:monetdb:///demo
+
