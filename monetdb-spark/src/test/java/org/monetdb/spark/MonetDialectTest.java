@@ -84,6 +84,7 @@ public class MonetDialectTest {
 	@Test
 	public void testGetVersion() {
 		String version = MonetDialect.getVersion();
+		assertNotEquals("unknown", version);
 		assertFalse(version.contains("unknown"));
 		assertTrue(version.contains("."));
 	}

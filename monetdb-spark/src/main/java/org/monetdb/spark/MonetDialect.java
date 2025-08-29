@@ -3,7 +3,6 @@ package org.monetdb.spark;
 import org.apache.spark.sql.jdbc.JdbcDialect;
 import org.apache.spark.sql.jdbc.JdbcType;
 import org.apache.spark.sql.types.*;
-import org.monetdb.jdbc.MonetDriver;
 import scala.Option;
 
 import java.io.IOException;
@@ -16,23 +15,29 @@ import java.util.Properties;
 
 public class MonetDialect extends JdbcDialect {
 	private final static String DIALECT_PROPERTIES_RESOURCE = "dialect.properties";
-	private final static String versionString;
-
-	static {
-		String v = "unknown-version";
-		// It's essential that DIALECT_PROPERTIES_RESOURCE is only the file name, not a path
-		try (InputStream stream = MonetDialect.class.getResourceAsStream(DIALECT_PROPERTIES_RESOURCE)) {
-			if (stream != null) {
-				Properties props = new Properties();
-				props.load(stream);
-				v = props.getProperty("version");
-			}
-		} catch (IOException ignored) {}
-		versionString = v;
-	}
+	private final static String GIT_PROPERTIES_RESOURCE = "git.properties";
 
 	public static String getVersion() {
-		return versionString;
+		Properties props;
+		props = loadProps(DIALECT_PROPERTIES_RESOURCE);
+		return props.getProperty("version", "unknown");
+	}
+
+	public static String getCommitId() {
+		Properties props = loadProps(GIT_PROPERTIES_RESOURCE);
+		return props.getProperty("git.commit.id.describe", "unknown");
+	}
+
+	private static Properties loadProps(String name) {
+		Properties props;
+		try (InputStream stream = MonetDialect.class.getResourceAsStream(name)) {
+			if (stream != null) {
+				props = new Properties();
+				props.load(stream);
+				return props;
+			}
+		} catch (IOException ignored) {}
+		return new Properties();
 	}
 
 	@Override
