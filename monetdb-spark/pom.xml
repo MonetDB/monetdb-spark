@@ -14,6 +14,11 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <scm>
+        <connection>scm:git:https://github.com/MonetDB/monetdb-spark.git</connection>
+        <url>https://github.com/MonetDB/monetdb-spark.git</url>
+    </scm>
+
     <repositories>
         <repository>
             <id>central</id>
@@ -89,6 +94,7 @@
                 </configuration>
             </plugin>
 
+            <!-- needed for MonetDialect#getCommitId -->
             <plugin>
                 <groupId>io.github.git-commit-id</groupId>
                 <artifactId>git-commit-id-maven-plugin</artifactId>
@@ -139,6 +145,17 @@
                             </excludes>
                         </filter>
                     </filters>
+                </configuration>
+            </plugin>
+
+            <!-- see HOWTORELEASE.md -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.5.3</version>
+                <configuration>
+                    <pushChanges>false</pushChanges>
+                    <tagNameFormat>v@{project.version}</tagNameFormat>
                 </configuration>
             </plugin>
         </plugins>

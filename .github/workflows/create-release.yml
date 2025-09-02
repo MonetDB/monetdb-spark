@@ -1,0 +1,39 @@
+name: create release
+
+# needed for 'gh release create'
+permissions:
+  contents: write
+on:
+    push:
+        tags:
+            - "v[0-9]+.[0-9]+.[0-9]+"
+
+jobs:
+
+    create_release:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: actions/setup-java@v4
+              with:
+                java-version: 17
+                distribution: temurin
+                cache: maven
+
+            - name: Verify version numbers and extract release notes
+              run: |
+                ./changelog-tool.py --check="$GITHUB_REF_NAME"
+                ./changelog-tool.py --title="$GITHUB_REF_NAME" >relnotes.title
+                ./changelog-tool.py --body="$GITHUB_REF_NAME" >relnotes.body
+
+            - run: |
+                mkdir release-files
+                make
+                ls monetdb-spark/target
+                cp -v "monetdb-spark/target/monetdb-spark-${GITHUB_REF_NAME#v}-fat.jar" release-files
+
+            - run: gh release create --verify-tag "$GITHUB_REF_NAME" -t "$(cat relnotes.title)" -F relnotes.body    release-files/*
+              env:
+                GH_TOKEN: ${{ github.token }}
+
