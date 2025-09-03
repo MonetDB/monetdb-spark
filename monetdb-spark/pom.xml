@@ -4,7 +4,7 @@
 
     <groupId>org.monetdb</groupId>
     <artifactId>monetdb-spark</artifactId>
-    <version>0.2.0</version>
+    <version>0.2.1-SNAPSHOT</version>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -15,7 +15,7 @@
     <scm>
         <connection>scm:git:https://github.com/MonetDB/monetdb-spark.git</connection>
         <url>https://github.com/MonetDB/monetdb-spark.git</url>
-      <tag>v0.2.0</tag>
+      <tag>HEAD</tag>
   </scm>
 
     <repositories>
