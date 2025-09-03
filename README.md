@@ -136,7 +136,7 @@ JDBC data source. The following configuration options are supported:
 * **allowoverflow**: determines what happens if a value is outside the range
   of the destination column. If true, overflowing values are replaced with
   NULL, if false an exception is thrown and processing is aborted.
-  The default is 'true'.
+  The default is 'false'.
 
 
 ## Building
