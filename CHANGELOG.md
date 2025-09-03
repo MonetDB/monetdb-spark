@@ -1,5 +1,8 @@
 # Unreleased
 
+
+# v0.2.0 - 2025-09-03
+
 First real release. It provides a Dialect that fixes several issues with
 how Spark's generic JDBC data source interacts with MonetDB, and also a
 MonetDB-specific data source that can upload data to MonetDB much faster
