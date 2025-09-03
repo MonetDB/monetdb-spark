@@ -28,33 +28,18 @@ public class PartitioningTests {
 	@BeforeAll
 	public static void createTestData() throws SQLException {
 		String sql = """
-				DROP TABLE IF EXISTS foo;
-				CREATE TABLE foo(id INT, n INT, d DATE, t TIMESTAMP WITH TIME ZONE);
-				INSERT INTO foo
-				SELECT
-					id, n,
-					DATE '2025-02-14' + INTERVAL '1' DAY * n AS d,
-					TIMESTAMPTZ '2025-02-14 12:34:56.789+01:00' + INTERVAL '1' HOUR * n AS t
-				FROM (SELECT value AS id, value % 1000 AS n FROM sys.generate_series(0, 15_000));
-		""";
+						DROP TABLE IF EXISTS foo;
+						CREATE TABLE foo(id INT, n INT, d DATE, t TIMESTAMP WITH TIME ZONE);
+						INSERT INTO foo
+						SELECT
+							id, n,
+							DATE '2025-02-14' + INTERVAL '1' DAY * n AS d,
+							TIMESTAMPTZ '2025-02-14 12:34:56.789+01:00' + INTERVAL '1' HOUR * n AS t
+						FROM (SELECT value AS id, value % 1000 AS n FROM sys.generate_series(0, 15_000));
+				""";
 		try (Connection conn = Config.connectDatabase(); Statement stmt = conn.createStatement()) {
 			stmt.execute(sql);
 		}
-	}
-
-	@Test
-	public void testPartitioningInt() {
-		testPartitioning("n", "0", "1000", 4);
-	}
-
-	@Test
-	public void testPartitioningDate() {
-		testPartitioning("d", "2025-02-14", "2027-11-11", 4);
-	}
-
-	@Test
-	public void testPartitioningTimestamp() {
-		testPartitioning("t", "2025-02-14 12:00:00", "2025-03-28 04:00:00", 4);
 	}
 
 	private static void testPartitioning(String partitionColumn, String lowerBound, String upperBound, int numPartitions) {
@@ -81,5 +66,20 @@ public class PartitioningTests {
 
 		long ndistinct = df.select(col("id")).distinct().count();
 		assertEquals(15_000, ndistinct);
+	}
+
+	@Test
+	public void testPartitioningInt() {
+		testPartitioning("n", "0", "1000", 4);
+	}
+
+	@Test
+	public void testPartitioningDate() {
+		testPartitioning("d", "2025-02-14", "2027-11-11", 4);
+	}
+
+	@Test
+	public void testPartitioningTimestamp() {
+		testPartitioning("t", "2025-02-14 12:00:00", "2025-03-28 04:00:00", 4);
 	}
 }

@@ -11,7 +11,10 @@
 package org.monetdb.spark.common.steps;
 
 import org.apache.spark.SparkException;
-import org.apache.spark.sql.*;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SaveMode;
+import org.apache.spark.sql.SparkSession;
 import org.junit.jupiter.api.Test;
 import org.monetdb.spark.Config;
 
@@ -26,6 +29,34 @@ import static org.apache.spark.sql.functions.lit;
 import static org.junit.jupiter.api.Assertions.*;
 
 class RangeCheckTest {
+	private static boolean tryToConvert(Object value, String sparkType, String sqlType, boolean allowOverflow) throws SQLException, IOException {
+		try (Connection conn = Config.connectDatabase(); Statement stmt = conn.createStatement()) {
+			stmt.execute("DROP TABLE IF EXISTS foo");
+			String sql = "CREATE TABLE foo(x " + sqlType + ")";
+			stmt.execute(sql);
+
+			try (SparkSession spark = Config.sparkSession()) {
+				Dataset<Row> df = spark.range(1).withColumn("x", lit(value).cast(sparkType)).drop("id");
+				df
+						.repartition(1)
+						.write()
+						.format("org.monetdb.spark")
+						.mode(SaveMode.Append)
+						.option("url", Config.databaseUrl())
+						.option("dbtable", "foo")
+						.option("allowoverflow", allowOverflow)
+						.save();
+			}
+
+			try (ResultSet rs = stmt.executeQuery("SELECT x FROM foo")) {
+				assertTrue(rs.next());
+				Object ignored = rs.getObject(1);
+				return rs.wasNull();
+			}
+		}
+
+	}
+
 	@Test
 	public void testIntToDecimal8() throws SQLException, IOException {
 		assertInRange(9999_9999, "INTEGER", "DECIMAL(8,0)");
@@ -52,31 +83,5 @@ class RangeCheckTest {
 		Throwable cause = exception.getCause();
 		assertInstanceOf(RuntimeException.class, cause);
 		assertTrue(cause.toString().contains("out of range"));
-	}
-
-	private static boolean tryToConvert(Object value, String sparkType, String sqlType, boolean allowOverflow) throws SQLException, IOException {
-		try (Connection conn = Config.connectDatabase(); Statement stmt = conn.createStatement()) {
-			stmt.execute("DROP TABLE IF EXISTS foo");
-			String sql = "CREATE TABLE foo(x " + sqlType + ")";
-			stmt.execute(sql);
-
-			try (SparkSession spark = Config.sparkSession()) {
-				Dataset<Row> df = spark.range(1).withColumn("x", lit(value).cast(sparkType)).drop("id");
-				df.repartition(1).write()
-						.format("org.monetdb.spark")
-						.mode(SaveMode.Append)
-						.option("url", Config.databaseUrl())
-						.option("dbtable", "foo")
-						.option("allowoverflow", allowOverflow)
-						.save();
-			}
-
-			try (ResultSet rs = stmt.executeQuery("SELECT x FROM foo")) {
-				assertTrue(rs.next());
-				Object ignored = rs.getObject(1);
-				return rs.wasNull();
-			}
-		}
-
 	}
 }
