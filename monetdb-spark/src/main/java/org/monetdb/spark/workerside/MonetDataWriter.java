@@ -18,12 +18,18 @@ public class MonetDataWriter implements DataWriter<InternalRow> {
 	private final Step[] steps;
 	private final BinCopyUploader uploader;
 	private final long batchSize;
+	private final StateTracker tracker;
+	private final long startTime;
 
 	public MonetDataWriter(Collector collector, Step[] steps, BinCopyUploader uploader, long batchSize) {
 		this.collector = collector;
 		this.steps = steps;
 		this.uploader = uploader;
+		this.tracker = new StateTracker();  // leave it in state null
 		this.batchSize = batchSize;
+		this.startTime = System.currentTimeMillis();
+		collector.setOnStartUpload(() -> tracker.setState(State.Uploading));
+		collector.setOnEndUpload(() -> tracker.setState(State.Server));
 	}
 
 	@Override
@@ -32,11 +38,19 @@ public class MonetDataWriter implements DataWriter<InternalRow> {
 	}
 
 	public void processRow(SpecializedGetters row) throws IOException {
+		if (tracker.getState() == null) {
+			// We should just have set the tracker to State.Initializing in the constructor
+			// but this is the critical path and an ==null check is cheaper than a
+			// !=null&&==Initializing check.
+			tracker.setState(State.Initializing, startTime);
+			tracker.setState(State.Collecting);
+		}
+		tracker.addRow();
 		runSteps(row);
 		collector.endRow();
 		if (collector.getRowCount() >= batchSize) {
 			try {
-				uploader.uploadBatch();
+				upload();
 			} catch (SQLException e) {
 				throw new IOException(e);
 			}
@@ -49,6 +63,17 @@ public class MonetDataWriter implements DataWriter<InternalRow> {
 		}
 	}
 
+	private void upload() throws SQLException {
+		tracker.addUpload();
+		State prev = tracker.setState(State.Server);
+		try {
+			uploader.uploadBatch();
+		} finally {
+			tracker.setState(prev);
+		}
+//		System.err.println(tracker);
+	}
+
 	@Override
 	public void abort() throws IOException {
 		close();
@@ -56,18 +81,24 @@ public class MonetDataWriter implements DataWriter<InternalRow> {
 
 	@Override
 	public WriterCommitMessage commit() throws IOException {
+		State prev = tracker.setState(State.Server); // for upload()
 		try {
-			uploader.uploadBatch();
+			upload();
+			tracker.setState(State.Committing);
 			uploader.commit();
 		} catch (SQLException e) {
 			throw new IOException(e);
+		} finally {
+			tracker.setState(prev);
 		}
 		close();
+//		System.err.println("END " + tracker);
 		return null;
 	}
 
 	@Override
 	public void close() throws IOException {
+		tracker.setState(null);
 		try {
 			uploader.close();
 		} catch (SQLException e) {

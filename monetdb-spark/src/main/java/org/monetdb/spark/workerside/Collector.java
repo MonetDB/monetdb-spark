@@ -30,6 +30,8 @@ public final class Collector implements MonetConnection.UploadHandler {
 	public UTF8String scratchUTF8String;
 	public byte[] scratchByteArray;
 	public final byte[] scratchBuffer = new byte[16];
+	private Runnable onStartUpload;
+	private Runnable onEndUpload;
 
 	public Collector() {
 		buffers = new ArrayList<>();
@@ -76,7 +78,20 @@ public final class Collector implements MonetConnection.UploadHandler {
 	@Override
 	public void handleUpload(MonetConnection.Upload handle, String filename, boolean textMode, long linesToSkip) throws IOException {
 		int idx = Integer.parseInt(filename);
-		OutputStream stream = handle.getStream();
-		buffers.get(idx).writeTo(stream);
+		onStartUpload.run();
+		try {
+			OutputStream stream = handle.getStream();
+			buffers.get(idx).writeTo(stream);
+		} finally {
+			onEndUpload.run();
+		}
+	}
+
+	public void setOnStartUpload(Runnable callback) {
+		onStartUpload = callback;
+	}
+
+	public void setOnEndUpload(Runnable callback) {
+		onEndUpload = callback;
 	}
 }

@@ -71,4 +71,12 @@ public class BinCopyUploader {
 		stmt.close();
 		conn.close();
 	}
+
+	public void setOnStartUpload(Runnable callback) {
+		collector.setOnStartUpload(callback);
+	}
+
+	public void setOnEndUpload(Runnable callback) {
+		collector.setOnEndUpload(callback);
+	}
 }
