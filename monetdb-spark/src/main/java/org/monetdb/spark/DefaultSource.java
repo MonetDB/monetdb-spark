@@ -6,6 +6,7 @@ import org.apache.spark.sql.connector.expressions.Transform;
 import org.apache.spark.sql.types.StructType;
 import org.apache.spark.sql.util.CaseInsensitiveStringMap;
 import org.monetdb.spark.driverside.MonetTable;
+import org.monetdb.spark.driverside.Parms;
 
 import java.util.Map;
 
@@ -35,6 +36,9 @@ public class DefaultSource implements TableProvider {
 		// This function is called in the driver when a read or write is requested.
 		// It doesn't do anything by itself, just bundles up the parameters and returns
 		// them as a new object.
-		return new MonetTable(structType, partitioning, map);
+
+		Parms parms = new Parms(structType, partitioning, map);
+
+		return new MonetTable(parms);
 	}
 }

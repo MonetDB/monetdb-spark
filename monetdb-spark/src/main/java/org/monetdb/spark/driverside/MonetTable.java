@@ -4,16 +4,13 @@
 
 package org.monetdb.spark.driverside;
 
-import org.apache.spark.sql.connector.catalog.Column;
 import org.apache.spark.sql.connector.catalog.SupportsWrite;
 import org.apache.spark.sql.connector.catalog.Table;
 import org.apache.spark.sql.connector.catalog.TableCapability;
 import org.apache.spark.sql.connector.expressions.Transform;
 import org.apache.spark.sql.connector.write.LogicalWriteInfo;
-import org.apache.spark.sql.connector.write.Write;
 import org.apache.spark.sql.connector.write.WriteBuilder;
 import org.apache.spark.sql.types.StructType;
-import org.monetdb.spark.common.Destination;
 
 import java.util.Map;
 import java.util.Set;
@@ -30,46 +27,32 @@ import java.util.Set;
  * {@link org.monetdb.spark.DefaultSource}.
  */
 public class MonetTable implements Table, SupportsWrite {
-	private final String tableName;
-	private final Map<String, String> props;
-	private final StructType structType;
-	private final Transform[] partitioning;
+	private final Parms parms;
 
-	public MonetTable(StructType structType, Transform[] partitioning, Map<String, String> props) {
-		this.props = props;
-		this.structType = structType;
-		this.partitioning = partitioning;
-		this.tableName = getArg("dbtable");
+	public MonetTable(Parms parms) {
+		this.parms = parms;
 	}
 
 	@Override
 	public String name() {
-		return tableName;
+		return parms.getTableName();
 	}
 
 	@Override
 	@Deprecated // it's deprecated but we must implement it
 	public StructType schema() {
-		return structType;
-	}
-
-	@Override
-	public Column[] columns() {
-		// {@link SupportsWrite#columns} is really just {@link Table#columns},
-		// which derives it from the structType.  Not sure if that's the right
-		// thing to do for us.
-		return SupportsWrite.super.columns();
+		return parms.getStructType();
 	}
 
 	@Override
 	public Transform[] partitioning() {
 		// Not sure what this is, just return what was given when we were created
-		return partitioning;
+		return parms.getPartitioning();
 	}
 
 	@Override
 	public Map<String, String> properties() {
-		return props;
+		return parms.getMap();
 	}
 
 	@Override
@@ -77,57 +60,10 @@ public class MonetTable implements Table, SupportsWrite {
 		return Set.of(TableCapability.BATCH_WRITE);
 	}
 
-	String getArg(String key) {
-		String value = props.get(key);
-		if (value == null)
-			throw new IllegalArgumentException("Option '" + key + "' is required");
-		return value;
-	}
-
-	String getArg(String key, String defaultValue) {
-		Object x = props.getOrDefault(key, defaultValue);
-		return x == null ? null : x.toString();
-	}
-
 	@Override // SupportsWrite
-	public WriteBuilder newWriteBuilder(LogicalWriteInfo logicalWriteInfo) {
+	public WriteBuilder newWriteBuilder(LogicalWriteInfo ignored) {
 		// Caller has made up their mind that we're going to write.
 		// Create a new object to celebrate.
-		return new MonetWriteBuilder(logicalWriteInfo);
-	}
-
-	/**
-	 * Helper class that extends {@link MonetTable} with information specific to writing
-	 * <p>
-	 * In the future we can implement some helper interfaces such as
-	 * {@link org.apache.spark.sql.connector.write.SupportsOverwrite} and
-	 * {@link org.apache.spark.sql.connector.write.SupportsTruncate}.
-	 * Right now it only implements {@link #build()} which builds a {@link Write}.
-	 */
-	private class MonetWriteBuilder implements WriteBuilder {
-		public MonetWriteBuilder(LogicalWriteInfo ignored) {
-		}
-
-		@Override
-		public Write build() {
-			// The user has done a lot of method chaining:
-			//     dataframe
-			//         .write
-			//         .mode(...)
-			//         .option(...)
-			//         .option(...)
-			//         .save().
-			// We have now reached the save().
-			String url = getArg("url");
-			String user = getArg("user", null);
-			String password = getArg("password", null);
-			String batchSizeArg = getArg("batchsize", null);
-			long batchSize = batchSizeArg != null ? Long.parseLong(batchSizeArg) : Long.MAX_VALUE;
-			String allowOverflowArg = getArg("allowoverflow", "true");
-			boolean allowOverflow = Boolean.parseBoolean(allowOverflowArg);
-
-			Destination dest = new Destination(url, user, password, tableName);
-			return new MonetWrite(dest, structType, batchSize, allowOverflow);
-		}
+		return new MonetWriteBuilder(parms);
 	}
 }
