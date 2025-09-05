@@ -6,12 +6,16 @@ package org.monetdb.spark.workerside;
 
 import org.apache.spark.sql.catalyst.InternalRow;
 import org.apache.spark.sql.catalyst.expressions.SpecializedGetters;
+import org.apache.spark.sql.connector.metric.CustomTaskMetric;
 import org.apache.spark.sql.connector.write.DataWriter;
 import org.apache.spark.sql.connector.write.WriterCommitMessage;
 import org.monetdb.spark.bincopy.BinCopyUploader;
+import org.monetdb.spark.driverside.MonetWrite;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.stream.Stream;
 
 public class MonetDataWriter implements DataWriter<InternalRow> {
 	private final Collector collector;
@@ -106,4 +110,11 @@ public class MonetDataWriter implements DataWriter<InternalRow> {
 		}
 	}
 
+	@Override
+	public CustomTaskMetric[] currentMetricsValues() {
+		CustomTaskMetric[] superMetrics = DataWriter.super.currentMetricsValues();
+		Stream<CustomTaskMetric> customMetrics = Arrays.stream(MonetWrite.METRICS).map(m -> m.extract(tracker));
+		Stream<CustomTaskMetric> allMetrics = Stream.concat(Arrays.stream(superMetrics), customMetrics);
+		return allMetrics.toArray(CustomTaskMetric[]::new);
+	}
 }

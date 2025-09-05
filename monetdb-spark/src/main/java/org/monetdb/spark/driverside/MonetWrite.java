@@ -4,6 +4,7 @@
 
 package org.monetdb.spark.driverside;
 
+import org.apache.spark.sql.connector.metric.CustomMetric;
 import org.apache.spark.sql.connector.write.BatchWrite;
 import org.apache.spark.sql.connector.write.Write;
 import org.monetdb.spark.bincopy.PlanBuilder;
@@ -12,6 +13,8 @@ import org.monetdb.spark.common.Destination;
 import org.monetdb.spark.workerside.ConversionError;
 
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.stream.Stream;
 
 /**
  * Everything we know about what to write where, and how.
@@ -32,6 +35,8 @@ public class MonetWrite implements Write {
 	private final Parms parms;
 	private final PlanBuilder builder;
 
+	public static final MonetMetric[] METRICS = new MonetMetric[]{new MonetMetric.MillisCollecting(),};
+
 	public MonetWrite(Parms parms) {
 		this.parms = parms;
 
@@ -50,5 +55,15 @@ public class MonetWrite implements Write {
 	@Override
 	public BatchWrite toBatch() {
 		return new MonetBatchWrite(parms, builder.getColumns(), builder.getPlan());
+	}
+
+	@Override
+	public CustomMetric[] supportedCustomMetrics() {
+		CustomMetric[] superMetrics = Write.super.supportedCustomMetrics();
+		CustomMetric[] customMetrics = MonetWrite.METRICS;
+		CustomMetric[] allMetrics = Stream
+				.concat(Arrays.stream(superMetrics), Arrays.stream(customMetrics))
+				.toArray(CustomMetric[]::new);
+		return allMetrics;
 	}
 }
