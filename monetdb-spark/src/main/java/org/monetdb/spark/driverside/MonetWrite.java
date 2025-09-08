@@ -11,6 +11,7 @@ import org.monetdb.spark.bincopy.PlanBuilder;
 import org.monetdb.spark.common.ColumnDescr;
 import org.monetdb.spark.common.Destination;
 import org.monetdb.spark.workerside.ConversionError;
+import org.monetdb.spark.workerside.StateTrackerMetric;
 
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -35,8 +36,6 @@ public class MonetWrite implements Write {
 	private final Parms parms;
 	private final PlanBuilder builder;
 
-	public static final MonetMetric[] METRICS = new MonetMetric[]{new MonetMetric.MillisCollecting(),};
-
 	public MonetWrite(Parms parms) {
 		this.parms = parms;
 
@@ -60,7 +59,7 @@ public class MonetWrite implements Write {
 	@Override
 	public CustomMetric[] supportedCustomMetrics() {
 		CustomMetric[] superMetrics = Write.super.supportedCustomMetrics();
-		CustomMetric[] customMetrics = MonetWrite.METRICS;
+		CustomMetric[] customMetrics = StateTrackerMetric.METRICS;
 		CustomMetric[] allMetrics = Stream
 				.concat(Arrays.stream(superMetrics), Arrays.stream(customMetrics))
 				.toArray(CustomMetric[]::new);

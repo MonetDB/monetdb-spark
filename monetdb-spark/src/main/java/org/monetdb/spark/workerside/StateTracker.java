@@ -11,19 +11,22 @@
 package org.monetdb.spark.workerside;
 
 public class StateTracker {
+	private final String identifier;
 	private final long[] millis;
+	private long total;
 	private long nrows;
 	private long nuploads;
 
 	private State currentState = null;
 	private long currentStateStarted = 0;
 
-	private StateTracker(long[] counters) {
+	private StateTracker(String identifier, long[] counters) {
+		this.identifier = identifier;
 		millis = counters.clone();
 	}
 
-	public StateTracker() {
-		this(new long[State.values().length]);
+	public StateTracker(String identifier) {
+		this(identifier, new long[State.values().length]);
 	}
 
 	public State getState() {
@@ -36,8 +39,11 @@ public class StateTracker {
 
 	public State setState(State newState, long now) {
 		State prevState = currentState;
-		if (prevState != null)
-			millis[prevState.ordinal()] += now - currentStateStarted;
+		if (prevState != null) {
+			long duration = now - currentStateStarted;
+			millis[prevState.ordinal()] += duration;
+			total += duration;
+		}
 		currentState = newState;
 		currentStateStarted = now;
 		return prevState;
@@ -63,18 +69,22 @@ public class StateTracker {
 		return nuploads;
 	}
 
+	public long millisTotal() {
+		return total;
+	}
+
 	@Override
 	public String toString() {
-		long total = 0;
-		long collecting = duration(State.Collecting);
-		total += collecting;
-		long uploading = duration(State.Uploading);
-		total += uploading;
-		long server = duration(State.Server);
-		total += server;
-		long committing = duration(State.Committing);
-		total += committing;
-		return "(uploads=%d rows=%d millisCollecting=%d millisUploading=%d millisServer=%d millisCommitting=%d millisTotal=%d)".formatted(
-				nuploads, nrows, collecting, uploading, server, committing, total);
+		StringBuilder sb = new StringBuilder("StateTracker(");
+		sb.append("id='").append(identifier).append("'");
+		for (var m : StateTrackerMetric.METRICS) {
+			String name = m.name();
+			if (name.startsWith("monet."))
+				name = name.substring(6);
+			long value = m.extract(this);
+			sb.append(", ").append(name).append("=").append(value);
+		}
+		sb.append(")");
+		return sb.toString();
 	}
 }

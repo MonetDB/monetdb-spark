@@ -50,7 +50,7 @@ public class BinCopyDataWriterFactory implements DataWriterFactory, Serializable
 			Collector collector = new Collector();
 			BinCopyUploader uploader = new BinCopyUploader(parms.getDestination(), collector, identifier, columns);
 			collector.registerWithConverters(steps);
-			return new MonetDataWriter(collector, steps, uploader, parms.getBatchSize());
+			return new MonetDataWriter(collector, steps, uploader, identifier, parms.getBatchSize());
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}

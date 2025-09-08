@@ -10,7 +10,6 @@ import org.apache.spark.sql.connector.metric.CustomTaskMetric;
 import org.apache.spark.sql.connector.write.DataWriter;
 import org.apache.spark.sql.connector.write.WriterCommitMessage;
 import org.monetdb.spark.bincopy.BinCopyUploader;
-import org.monetdb.spark.driverside.MonetWrite;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -25,11 +24,11 @@ public class MonetDataWriter implements DataWriter<InternalRow> {
 	private final StateTracker tracker;
 	private final long startTime;
 
-	public MonetDataWriter(Collector collector, Step[] steps, BinCopyUploader uploader, long batchSize) {
+	public MonetDataWriter(Collector collector, Step[] steps, BinCopyUploader uploader, String identifier, long batchSize) {
 		this.collector = collector;
 		this.steps = steps;
 		this.uploader = uploader;
-		this.tracker = new StateTracker();  // leave it in state null
+		this.tracker = new StateTracker(identifier);  // leave it in state null
 		this.batchSize = batchSize;
 		this.startTime = System.currentTimeMillis();
 		collector.setOnStartUpload(() -> tracker.setState(State.Uploading));
@@ -95,13 +94,12 @@ public class MonetDataWriter implements DataWriter<InternalRow> {
 		} finally {
 			tracker.setState(prev);
 		}
-		close();
-//		System.err.println("END " + tracker);
 		return null;
 	}
 
 	@Override
 	public void close() throws IOException {
+//		System.err.println("END     " + tracker);
 		tracker.setState(null);
 		try {
 			uploader.close();
@@ -112,8 +110,11 @@ public class MonetDataWriter implements DataWriter<InternalRow> {
 
 	@Override
 	public CustomTaskMetric[] currentMetricsValues() {
+//		System.err.println("COLLECT " + tracker);
 		CustomTaskMetric[] superMetrics = DataWriter.super.currentMetricsValues();
-		Stream<CustomTaskMetric> customMetrics = Arrays.stream(MonetWrite.METRICS).map(m -> m.extract(tracker));
+		Stream<CustomTaskMetric> customMetrics = Arrays
+				.stream(StateTrackerMetric.METRICS)
+				.map(m -> m.extractMetric(tracker));
 		Stream<CustomTaskMetric> allMetrics = Stream.concat(Arrays.stream(superMetrics), customMetrics);
 		return allMetrics.toArray(CustomTaskMetric[]::new);
 	}
