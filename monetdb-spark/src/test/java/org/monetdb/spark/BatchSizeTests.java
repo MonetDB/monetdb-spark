@@ -11,8 +11,8 @@
 package org.monetdb.spark;
 
 import org.apache.spark.sql.*;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIf;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.io.IOException;
@@ -30,7 +30,6 @@ import java.util.stream.Stream;
 import static org.apache.spark.sql.functions.lit;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 /**
  * Verify batchsize and immediatecommit by enabling the jdbc log and
@@ -45,16 +44,16 @@ public class BatchSizeTests {
 	private long maxStars;
 	private long commitCount;
 
-	@BeforeAll
-	public static void needsJdbc12_1() throws SQLException {
+	public static boolean atLeastJdbc_12_1() throws SQLException {
 		// monetdb-jdbc 12.1 fixes a bug in the logging configuration.
 		Driver driver = DriverManager.getDriver(Config.databaseUrl());
 		int major = driver.getMajorVersion();
 		int minor = driver.getMinorVersion();
-		assumeTrue(major > 12 || (major == 12 && minor >= 1));
+		return major > 12 || (major == 12 && minor >= 1);
 	}
 
 	@Test
+	@EnabledIf(value = "atLeastJdbc_12_1", disabledReason = "needs JDBC 12.1 or newer")
 	public void testNoBatchSize() throws IOException, SQLException {
 		DataFrameWriter<Row> writer = makeWriter();
 		writer.save();
@@ -65,6 +64,7 @@ public class BatchSizeTests {
 	}
 
 	@Test
+	@EnabledIf(value = "atLeastJdbc_12_1", disabledReason = "needs JDBC 12.1 or newer")
 	public void testWithBatchSize() throws SQLException, IOException {
 		DataFrameWriter<Row> writer = makeWriter();
 		writer.option("batchsize", "1000").save();
@@ -75,6 +75,7 @@ public class BatchSizeTests {
 	}
 
 	@Test
+	@EnabledIf(value = "atLeastJdbc_12_1", disabledReason = "needs JDBC 12.1 or newer")
 	public void testImmediateCommit() throws SQLException, IOException {
 		DataFrameWriter<Row> writer = makeWriter();
 		writer.option("batchsize", "1000").option("immediatecommit", "true").save();
