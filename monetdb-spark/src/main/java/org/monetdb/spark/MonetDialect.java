@@ -36,7 +36,8 @@ public class MonetDialect extends JdbcDialect {
 				props.load(stream);
 				return props;
 			}
-		} catch (IOException ignored) {}
+		} catch (IOException ignored) {
+		}
 		return new Properties();
 	}
 

@@ -30,7 +30,9 @@ public final class ColumnDescr implements Serializable {
 		this(name, type, 0, 0, type.name());
 	}
 
-	public String getName() { return name; }
+	public String getName() {
+		return name;
+	}
 
 	public JDBCType getType() {
 		return type;

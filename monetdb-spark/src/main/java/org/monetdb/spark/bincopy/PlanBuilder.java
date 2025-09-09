@@ -32,7 +32,7 @@ public class PlanBuilder {
 	public PlanBuilder(ColumnDescr[] tableColumns, boolean allowOverflow) {
 		this.allowOverflow = allowOverflow;
 		schema = new HashMap<>();
-		for (var col: tableColumns) {
+		for (var col : tableColumns) {
 			schema.put(col.getName(), col);
 		}
 		plan = new ArrayList<>();

@@ -36,7 +36,7 @@ public class BinCopyUploader {
 
 		pw.printf("COPY /* %s */ LITTLE ENDIAN BINARY INTO %s (", identifier, dest.getTable());
 		sep = "";
-		for (String col: columns) {
+		for (String col : columns) {
 			pw.printf("%s\"%s\"", sep, col.replace("\"", "\"\""));
 			sep = ", ";
 		}

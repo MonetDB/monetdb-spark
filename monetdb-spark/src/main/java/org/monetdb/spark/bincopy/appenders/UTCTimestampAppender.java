@@ -12,7 +12,9 @@ package org.monetdb.spark.bincopy.appenders;
 
 import org.apache.spark.sql.catalyst.expressions.SpecializedGetters;
 
-import java.time.*;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 
 public class UTCTimestampAppender extends Appender {
 	public UTCTimestampAppender(int index) {
