@@ -21,13 +21,15 @@ public class MonetDataWriter implements DataWriter<InternalRow> {
 	private final Step[] steps;
 	private final BinCopyUploader uploader;
 	private final long batchSize;
+	private final boolean immediateCommit;
 	private final StateTracker tracker;
 	private final long startTime;
 
-	public MonetDataWriter(Collector collector, Step[] steps, BinCopyUploader uploader, String identifier, long batchSize) {
+	public MonetDataWriter(Collector collector, Step[] steps, BinCopyUploader uploader, boolean immediateCommit, String identifier, long batchSize) {
 		this.collector = collector;
 		this.steps = steps;
 		this.uploader = uploader;
+		this.immediateCommit = immediateCommit;
 		this.tracker = new StateTracker(identifier);  // leave it in state null
 		this.batchSize = batchSize;
 		this.startTime = System.currentTimeMillis();
@@ -35,12 +37,7 @@ public class MonetDataWriter implements DataWriter<InternalRow> {
 		collector.setOnEndUpload(() -> tracker.setState(State.Server));
 	}
 
-	@Override
-	public void write(InternalRow row) throws IOException {
-		this.processRow(row);
-	}
-
-	public void processRow(SpecializedGetters row) throws IOException {
+	public void doWrite(SpecializedGetters row) throws SQLException {
 		if (tracker.getState() == null) {
 			// We should just have set the tracker to State.Initializing in the constructor
 			// but this is the critical path and an ==null check is cheaper than a
@@ -48,25 +45,23 @@ public class MonetDataWriter implements DataWriter<InternalRow> {
 			tracker.setState(State.Initializing, startTime);
 			tracker.setState(State.Collecting);
 		}
-		tracker.addRow();
 		runSteps(row);
 		collector.endRow();
+		tracker.addRow();
 		if (collector.getRowCount() >= batchSize) {
-			try {
-				upload();
-			} catch (SQLException e) {
-				throw new IOException(e);
-			}
+			doUpload();
+			if (immediateCommit)
+				doCommit();
 		}
 	}
 
-	private void runSteps(SpecializedGetters row) throws IOException {
+	private void runSteps(SpecializedGetters row) {
 		for (Step step : steps) {
 			step.exec(row);
 		}
 	}
 
-	private void upload() throws SQLException {
+	private void doUpload() throws SQLException {
 		tracker.addUpload();
 		State prev = tracker.setState(State.Server);
 		try {
@@ -74,7 +69,24 @@ public class MonetDataWriter implements DataWriter<InternalRow> {
 		} finally {
 			tracker.setState(prev);
 		}
-//		System.err.println(tracker);
+	}
+
+	private void doCommit() throws SQLException {
+		State prev = tracker.setState(State.Committing);
+		try {
+			uploader.commit();
+		} finally {
+			tracker.setState(prev);
+		}
+	}
+
+	@Override
+	public void write(InternalRow row) throws IOException {
+		try {
+			this.doWrite(row);
+		} catch (SQLException e) {
+			throw new IOException(e);
+		}
 	}
 
 	@Override
@@ -84,22 +96,17 @@ public class MonetDataWriter implements DataWriter<InternalRow> {
 
 	@Override
 	public WriterCommitMessage commit() throws IOException {
-		State prev = tracker.setState(State.Server); // for upload()
 		try {
-			upload();
-			tracker.setState(State.Committing);
-			uploader.commit();
+			doUpload();
+			doCommit();
 		} catch (SQLException e) {
 			throw new IOException(e);
-		} finally {
-			tracker.setState(prev);
 		}
 		return null;
 	}
 
 	@Override
 	public void close() throws IOException {
-//		System.err.println("END     " + tracker);
 		tracker.setState(null);
 		try {
 			uploader.close();
@@ -110,7 +117,6 @@ public class MonetDataWriter implements DataWriter<InternalRow> {
 
 	@Override
 	public CustomTaskMetric[] currentMetricsValues() {
-//		System.err.println("COLLECT " + tracker);
 		CustomTaskMetric[] superMetrics = DataWriter.super.currentMetricsValues();
 		Stream<CustomTaskMetric> customMetrics = Arrays
 				.stream(StateTrackerMetric.METRICS)

@@ -40,6 +40,19 @@ public class Config {
 		return fileProperties.getProperty(key, System.getProperty(key, defaultValue));
 	}
 
+	public static String databaseUrl(String... queryParts) {
+		String url = databaseUrl();
+		String sep = url.contains("?") ? "&" : "?";
+		StringBuilder urlBuilder = new StringBuilder(url);
+		for (String part : queryParts) {
+			if (part.isEmpty())
+				continue;
+			urlBuilder.append(sep).append(part);
+			sep = "&";
+		}
+		return urlBuilder.toString();
+	}
+
 	public static String databaseUrl() {
 		String db = getProperty(DB_PROPERTY, DB_DEFAULT);
 		if (!db.contains("/") && !db.contains(":"))

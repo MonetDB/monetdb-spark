@@ -138,6 +138,8 @@ JDBC data source. The following configuration options are supported:
   NULL, if false an exception is thrown and processing is aborted.
   The default is 'false'.
 
+* **immediatecommit**: commit immediately after each batch instead of only at
+  the end.
 
 ## Building
 

@@ -67,7 +67,7 @@ public class UploadTests {
 		String identifier = "uploadtest";
 		BinCopyUploader uploader = new BinCopyUploader(dest, collector, identifier, builder.getColumns());
 		long batchSize = Long.MAX_VALUE;
-		MonetDataWriter dataWriter = new MonetDataWriter(collector, steps, uploader, identifier, batchSize);
+		MonetDataWriter dataWriter = new MonetDataWriter(collector, steps, uploader, false, identifier, batchSize);
 
 		// Write data
 		MockRow row1 = new MockRow(TRUE, 1, "one");
@@ -75,9 +75,9 @@ public class UploadTests {
 		MockRow row3 = new MockRow(TRUE, 3, "three");
 		// .processRow is the same as .write but with a more permissive type
 		// so MockRow works.
-		dataWriter.processRow(row1);
-		dataWriter.processRow(row2);
-		dataWriter.processRow(row3);
+		dataWriter.doWrite(row1);
+		dataWriter.doWrite(row2);
+		dataWriter.doWrite(row3);
 		dataWriter.commit();
 		dataWriter.close();
 

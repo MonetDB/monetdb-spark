@@ -26,6 +26,7 @@ public class Parms implements Serializable {
 	private final String user;
 	private final String password;
 	private final long batchSize;
+	private final boolean immediateCommit;
 	private final boolean allowOverflow;
 
 	public Parms(StructType structType, Transform[] partitioning, Map<String, String> parameterMap) {
@@ -39,6 +40,10 @@ public class Parms implements Serializable {
 
 		String allowOverflowArg = argument("allowoverflow", "true");
 		allowOverflow = Boolean.parseBoolean(allowOverflowArg);
+
+		String immediateCommitArg = argument("immediatecommit", "false");
+		immediateCommit = Boolean.parseBoolean(immediateCommitArg);
+
 		url = argument("url");
 		user = argument("user", null);
 		password = argument("password", null);
@@ -95,5 +100,9 @@ public class Parms implements Serializable {
 
 	public boolean isAllowOverflow() {
 		return allowOverflow;
+	}
+
+	public boolean isImmediateCommit() {
+		return immediateCommit;
 	}
 }
