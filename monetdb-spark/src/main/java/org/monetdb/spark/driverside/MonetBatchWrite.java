@@ -9,6 +9,7 @@ import org.apache.spark.sql.connector.write.DataWriterFactory;
 import org.apache.spark.sql.connector.write.PhysicalWriteInfo;
 import org.apache.spark.sql.connector.write.WriterCommitMessage;
 import org.monetdb.spark.bincopy.BinCopyDataWriterFactory;
+import org.monetdb.spark.bincopy.BinCopySql;
 import org.monetdb.spark.workerside.Step;
 
 /**
@@ -23,18 +24,18 @@ import org.monetdb.spark.workerside.Step;
  */
 public class MonetBatchWrite implements BatchWrite {
 	private final Parms parms;
-	private final String[] columnNames;
 	private final Step[] steps;
+	private final BinCopySql sqlstmt;
 
-	public MonetBatchWrite(Parms parms, String[] columnNames, Step[] steps) {
+	public MonetBatchWrite(Parms parms, Step[] steps, BinCopySql sqlstmt) {
 		this.parms = parms;
-		this.columnNames = columnNames;
 		this.steps = steps;
+		this.sqlstmt = sqlstmt;
 	}
 
 	@Override
 	public DataWriterFactory createBatchWriterFactory(PhysicalWriteInfo info) {
-		return new BinCopyDataWriterFactory(parms, columnNames, steps);
+		return new BinCopyDataWriterFactory(parms, steps, sqlstmt);
 	}
 
 	@Override

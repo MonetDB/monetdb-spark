@@ -7,6 +7,7 @@ package org.monetdb.spark.driverside;
 import org.apache.spark.sql.connector.metric.CustomMetric;
 import org.apache.spark.sql.connector.write.BatchWrite;
 import org.apache.spark.sql.connector.write.Write;
+import org.monetdb.spark.bincopy.BinCopySql;
 import org.monetdb.spark.bincopy.PlanBuilder;
 import org.monetdb.spark.common.ColumnDescr;
 import org.monetdb.spark.common.Destination;
@@ -53,7 +54,8 @@ public class MonetWrite implements Write {
 
 	@Override
 	public BatchWrite toBatch() {
-		return new MonetBatchWrite(parms, builder.getColumns(), builder.getPlan());
+		BinCopySql sqlstmt = new BinCopySql(this.parms.getDestination().getTable(), builder.getColumns());
+		return new MonetBatchWrite(parms, builder.getPlan(), sqlstmt);
 	}
 
 	@Override
