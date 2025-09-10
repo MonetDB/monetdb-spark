@@ -22,6 +22,7 @@ import org.monetdb.spark.workerside.Collector;
 import org.monetdb.spark.workerside.MonetDataWriter;
 import org.monetdb.spark.workerside.Step;
 
+import java.io.IOException;
 import java.io.Serial;
 import java.io.Serializable;
 import java.sql.SQLException;
@@ -49,10 +50,10 @@ public class BinCopyDataWriterFactory implements DataWriterFactory, Serializable
 			String identifier = "part" + partitionId + "-task" + taskId;
 			Collector collector = new Collector();
 			sqlstmt.identifier(identifier);
-			BinCopyUploader uploader = new BinCopyUploader(parms.getDestination(), collector, sqlstmt);
+			Uploader uploader = parms.getDumpdir() == null ? new BinCopyUploader(parms.getDestination(), collector, sqlstmt) : new BinCopyFileDump(parms.getDumpdir(), parms.getDumpPrefix(), collector, sqlstmt, partitionId, taskId);
 			collector.registerWithConverters(steps);
 			return new MonetDataWriter(collector, steps, uploader, parms.isImmediateCommit(), identifier, parms.getBatchSize());
-		} catch (SQLException e) {
+		} catch (SQLException | IOException e) {
 			throw new RuntimeException(e);
 		}
 	}

@@ -28,6 +28,9 @@ public class Parms implements Serializable {
 	private final long batchSize;
 	private final boolean immediateCommit;
 	private final boolean allowOverflow;
+	private final String dumpdir;
+	private final String dumpprefix;
+	private final boolean dumponserver;
 
 	public Parms(StructType structType, Transform[] partitioning, Map<String, String> parameterMap) {
 		this.map = parameterMap;
@@ -47,6 +50,18 @@ public class Parms implements Serializable {
 		url = argument("url");
 		user = argument("user", null);
 		password = argument("password", null);
+
+		dumpdir = argument("dumpdir", null);
+		dumpprefix = argument("dumpprefix", dumpdir);
+		String dumponserverArg = argument("dumponserver", "false");
+		dumponserver = Boolean.parseBoolean(dumponserverArg);
+
+		if (dumpdir != null && immediateCommit)
+			throw new RuntimeException("dumpdir cannot be combined with immediatecommit");
+		if (dumpprefix != null && dumpdir == null)
+			throw new RuntimeException("dumpprefix can only be used with dumpdir");
+		if (dumponserver && dumpdir == null)
+			throw new RuntimeException("dumponserver can only be used with dumpdir");
 	}
 
 	public Destination getDestination() {
@@ -104,5 +119,13 @@ public class Parms implements Serializable {
 
 	public boolean isImmediateCommit() {
 		return immediateCommit;
+	}
+
+	public String getDumpdir() {
+		return dumpdir;
+	}
+
+	public String getDumpPrefix() {
+		return dumpprefix;
 	}
 }

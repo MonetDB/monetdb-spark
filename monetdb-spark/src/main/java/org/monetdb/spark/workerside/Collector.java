@@ -81,10 +81,14 @@ public final class Collector implements MonetConnection.UploadHandler {
 		onStartUpload.run();
 		try {
 			OutputStream stream = handle.getStream();
-			buffers.get(idx).writeTo(stream);
+			writeTo(idx, stream);
 		} finally {
 			onEndUpload.run();
 		}
+	}
+
+	public void writeTo(int idx, OutputStream stream) throws IOException {
+		buffers.get(idx).writeTo(stream);
 	}
 
 	public void setOnStartUpload(Runnable callback) {

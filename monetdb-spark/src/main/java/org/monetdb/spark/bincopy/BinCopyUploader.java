@@ -17,7 +17,7 @@ import org.monetdb.spark.workerside.Collector;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-public class BinCopyUploader {
+public class BinCopyUploader implements Uploader {
 	private final Collector collector;
 	private final MonetConnection conn;
 	private final PreparedStatement stmt;
@@ -33,6 +33,7 @@ public class BinCopyUploader {
 		stmt = conn.prepareStatement(sql);
 	}
 
+	@Override
 	public void uploadBatch() throws SQLException {
 		if (collector.getRowCount() == 0)
 			return;
@@ -40,20 +41,24 @@ public class BinCopyUploader {
 		collector.clear();
 	}
 
+	@Override
 	public void commit() throws SQLException {
 		uploadBatch();
 		conn.commit();
 	}
 
+	@Override
 	public void close() throws SQLException {
 		stmt.close();
 		conn.close();
 	}
 
+	@Override
 	public void setOnStartUpload(Runnable callback) {
 		collector.setOnStartUpload(callback);
 	}
 
+	@Override
 	public void setOnEndUpload(Runnable callback) {
 		collector.setOnEndUpload(callback);
 	}

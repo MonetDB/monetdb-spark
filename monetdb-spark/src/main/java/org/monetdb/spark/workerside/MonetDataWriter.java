@@ -9,7 +9,7 @@ import org.apache.spark.sql.catalyst.expressions.SpecializedGetters;
 import org.apache.spark.sql.connector.metric.CustomTaskMetric;
 import org.apache.spark.sql.connector.write.DataWriter;
 import org.apache.spark.sql.connector.write.WriterCommitMessage;
-import org.monetdb.spark.bincopy.BinCopyUploader;
+import org.monetdb.spark.bincopy.Uploader;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -19,13 +19,13 @@ import java.util.stream.Stream;
 public class MonetDataWriter implements DataWriter<InternalRow> {
 	private final Collector collector;
 	private final Step[] steps;
-	private final BinCopyUploader uploader;
+	private final Uploader uploader;
 	private final long batchSize;
 	private final boolean immediateCommit;
 	private final StateTracker tracker;
 	private final long startTime;
 
-	public MonetDataWriter(Collector collector, Step[] steps, BinCopyUploader uploader, boolean immediateCommit, String identifier, long batchSize) {
+	public MonetDataWriter(Collector collector, Step[] steps, Uploader uploader, boolean immediateCommit, String identifier, long batchSize) {
 		this.collector = collector;
 		this.steps = steps;
 		this.uploader = uploader;
@@ -37,7 +37,7 @@ public class MonetDataWriter implements DataWriter<InternalRow> {
 		collector.setOnEndUpload(() -> tracker.setState(State.Server));
 	}
 
-	public void doWrite(SpecializedGetters row) throws SQLException {
+	public void doWrite(SpecializedGetters row) throws SQLException, IOException {
 		if (tracker.getState() == null) {
 			// We should just have set the tracker to State.Initializing in the constructor
 			// but this is the critical path and an ==null check is cheaper than a
@@ -61,7 +61,7 @@ public class MonetDataWriter implements DataWriter<InternalRow> {
 		}
 	}
 
-	private void doUpload() throws SQLException {
+	private void doUpload() throws SQLException, IOException {
 		tracker.addUpload();
 		State prev = tracker.setState(State.Server);
 		try {
@@ -71,7 +71,7 @@ public class MonetDataWriter implements DataWriter<InternalRow> {
 		}
 	}
 
-	private void doCommit() throws SQLException {
+	private void doCommit() throws SQLException, IOException {
 		State prev = tracker.setState(State.Committing);
 		try {
 			uploader.commit();

@@ -13,14 +13,14 @@ package org.monetdb.spark.bincopy;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringWriter;
+import java.util.function.IntFunction;
 
 public class BinCopySql implements Serializable {
-	String quotedTableName;
-	String[] columnNames;
-	String identifier;
-	String prefix = "";
-	String suffix = "";
-	boolean onClient = true;
+	private final String quotedTableName;
+	private final String[] columnNames;
+	private String identifier;
+	private boolean onClient = true;
+	private transient IntFunction<String> nameMapper;
 
 	public BinCopySql(String quotedTableName, String[] columnNames) {
 		this.quotedTableName = quotedTableName;
@@ -32,13 +32,8 @@ public class BinCopySql implements Serializable {
 		return this;
 	}
 
-	public BinCopySql suffix(String suffix) {
-		this.suffix = suffix;
-		return this;
-	}
-
-	public BinCopySql prefix(String prefix) {
-		this.prefix = prefix;
+	public BinCopySql nameMapper(IntFunction<String> f) {
+		nameMapper = f;
 		return this;
 	}
 
@@ -49,6 +44,14 @@ public class BinCopySql implements Serializable {
 
 	public BinCopySql onServer(boolean onServer) {
 		return onClient(!onServer);
+	}
+
+	public int getColumnCount() {
+		return columnNames.length;
+	}
+
+	public String getColumnName(int i) {
+		return columnNames[i];
 	}
 
 	@Override
@@ -67,22 +70,23 @@ public class BinCopySql implements Serializable {
 		}
 		pw.println(")");
 
-		pw.print("FROM ");
-		final String qprefix, qsuffix;
-		if (prefix.contains("\\") || prefix.contains("'") || suffix.contains("\\") || suffix.contains("'")) {
-			qprefix = "R'" + prefix.replace("'", "''");
-			qsuffix = suffix.replace("'", "''") + "'";
-		} else {
-			qprefix = "'" + prefix;
-			qsuffix = suffix + "'";
-		}
-		sep = "";
+		pw.println("FROM");
+		sep = "\t";
 		for (int i = 0; i < columnNames.length; i++) {
-			pw.printf("%s%s%d%s", sep, qprefix, i, qsuffix);
-			sep = ", ";
+			String name = nameMapper != null ? nameMapper.apply(i) : Integer.toString(i);
+			String escaped = escape(name);
+			pw.printf("%s%s", sep, escaped);
+			sep = ",\n\t";
 		} pw.println();
 		pw.println(onClient ? "ON CLIENT" : "ON SERVER");
 
 		return sw.toString();
+	}
+
+	private String escape(String s) {
+		if (s.contains("'") || s.contains("\\"))
+			return "R'" + s.replace("'", "''") + "'";
+		else
+			return "'" + s + "'";
 	}
 }
