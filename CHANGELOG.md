@@ -1,5 +1,20 @@
 # Unreleased
 
+New features
+
+## Dialect
+
+no changes
+
+## Writer
+
+- writing to file
+
+- A new option **immediatecommit** allows you to force a commit after
+  each batch (see **batchsize**).
+
+- The Writer gathers some custom performance metrics.
+  Unfortunately Spark does not show them in the web UI.
 
 # v0.2.0 - 2025-09-03
 
