@@ -32,9 +32,9 @@ public class Config {
 			if (!filePropertiesLoaded) {
 				try {
 					fileProperties.load(new FileReader(PROPERTIES_FILE_NAME));
-					filePropertiesLoaded = true;
 				} catch (IOException ignored) {
 				}
+				filePropertiesLoaded = true;
 			}
 		}
 		return fileProperties.getProperty(key, System.getProperty(key, defaultValue));
