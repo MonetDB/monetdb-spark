@@ -102,4 +102,19 @@ public class UploadTests {
 			assertFalse(rs.next());
 		}
 	}
+
+	@Test
+	public void testBackslashColumn() throws SQLException {
+		conn = Config.connectDatabase();
+		conn.setAutoCommit(true);
+		stmt = conn.createStatement();
+		stmt.execute("DROP TABLE IF EXISTS foo");
+		// the column name has 4 characters: i backslash space i
+		stmt.execute("CREATE TABLE foo (\"i\\ i\" INT)");
+
+		Destination dest = new Destination(Config.databaseUrl(), null, null, "foo");
+		ColumnDescr[] colTypes = dest.getColumns();
+		assertEquals("i\\ i", colTypes[0].name());
+
+	}
 }
