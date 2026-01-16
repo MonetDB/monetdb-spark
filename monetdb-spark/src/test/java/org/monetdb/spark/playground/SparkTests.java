@@ -1,4 +1,4 @@
-package org.monetdb.spark;
+package org.monetdb.spark.playground;
 
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
@@ -9,6 +9,7 @@ import org.apache.spark.unsafe.types.UTF8String;
 import org.junit.jupiter.api.AutoClose;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.monetdb.spark.Config;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -25,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Test Spark itself, to get to know it
  */
-public class TestsToLearnSpark {
+public class SparkTests {
 	@AutoClose
 	Connection conn = null;
 	@AutoClose
