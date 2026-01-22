@@ -10,6 +10,8 @@
 
 package org.monetdb.spark.bincopy;
 
+import org.monetdb.spark.common.CompressionSettings;
+
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringWriter;
@@ -20,6 +22,7 @@ public class BinCopySql implements Serializable {
 	private final String[] columnNames;
 	private String identifier;
 	private boolean onClient = true;
+	private CompressionSettings compression = null;
 	private transient IntFunction<String> nameMapper;
 
 	public BinCopySql(String quotedTableName, String[] columnNames) {
@@ -44,6 +47,11 @@ public class BinCopySql implements Serializable {
 
 	public BinCopySql onServer(boolean onServer) {
 		return onClient(!onServer);
+	}
+
+	public BinCopySql compression(CompressionSettings settings) {
+		this.compression = settings;
+		return this;
 	}
 
 	public int getColumnCount() {
@@ -78,7 +86,11 @@ public class BinCopySql implements Serializable {
 			pw.printf("%s%s", sep, escaped);
 			sep = ",\n\t";
 		} pw.println();
-		pw.println(onClient ? "ON CLIENT" : "ON SERVER");
+		pw.print("ON ");
+		if (compression != null) {
+			pw.print("'" + compression.name() + "' ");
+		}
+		pw.println(onClient ? "CLIENT" : "SERVER");
 
 		return sw.toString();
 	}
