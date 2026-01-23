@@ -33,7 +33,7 @@ public class PlanBuilder {
 		this.allowOverflow = allowOverflow;
 		schema = new HashMap<>();
 		for (var col : tableColumns) {
-			schema.put(col.getName(), col);
+			schema.put(col.name(), col);
 		}
 		plan = new ArrayList<>();
 		columns = new ArrayList<>();
@@ -73,7 +73,7 @@ public class PlanBuilder {
 	 * @param sparkField  Spark field being read from
 	 * @param columnDescr Column being written to
 	 * @return the Steps that must be executed to convert one field.
-	 * @throws ConversionError
+	 * @throws ConversionError on errors
 	 */
 	private Step[] planIntegerLikeTypes(int index, StructField sparkField, ColumnDescr columnDescr) throws ConversionError {
 		DataType sparkType = sparkField.dataType();
@@ -86,7 +86,7 @@ public class PlanBuilder {
 
 		// The scales must match
 		int sparkScale = sparkType instanceof DecimalType dec ? dec.scale() : 0;
-		if (sparkScale != columnDescr.getScale())
+		if (sparkScale != columnDescr.scale())
 			return null;
 
 		Extractor extractor = src.getExtractor(index);
@@ -144,12 +144,14 @@ public class PlanBuilder {
 		final UTF8StringAppender appender;
 
 		DataType sparkType = sparkField.dataType();
-		if (sparkType instanceof StringType || sparkType instanceof VarcharType || sparkType instanceof CharType)
+		// VarcharType and CharType are subclasses of StringType so we don't have to check them
+		// separately
+		if (sparkType instanceof StringType)
 			extractor = new StringExtractor(i);
 		else
 			return null;
 
-		switch (columnDescr.getType()) {
+		switch (columnDescr.type()) {
 			case VARCHAR, CLOB, CHAR -> appender = new UTF8StringAppender(i);
 			default -> {
 				return null;
@@ -161,7 +163,7 @@ public class PlanBuilder {
 
 	private Step[] planFloatTypes(int i, StructField sparkField, ColumnDescr columnDescr) {
 		DataType sparkType = sparkField.dataType();
-		JDBCType colType = columnDescr.getType();
+		JDBCType colType = columnDescr.type();
 
 		Extractor extractor //
 				= sparkType instanceof FloatType ? new FloatExtractor(i) //
@@ -182,7 +184,7 @@ public class PlanBuilder {
 
 	private Step[] planTemporalTypes(int i, StructField sparkField, ColumnDescr columnDescr) {
 		DataType sparkType = sparkField.dataType();
-		JDBCType colType = columnDescr.getType();
+		JDBCType colType = columnDescr.type();
 		final Extractor extractor;
 		final Appender appender;
 
@@ -222,7 +224,7 @@ public class PlanBuilder {
 		else
 			return null;
 
-		switch (columnDescr.getType()) {
+		switch (columnDescr.type()) {
 			case BLOB, VARBINARY -> appender = new BinaryAppender(i);
 			default -> {
 				return null;

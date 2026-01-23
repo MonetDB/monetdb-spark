@@ -116,6 +116,7 @@ public class MonetDialect extends JdbcDialect {
 					type = DataTypes.FloatType; // is this always safe? or can funny precision switch to DoubleType?
 			case TIMESTAMP_WITH_TIMEZONE -> type = DataTypes.TimestampType;
 			case TIMESTAMP -> type = DataTypes.TimestampNTZType;
+			default -> {}
 		}
 
 		if (type == null)
@@ -165,7 +166,6 @@ public class MonetDialect extends JdbcDialect {
 	@Override
 	public long getDayTimeIntervalAsMicros(String daytimeStr) {
 		// comes in as a 3 digit decimal
-		int n = daytimeStr.length();
 		int dot = daytimeStr.length() - 4; // three digits and a '.'
 		String whole = daytimeStr.substring(0, dot);
 		String fraction = daytimeStr.substring(dot + 1);

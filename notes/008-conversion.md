@@ -52,8 +52,7 @@ We still only support uploads where the scale doesn't change.
 
 The extractors leave the unscaled value in `scratchLong`.
 We can then use the integer appenders and range check.
-However, the range check will be something like 9999 instead of
-32767.
+However, the range check will be something like 9999 instead of 32767.
 
 
 ## Huge Decimals

@@ -73,14 +73,14 @@ Why do we need to include the "driver" option? Why can't it find it based on the
 The [Driver Manager] uses the [Service Loader] mechanism to automatically load all
 drivers on the class path.
 
-When I try this in a JUnit test [TestSpark], the "driver" option is indeed not needed,
+When I try this in a JUnit test [SparkTests], the "driver" option is indeed not needed,
 but spark-shell doesn't work without it. Does spark-shell somehow break the service loader?
 
 Pyspark also requires the driver.
 
 [Driver Manager]: https://docs.oracle.com/javase/8/docs/api/java/sql/DriverManager.html
 [Service Loader]: https://docs.oracle.com/javase/8/docs/api/java/util/ServiceLoader.html
-[TestSpark]: ../monetdb-spark/src/test/java/org/monetdb/spark/TestSpark.java
+[SparkTests]: ../monetdb-spark/src/test/java/org/monetdb/spark/playground/SparkTests.java
 
 
 ## Second attempt

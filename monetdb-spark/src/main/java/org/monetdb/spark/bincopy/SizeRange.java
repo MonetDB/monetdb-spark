@@ -43,8 +43,8 @@ public class SizeRange {
 	public final int decimalScale;
 
 	public SizeRange(ColumnDescr columnDescr) {
-		JDBCType jdbcType = columnDescr.getType();
-		int precision = columnDescr.getPrecision();
+		JDBCType jdbcType = columnDescr.type();
+		int precision = columnDescr.precision();
 
 		isBool = jdbcType == JDBCType.BOOLEAN;
 
@@ -65,7 +65,7 @@ public class SizeRange {
 
 		if (jdbcType == JDBCType.DECIMAL || jdbcType == JDBCType.NUMERIC) {
 			decimalPrecision = precision;
-			decimalScale = columnDescr.getScale();
+			decimalScale = columnDescr.scale();
 		} else {
 			decimalPrecision = -1;
 			decimalScale = -1;

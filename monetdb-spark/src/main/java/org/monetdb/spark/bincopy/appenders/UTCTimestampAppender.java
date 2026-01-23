@@ -62,7 +62,7 @@ public class UTCTimestampAppender extends Appender {
 			scratch[i++] = day;
 			scratch[i++] = month;
 			scratch[i++] = (byte) year;
-			scratch[i++] = (byte) (year >> 8);
+			scratch[i] = (byte) (year >> 8);
 		}
 		buffer.write(scratch, 0, 12);
 	}

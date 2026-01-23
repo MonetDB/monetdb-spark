@@ -23,7 +23,6 @@ public class BinCopyUploader implements Uploader {
 	private final PreparedStatement stmt;
 
 	public BinCopyUploader(Destination dest, Collector collector, BinCopySql sqlstmt) throws SQLException {
-		String sep;
 		this.collector = collector;
 		this.conn = dest.connect();
 		conn.setAutoCommit(false);

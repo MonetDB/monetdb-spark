@@ -24,13 +24,12 @@ import org.monetdb.spark.workerside.Step;
 
 import java.io.IOException;
 import java.io.Serial;
-import java.io.Serializable;
 import java.sql.SQLException;
 
 /**
  * Passed from driver to executors, holds everything the executors must know.
  */
-public class BinCopyDataWriterFactory implements DataWriterFactory, Serializable {
+public class BinCopyDataWriterFactory implements DataWriterFactory {
 	@Serial
 	private static final long serialVersionUID = 0L;
 

@@ -5,7 +5,6 @@
 package org.monetdb.spark.driverside;
 
 import org.apache.spark.sql.connector.catalog.SupportsWrite;
-import org.apache.spark.sql.connector.catalog.Table;
 import org.apache.spark.sql.connector.catalog.TableCapability;
 import org.apache.spark.sql.connector.expressions.Transform;
 import org.apache.spark.sql.connector.write.LogicalWriteInfo;
@@ -26,7 +25,7 @@ import java.util.Set;
  * The constructor just takes everything that was originally passed to
  * {@link org.monetdb.spark.DefaultSource}.
  */
-public class MonetTable implements Table, SupportsWrite {
+public class MonetTable implements SupportsWrite {
 	private final Parms parms;
 
 	public MonetTable(Parms parms) {

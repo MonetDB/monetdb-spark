@@ -9,46 +9,14 @@ import java.io.Serializable;
 import java.sql.JDBCType;
 import java.util.Objects;
 
-public final class ColumnDescr implements Serializable {
+public record ColumnDescr(String name, JDBCType type, int precision, int scale, String typeName) implements Serializable {
 	@Serial
 	private static final long serialVersionUID = 0L;
-	private final String name;
-	private final JDBCType type;
-	private final int precision;
-	private final int scale;
-	private final String typeName;
-
-	public ColumnDescr(String name, JDBCType type, int precision, int scale, String typeName) {
-		this.name = name;
-		this.type = type;
-		this.precision = precision;
-		this.scale = scale;
-		this.typeName = typeName;
-	}
 
 	public ColumnDescr(String name, JDBCType type) {
 		this(name, type, 0, 0, type.name());
 	}
 
-	public String getName() {
-		return name;
-	}
-
-	public JDBCType getType() {
-		return type;
-	}
-
-	public int getPrecision() {
-		return precision;
-	}
-
-	public int getScale() {
-		return scale;
-	}
-
-	public String getTypeName() {
-		return typeName;
-	}
 
 	@Override
 	public boolean equals(Object o) {

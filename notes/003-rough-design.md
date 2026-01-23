@@ -41,7 +41,7 @@ parameters. If that succeeds you can start the loader, pass it some
 rows, finish it and tell the Target to commit the transaction.
 
 Namespace *org.monetdb.spark* also contains a *MonetDBSource* class.
-This is not in a subpackage because the end user will refers to it.
+This is not in a subpackage because the end user will refer to it.
 However, the bulk of its implementation should be in a subpackage, for
 example *org.monetdb.spark.writer*. The *MonetDBSource* knows the
 details about the Loaders we provide, we're not going to build an

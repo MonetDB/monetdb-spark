@@ -50,6 +50,7 @@ class RangeCheckTest {
 
 			try (ResultSet rs = stmt.executeQuery("SELECT x FROM foo")) {
 				assertTrue(rs.next());
+				@SuppressWarnings("unused")
 				Object ignored = rs.getObject(1);
 				return rs.wasNull();
 			}

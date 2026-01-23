@@ -53,9 +53,9 @@ public class UploadTests {
 		// Check the column types are as exoected
 		Destination dest = new Destination(Config.databaseUrl(), null, null, "foo");
 		ColumnDescr[] colTypes = dest.getColumns();
-		assertEquals(JDBCType.BOOLEAN, colTypes[0].getType());
-		assertEquals(JDBCType.INTEGER, colTypes[1].getType());
-		assertEquals(JDBCType.VARCHAR, colTypes[2].getType());
+		assertEquals(JDBCType.BOOLEAN, colTypes[0].type());
+		assertEquals(JDBCType.INTEGER, colTypes[1].type());
+		assertEquals(JDBCType.VARCHAR, colTypes[2].type());
 
 		// Create the DataWriter
 		StructField[] sparkTypes = {boolField, intField, stringField};

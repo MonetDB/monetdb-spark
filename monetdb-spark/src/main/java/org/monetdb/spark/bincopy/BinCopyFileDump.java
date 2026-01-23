@@ -40,7 +40,6 @@ public class BinCopyFileDump implements Uploader {
 		this.collector = collector;
 		this.sqlstmt = sqlstmt;
 		String part = "part" + partitionId;
-		String suffix = "tmp" + taskId;
 
 		Path topDir = Paths.get(dumpdir);
 		destDir = topDir.resolve(part);

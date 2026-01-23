@@ -34,8 +34,6 @@ public class DataTypesTests {
 	private Connection conn;
 	@AutoClose
 	private Statement stmt;
-	private String extraInitialization;
-
 
 	@AutoClose
 	private SparkSession spark;
@@ -67,7 +65,6 @@ public class DataTypesTests {
 		spark = Config.sparkSession();
 		nrows = 10;
 		forceType = null;
-		extraInitialization = null;
 	}
 
 	private Dataset<Row> createTestData() {
