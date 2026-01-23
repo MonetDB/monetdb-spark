@@ -55,6 +55,7 @@ public class MonetWrite implements Write {
 	@Override
 	public BatchWrite toBatch() {
 		BinCopySql sqlstmt = new BinCopySql(this.parms.getDestination().getTable(), builder.getColumns());
+		sqlstmt.compression(parms.getCompressionSettings());
 		return new MonetBatchWrite(parms, builder.getPlan(), sqlstmt);
 	}
 

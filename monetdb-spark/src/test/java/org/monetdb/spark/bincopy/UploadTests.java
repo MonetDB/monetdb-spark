@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.monetdb.spark.Config;
 import org.monetdb.spark.MockRow;
 import org.monetdb.spark.common.ColumnDescr;
+import org.monetdb.spark.common.CompressionSettings;
 import org.monetdb.spark.common.Destination;
 import org.monetdb.spark.workerside.Collector;
 import org.monetdb.spark.workerside.ConversionError;
@@ -43,6 +44,15 @@ public class UploadTests {
 
 	@Test
 	public void testUploadingData() throws SQLException, ConversionError, IOException {
+		testUploadingData(null);
+	}
+
+	@Test
+	public void testUploadingCompressedData() throws SQLException, ConversionError, IOException {
+		testUploadingData(new CompressionSettings("lz4"));
+	}
+
+	public void testUploadingData(CompressionSettings compression) throws SQLException, ConversionError, IOException {
 		// Create the table
 		conn = Config.connectDatabase();
 		conn.setAutoCommit(true);
@@ -50,7 +60,7 @@ public class UploadTests {
 		stmt.execute("DROP TABLE IF EXISTS foo");
 		stmt.execute("CREATE TABLE foo(b BOOLEAN, i INTEGER, t TEXT)");
 
-		// Check the column types are as exoected
+		// Check the column types are as expected
 		Destination dest = new Destination(Config.databaseUrl(), null, null, "foo");
 		ColumnDescr[] colTypes = dest.getColumns();
 		assertEquals(JDBCType.BOOLEAN, colTypes[0].type());
@@ -62,10 +72,12 @@ public class UploadTests {
 		PlanBuilder builder = new PlanBuilder(colTypes, false);
 		builder.plan(sparkTypes);
 		Step[] steps = builder.getPlan();
-		Collector collector = new Collector();
+		Collector collector = new Collector(compression);
 		collector.registerWithConverters(steps);
 		String identifier = "uploadtest";
-		BinCopySql sqlstmt = new BinCopySql(dest.getTable(), builder.getColumns()).identifier(identifier);
+		BinCopySql sqlstmt = new BinCopySql(dest.getTable(), builder.getColumns())
+				.identifier(identifier)
+				.compression(compression);
 		BinCopyUploader uploader = new BinCopyUploader(dest, collector, sqlstmt);
 		long batchSize = Long.MAX_VALUE;
 		MonetDataWriter dataWriter = new MonetDataWriter(collector, steps, uploader, false, identifier, batchSize);

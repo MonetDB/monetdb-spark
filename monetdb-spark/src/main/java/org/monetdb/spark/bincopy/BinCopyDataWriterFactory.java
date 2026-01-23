@@ -47,7 +47,7 @@ public class BinCopyDataWriterFactory implements DataWriterFactory {
 	public DataWriter<InternalRow> createWriter(int partitionId, long taskId) {
 		try {
 			String identifier = "part" + partitionId + "-task" + taskId;
-			Collector collector = new Collector();
+			Collector collector = new Collector(parms.getCompressionSettings());
 			sqlstmt.identifier(identifier);
 			if (parms.isDumpOnServer())
 				sqlstmt.onServer(true);

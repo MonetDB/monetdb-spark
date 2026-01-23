@@ -12,6 +12,7 @@ package org.monetdb.spark.driverside;
 
 import org.apache.spark.sql.connector.expressions.Transform;
 import org.apache.spark.sql.types.StructType;
+import org.monetdb.spark.common.CompressionSettings;
 import org.monetdb.spark.common.Destination;
 
 import java.io.Serializable;
@@ -31,6 +32,7 @@ public class Parms implements Serializable {
 	private final String dumpdir;
 	private final String dumpprefix;
 	private final boolean dumponserver;
+	private final CompressionSettings compressionSettings;
 
 	public Parms(StructType structType, Transform[] partitioning, Map<String, String> parameterMap) {
 		this.map = parameterMap;
@@ -55,6 +57,9 @@ public class Parms implements Serializable {
 		dumpprefix = argument("dumpprefix", dumpdir);
 		String dumponserverArg = argument("dumponserver", "false");
 		dumponserver = Boolean.parseBoolean(dumponserverArg);
+
+		String compression = argument("compression", null);
+		compressionSettings = compression != null ? new CompressionSettings(compression): null;
 
 		if (dumpdir != null && immediateCommit)
 			throw new RuntimeException("dumpdir cannot be combined with immediatecommit");
@@ -131,5 +136,9 @@ public class Parms implements Serializable {
 
 	public boolean isDumpOnServer() {
 		return dumponserver;
+	}
+
+	public CompressionSettings getCompressionSettings() {
+		return compressionSettings;
 	}
 }
