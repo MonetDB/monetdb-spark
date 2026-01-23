@@ -12,7 +12,7 @@ jobs:
         runs-on: ubuntu-latest
         services:
             monetdb:
-                image: monetdb/dev-builds:Mar2025
+                image: monetdb/monetdb:Dec2025
                 env:
                     MDB_CREATE_DBS: demo
                     MDB_DB_ADMIN_PASS: monetdb
