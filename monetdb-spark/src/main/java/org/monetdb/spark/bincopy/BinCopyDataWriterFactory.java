@@ -50,7 +50,13 @@ public class BinCopyDataWriterFactory implements DataWriterFactory, Serializable
 			String identifier = "part" + partitionId + "-task" + taskId;
 			Collector collector = new Collector();
 			sqlstmt.identifier(identifier);
-			Uploader uploader = parms.getDumpdir() == null ? new BinCopyUploader(parms.getDestination(), collector, sqlstmt) : new BinCopyFileDump(parms.getDumpdir(), parms.getDumpPrefix(), collector, sqlstmt, partitionId, taskId);
+			if (parms.isDumpOnServer())
+				sqlstmt.onServer(true);
+ 			Uploader uploader;
+ 			if (parms.getDumpdir() == null)
+ 				uploader = new BinCopyUploader(parms.getDestination(), collector, sqlstmt);
+ 			else
+ 				uploader = new BinCopyFileDump(parms.getDumpdir(), parms.getDumpPrefix(), collector, sqlstmt, partitionId, taskId);
 			collector.registerWithConverters(steps);
 			return new MonetDataWriter(collector, steps, uploader, parms.isImmediateCommit(), identifier, parms.getBatchSize());
 		} catch (SQLException | IOException e) {

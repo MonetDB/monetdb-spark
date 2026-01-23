@@ -128,4 +128,8 @@ public class Parms implements Serializable {
 	public String getDumpPrefix() {
 		return dumpprefix;
 	}
+
+	public boolean isDumpOnServer() {
+		return dumponserver;
+	}
 }

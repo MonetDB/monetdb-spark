@@ -147,8 +147,8 @@ class BinCopyFileDumpTest {
 	@Test
 	public void testDumpOnServer() throws IOException {
 		DataFrameWriter<Row> writer = makeWriter();
-		writer.option("dumpdir", destDir.toString()).option("dumpprefix", "").option("dumponserver", "false").save();
+		writer.option("dumpdir", destDir.toString()).option("dumpprefix", "").option("dumponserver", "true").save();
 
-		checkOnClause("CLIENT");
+		checkOnClause("SERVER");
 	}
 }
