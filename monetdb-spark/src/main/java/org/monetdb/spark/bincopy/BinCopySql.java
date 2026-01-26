@@ -22,7 +22,7 @@ public class BinCopySql implements Serializable {
 	private final String[] columnNames;
 	private String identifier;
 	private boolean onClient = true;
-	private CompressionSettings compression = null;
+	private CompressionSettings compression = new CompressionSettings();
 	private transient IntFunction<String> nameMapper;
 
 	public BinCopySql(String quotedTableName, String[] columnNames) {
@@ -87,8 +87,8 @@ public class BinCopySql implements Serializable {
 			sep = ",\n\t";
 		} pw.println();
 		pw.print("ON ");
-		if (compression != null) {
-			pw.print("'" + compression.name() + "' ");
+		if (compression.algo() != null) {
+			pw.print("'" + compression.algo() + "' ");
 		}
 		pw.println(onClient ? "CLIENT" : "SERVER");
 

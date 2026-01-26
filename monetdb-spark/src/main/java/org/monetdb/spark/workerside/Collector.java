@@ -36,7 +36,7 @@ public final class Collector implements MonetConnection.UploadHandler {
 	private Runnable onEndUpload;
 
 	public Collector() {
-		this(null);
+		this(new CompressionSettings());
 	}
 
 	public Collector(CompressionSettings compressionSettings) {
@@ -88,9 +88,7 @@ public final class Collector implements MonetConnection.UploadHandler {
 		onStartUpload.run();
 		try {
 			OutputStream stream = handle.getStream();
-			if (compressionSettings != null) {
-				stream = compressionSettings.wrap(stream);
-			}
+			stream = compressionSettings.wrap(stream);
 			writeTo(idx, stream);
 			stream.close();
 		} finally {

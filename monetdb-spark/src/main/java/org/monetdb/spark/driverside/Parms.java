@@ -58,8 +58,8 @@ public class Parms implements Serializable {
 		String dumponserverArg = argument("dumponserver", "false");
 		dumponserver = Boolean.parseBoolean(dumponserverArg);
 
-		String compression = argument("compression", null);
-		compressionSettings = compression != null ? new CompressionSettings(compression): null;
+		String compression = argument("compression", "none");
+		compressionSettings = new CompressionSettings(compression);
 
 		if (dumpdir != null && immediateCommit)
 			throw new RuntimeException("dumpdir cannot be combined with immediatecommit");

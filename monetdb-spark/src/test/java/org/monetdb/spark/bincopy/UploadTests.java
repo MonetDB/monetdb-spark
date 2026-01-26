@@ -44,7 +44,7 @@ public class UploadTests {
 
 	@Test
 	public void testUploadingData() throws SQLException, ConversionError, IOException {
-		testUploadingData(null);
+		testUploadingData(new CompressionSettings());
 	}
 
 	@Test

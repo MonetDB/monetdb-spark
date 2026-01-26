@@ -12,18 +12,26 @@ import java.io.Serializable;
 
 /**
  * A helper class that can parse strings like "lz4:5" and can wrap
- * InputStreams and Outputstreams in the requested compression algorithm.
+ * Outputstreams in the requested compression algorithm.
  */
 public class CompressionSettings implements Serializable {
+	private final String algo;
 	private final int level;
 	private static LZ4Factory lz4factory;
 	private static XXHashFactory hashfactory;
 
+	public CompressionSettings() {
+		this("none");
+	}
+
 	public CompressionSettings(String desc) {
 		String[] parts = desc.split(":", 2);
-		String algo = parts[0];
-		if (!algo.equals("lz4"))
-			throw new IllegalArgumentException("Unsupported compression algorithm: " + algo);
+		if (parts[0].equals("none"))
+			algo = null;
+		else if (parts[0].equals("lz4"))
+			algo = "lz4";
+		else
+			throw new IllegalArgumentException("Unsupported compression algorithm: " + parts[0]);
 
 		if (parts.length == 1) {
 			level = 0;
@@ -42,11 +50,20 @@ public class CompressionSettings implements Serializable {
 		level = n;
 	}
 
-	public String name() {
-		return "lz4";
+	public String algo() {
+		return algo;
 	}
 
 	public OutputStream wrap(OutputStream inner) {
+		if (algo == null)
+			return inner;
+		else if (algo.equals("lz4"))
+			return wrapLz4(inner);
+		else
+			throw new IllegalArgumentException("Not implemented yet: " + algo);
+	}
+
+	public OutputStream wrapLz4(OutputStream inner) {
 		synchronized (CompressionSettings.class) {
 			if (lz4factory == null) {
 				lz4factory = LZ4Factory.fastestInstance();
