@@ -10,6 +10,11 @@
 
 package org.monetdb.spark.bincopy;
 
+import org.apache.hadoop.shaded.org.xbill.DNS.dnssec.R;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SaveMode;
+import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.Metadata;
 import org.apache.spark.sql.types.StructField;
@@ -31,6 +36,7 @@ import java.sql.*;
 
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
+import static org.apache.spark.sql.functions.col;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
@@ -131,6 +137,39 @@ public class UploadTests {
 		Destination dest = new Destination(Config.databaseUrl(), null, null, "foo");
 		ColumnDescr[] colTypes = dest.getColumns();
 		assertEquals("i\\ i", colTypes[0].name());
+	}
+
+	@Test
+	public void testCompressionSupportCheck() throws SQLException, IOException {
+		String algo = "lz4";
+		boolean serverSupportsLZ4 = Config.supportsCompression(conn, algo);
+		boolean detectedLZ4Support;
+
+		stmt.execute("DROP TABLE IF EXISTS foo");
+		stmt.execute("CREATE TABLE foo(i INT)");
+
+		try (SparkSession spark = Config.sparkSession()) {
+			Dataset<Row> df = spark.range(1_000)
+					.withColumn("i", col("id").mod(100).cast("Integer"))
+					.drop("id");
+
+			try {
+				df.write()
+					.format("org.monetdb.spark")
+					.mode(SaveMode.Append)
+					.option("url", Config.databaseUrl())
+					.option("compression", "lz4")
+					.option("dbtable", "foo")
+					.save();
+				detectedLZ4Support = true;
+			} catch (RuntimeException e) {
+				if (!e.getMessage().contains("Server does not support compression algorithm"))
+					throw e;
+				detectedLZ4Support = false;
+			}
+
+			assertEquals(serverSupportsLZ4, detectedLZ4Support);
+		}
 
 	}
 }
