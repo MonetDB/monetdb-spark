@@ -11,6 +11,8 @@ import org.junit.jupiter.api.AutoClose;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.Parameter;
+import org.junit.jupiter.params.ParameterizedClass;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.monetdb.spark.workerside.ConversionError;
@@ -24,7 +26,12 @@ import java.sql.Statement;
 import static org.apache.spark.sql.functions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+@ParameterizedClass
+@ValueSource(strings = { "none", "lz4" })
 public class DataTypesTests {
+
+	@Parameter
+	private static String compression;
 
 	private final int N = 100_000;
 	private final String TABLE = "foo";
@@ -123,6 +130,7 @@ public class DataTypesTests {
 				.format("org.monetdb.spark")
 				.mode(SaveMode.Append)
 				.option("url", Config.databaseUrl())
+				.option("compression", compression)
 				.option("dbtable", TABLE)
 				.option("numPartitions", 1) // ignored!
 				.save();
@@ -148,6 +156,7 @@ public class DataTypesTests {
 					.format("org.monetdb.spark")
 					.mode(SaveMode.Append)
 					.option("url", Config.databaseUrl())
+					.option("compression", compression)
 					.option("dbtable", OTHER_TABLE)
 					.save();
 			fail("df.write() should have failed because f has the wrong type");
@@ -294,6 +303,7 @@ public class DataTypesTests {
 				.format("org.monetdb.spark")
 				.mode(SaveMode.Append)
 				.option("url", Config.databaseUrl())
+				.option("compression", compression)
 				.option("dbtable", TABLE)
 				.save();
 
@@ -335,6 +345,7 @@ public class DataTypesTests {
 				.format("org.monetdb.spark")
 				.mode(SaveMode.Append)
 				.option("url", Config.databaseUrl())
+				.option("compression", compression)
 				.option("dbtable", "foo")
 				.save();
 	}
