@@ -67,6 +67,13 @@ public class DataTypesTests {
 		forceType = null;
 	}
 
+	private void connect() throws SQLException {
+		if (stmt == null) {
+			conn = Config.connectDatabase();
+			stmt = conn.createStatement();
+		}
+	}
+
 	private Dataset<Row> createTestData() {
 		Dataset<Long> spine = spark.range(N);
 		return spine
@@ -76,10 +83,10 @@ public class DataTypesTests {
 	}
 
 	private void verifyTestData() throws SQLException {
+		connect();
+
 		String sql = "SELECT id, b, f, t FROM " + TABLE + " ORDER BY id";
-		try (Connection conn = Config.connectDatabase(); Statement stmt = conn.createStatement();
-			 ResultSet rs = stmt.executeQuery(sql)
-		) {
+		try (ResultSet rs = stmt.executeQuery(sql)) {
 			int rowNr = 0;
 			for (; rs.next(); rowNr++) {
 				assertEquals(rowNr, rs.getInt("id"));
@@ -126,9 +133,7 @@ public class DataTypesTests {
 
 	@Test
 	public void testSchemaMismatch() throws SQLException {
-		conn = Config.connectDatabase();
-		stmt = conn.createStatement();
-
+		connect();
 
 		// Create dummy table with the wrong schema: f BIGINT instead of DOUBLE
 		stmt.execute("DROP TABLE IF EXISTS " + OTHER_TABLE);
@@ -155,91 +160,91 @@ public class DataTypesTests {
 	}
 
 	@Test
-	public void testBooleanType() {
+	public void testBooleanType() throws SQLException {
 		testRoundTrip(col("id").mod(2).equalTo(0));
 	}
 
 	@Test
-	public void testByteType() {
+	public void testByteType() throws SQLException {
 		forceType = "TINYINT"; // by default, it becomes SMALLINT
 		testRoundTrip("Byte");
 	}
 
 	@Test
-	public void testShortType() {
+	public void testShortType() throws SQLException {
 		forceType = "SMALLINT"; // by default, it becomes INT
 		testRoundTrip("Short");
 	}
 
 	@Test
-	public void testIntegerType() {
+	public void testIntegerType() throws SQLException {
 		forceType = "INTEGER"; // by default, it becomes BIGINT
 		testRoundTrip("Integer");
 	}
 
 	@Test
-	public void testLongType() {
+	public void testLongType() throws SQLException {
 		testRoundTrip("Long");
 	}
 
 	@Test
-	public void testFloatType() {
+	public void testFloatType() throws SQLException {
 		testRoundTrip(col("id").cast("Float").divide(2.0));
 	}
 
 	@Test
-	public void testDoubleType() {
+	public void testDoubleType() throws SQLException {
 		testRoundTrip(col("id").cast("Double").divide(2.0));
 	}
 
 	@ParameterizedTest
 	@ValueSource(ints = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18})
-	public void testDecimal(int precision) {
+	public void testDecimal(int precision) throws SQLException {
 		Column data = decimalTestData(precision);
 		testRoundTrip(data);
 	}
 
 	@ParameterizedTest
 	@ValueSource(ints = {19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38})
-	public void testHugeDecimal(int precision) {
+	public void testHugeDecimal(int precision) throws SQLException {
 		Column data = decimalTestData(precision);
 		testRoundTrip(data);
 	}
 
 	@Test
-	public void testStringType() {
+	public void testStringType() throws SQLException {
 		testRoundTrip(concat(lit("x"), col("id")));
 	}
 
 	@Test
-	public void testBinaryType() {
+	public void testBinaryType() throws SQLException {
 		testRoundTrip(col("id").cast("STRING").cast("BINARY"));
 	}
 
 	@Test
-	public void testDateType() {
+	public void testDateType() throws SQLException {
 		Column base = make_date(lit(2025), lit(8), lit(21));
 		testRoundTrip(base.plus(col("id").cast("INTERVAL DAY")));
 	}
 
 	@Test
-	public void testTimestampNTZType() {
+	public void testTimestampNTZType() throws SQLException {
 		Column base = make_timestamp_ntz(lit(2025), lit(8), lit(21), lit(1), lit(23), lit(45));
 		testRoundTrip(base.plus(col("id").cast("INTERVAL HOUR")));
 	}
 
 	@Test
-	public void testTimestampLTZType() {
+	public void testTimestampLTZType() throws SQLException {
 		Column base = make_timestamp_ltz(lit(2025), lit(8), lit(21), lit(1), lit(23), lit(45));
 		testRoundTrip(base.plus(col("id").cast("INTERVAL HOUR")));
 	}
 
-	private void testRoundTrip(String typeName) {
+	private void testRoundTrip(String typeName) throws SQLException {
 		Column expr = col("id").cast(typeName);
 		testRoundTrip(expr);
 	}
 
-	private void testRoundTrip(Column expr) {
+	private void testRoundTrip(Column expr) throws SQLException {
 		// Create the dataframe
 		Dataset<Row> data = spark.range(-2, nrows - 2).withColumn("x", expr);
 
@@ -253,7 +258,9 @@ public class DataTypesTests {
 		testRoundTrip(data);
 	}
 
-	private void testRoundTrip(Dataset<Row> data) {
+	private void testRoundTrip(Dataset<Row> data) throws SQLException {
+		connect();
+
 		if (Config.verbose()) {
 			data.show();
 			data.printSchema();
@@ -271,7 +278,7 @@ public class DataTypesTests {
 				.databaseTypeDefinition();
 		String qTable = dialect.quoteIdentifier(TABLE);
 		String sql = "DROP TABLE IF EXISTS " + qTable + "; CREATE TABLE " + qTable + "(id " + idSql + ", x " + xSql + ")";
-		try (Connection conn = Config.connectDatabase(); Statement stmt = conn.createStatement()) {
+		try {
 			stmt.execute(sql);
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
@@ -309,8 +316,7 @@ public class DataTypesTests {
 
 	@Test
 	public void testDifferentOrder() throws SQLException {
-		conn = Config.connectDatabase();
-		stmt = conn.createStatement();
+		connect();
 
 		stmt.execute("DROP TABLE IF EXISTS foo");
 		// The types match but the columns are in a different order:
