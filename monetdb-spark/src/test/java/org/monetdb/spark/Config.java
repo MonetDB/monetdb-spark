@@ -4,10 +4,9 @@ import org.apache.spark.sql.SparkSession;
 
 import java.io.FileReader;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.Properties;
+
 
 public class Config {
 	public static final String PROPERTIES_FILE_NAME = "override.properties";
@@ -99,5 +98,30 @@ public class Config {
 		String boolval = getProperty(VERBOSE_PROPERTY, VERBOSE_DEFAULT);
 		boolean b = Boolean.parseBoolean(boolval);
 		return b;
+	}
+
+	public static boolean supportsCompression(Connection conn, String compression) throws SQLException {
+		boolean origAutoCommit = conn.getAutoCommit();
+		Savepoint savePoint = null;
+		try {
+			conn.setAutoCommit(false);
+			savePoint = conn.setSavepoint();
+			String create = "DROP TABLE IF EXISTS foo; CREATE TABLE foo(i INT)";
+			try (Statement stmt = conn.createStatement()) {
+				stmt.execute(create);
+			}
+			String prepare = "COPY BINARY INTO foo FROM 'bla' ON '" + compression + "' CLIENT";
+			try {
+				conn.prepareStatement(prepare).close();
+				return true;
+			} catch (SQLException e) {
+				return false;
+			}
+		} finally {
+			if (savePoint != null) {
+				conn.rollback(savePoint);
+			}
+			conn.setAutoCommit(origAutoCommit);
+		}
 	}
 }

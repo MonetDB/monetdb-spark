@@ -10,10 +10,12 @@ import org.apache.spark.sql.connector.write.Write;
 import org.monetdb.spark.bincopy.BinCopySql;
 import org.monetdb.spark.bincopy.PlanBuilder;
 import org.monetdb.spark.common.ColumnDescr;
+import org.monetdb.spark.common.CompressionSettings;
 import org.monetdb.spark.common.Destination;
 import org.monetdb.spark.workerside.ConversionError;
 import org.monetdb.spark.workerside.StateTrackerMetric;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.stream.Stream;
@@ -36,6 +38,7 @@ import java.util.stream.Stream;
 public class MonetWrite implements Write {
 	private final Parms parms;
 	private final PlanBuilder builder;
+	private final BinCopySql sqlstmt;
 
 	public MonetWrite(Parms parms) {
 		this.parms = parms;
@@ -46,6 +49,24 @@ public class MonetWrite implements Write {
 			ColumnDescr[] columnDescrs = dest.getColumns();
 			builder = new PlanBuilder(columnDescrs, parms.isAllowOverflow());
 			builder.plan(parms.getStructType());
+
+			// Construct the SQL statement we will use, and test if the server accepts it
+			sqlstmt = new BinCopySql(dest.getTable(), builder.getColumns());
+			try (Connection conn = dest.connect()) {
+				// Test it without compression
+				conn.prepareStatement("-- validate COPY statement\n" + sqlstmt.toString()).close();
+
+				CompressionSettings compression = parms.getCompressionSettings();
+				if (compression.algo() != null) {
+					sqlstmt.compression(compression);
+					// Test it with compression enabledl
+					try {
+						conn.prepareStatement("-- does server support COPY statement with compression?\n" + sqlstmt.toString()).close();
+					} catch (SQLException e) {
+						throw new RuntimeException("Server does not support compression algorithm '" + compression.algo() + "'");
+					}
+				}
+			}
 		} catch (SQLException | ConversionError e) {
 			// Spark doesn't allow us to throw checked exceptions
 			throw new RuntimeException(e);
@@ -54,8 +75,6 @@ public class MonetWrite implements Write {
 
 	@Override
 	public BatchWrite toBatch() {
-		BinCopySql sqlstmt = new BinCopySql(this.parms.getDestination().getTable(), builder.getColumns());
-		sqlstmt.compression(parms.getCompressionSettings());
 		return new MonetBatchWrite(parms, builder.getPlan(), sqlstmt);
 	}
 

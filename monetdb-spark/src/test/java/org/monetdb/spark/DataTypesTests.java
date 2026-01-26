@@ -1,5 +1,6 @@
 package org.monetdb.spark;
 
+import org.apache.spark.internal.config.package$;
 import org.apache.spark.sql.*;
 import org.apache.spark.sql.execution.datasources.jdbc.JdbcUtils;
 import org.apache.spark.sql.jdbc.JdbcDialect;
@@ -18,13 +19,11 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.monetdb.spark.workerside.ConversionError;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 
 import static org.apache.spark.sql.functions.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 @ParameterizedClass
 @ValueSource(strings = { "none", "lz4" })
@@ -65,6 +64,15 @@ public class DataTypesTests {
 		Column modulo = power(lit(10), lit(precision - scale)).cast(new DecimalType(precision - scale + 1, 0));
 		Column reduced = round(decs, scale).mod(modulo).cast(new DecimalType(precision, scale));
 		return reduced;
+	}
+
+	@BeforeEach
+	public void checkCompressionSupported() throws SQLException {
+		if (!compression.equals("none")) {
+			connect();
+			boolean compressionSupported = Config.supportsCompression(conn, compression);
+			assumeTrue(compressionSupported, "compression '" + compression + "' not supported");
+		}
 	}
 
 	@BeforeEach

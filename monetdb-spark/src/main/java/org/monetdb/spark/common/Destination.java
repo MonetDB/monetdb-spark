@@ -40,7 +40,7 @@ public class Destination implements Serializable {
 		// works across schemas, how do we have to quote, etc.?
 		// Instead, we just look at the types of SELECT * FROM table.
 		try (Connection conn = connect(); Statement stmt = conn.createStatement()) {
-			String sql = "SELECT * FROM " + table + " WHERE FALSE";
+			String sql = "SELECT * FROM " + table + " WHERE FALSE -- get column types";
 			try (ResultSet rs = stmt.executeQuery(sql)) {
 				ResultSetMetaData md = rs.getMetaData();
 				int n = md.getColumnCount();

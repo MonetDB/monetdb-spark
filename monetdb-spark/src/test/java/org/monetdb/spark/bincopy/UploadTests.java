@@ -14,6 +14,7 @@ import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.Metadata;
 import org.apache.spark.sql.types.StructField;
 import org.junit.jupiter.api.AutoClose;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.monetdb.spark.Config;
 import org.monetdb.spark.MockRow;
@@ -31,6 +32,7 @@ import java.sql.*;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 public class UploadTests {
 	final StructField boolField = new StructField("b", DataTypes.BooleanType, false, Metadata.empty());
@@ -42,6 +44,13 @@ public class UploadTests {
 	@AutoClose
 	Statement stmt;
 
+	@BeforeEach
+	public void setup() throws SQLException {
+		conn = Config.connectDatabase();
+		conn.setAutoCommit(true);
+		stmt = conn.createStatement();
+	}
+
 	@Test
 	public void testUploadingData() throws SQLException, ConversionError, IOException {
 		testUploadingData(new CompressionSettings());
@@ -49,14 +58,12 @@ public class UploadTests {
 
 	@Test
 	public void testUploadingCompressedData() throws SQLException, ConversionError, IOException {
+		assumeTrue(Config.supportsCompression(conn, "lz4"), "LZ4 not supported");
 		testUploadingData(new CompressionSettings("lz4"));
 	}
 
 	public void testUploadingData(CompressionSettings compression) throws SQLException, ConversionError, IOException {
 		// Create the table
-		conn = Config.connectDatabase();
-		conn.setAutoCommit(true);
-		stmt = conn.createStatement();
 		stmt.execute("DROP TABLE IF EXISTS foo");
 		stmt.execute("CREATE TABLE foo(b BOOLEAN, i INTEGER, t TEXT)");
 
@@ -117,9 +124,6 @@ public class UploadTests {
 
 	@Test
 	public void testBackslashColumn() throws SQLException {
-		conn = Config.connectDatabase();
-		conn.setAutoCommit(true);
-		stmt = conn.createStatement();
 		stmt.execute("DROP TABLE IF EXISTS foo");
 		// the column name has 4 characters: i backslash space i
 		stmt.execute("CREATE TABLE foo (\"i\\ i\" INT)");
