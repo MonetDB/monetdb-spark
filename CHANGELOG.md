@@ -8,13 +8,25 @@ no changes
 
 ## Writer
 
-- writing to file
+- The **compression** option allows on-the-fly compression of the uploaded data,
+  which can be much faster if the network is the bottleneck.
+
+- The options **dumpdir**, **dumpprefix** and **dumponserver** allow
+  writing the data to file instead of directly to the server.
+  Still needs to connect to the server to determine the exact column types.
 
 - A new option **immediatecommit** allows you to force a commit after
   each batch (see **batchsize**).
 
-- The Writer gathers some custom performance metrics.
+- The Writer gathers some custom performance metrics:
+  *monet.uploadCount*, *monet.rowCount*, *monet.millisInitializing*,
+  *monet.millisCollecting*, *monet.millisUploading*, *monet.millisServer*,
+  *monet.millisCommitting* and *monet.millisTotal*.
+  Sometimes *monet.millisCollecting* is not present because it happens
+  at the end and Spark tends not to record the final few metrics.
+
   Unfortunately Spark does not show them in the web UI.
+
 
 # v0.2.0 - 2025-09-03
 

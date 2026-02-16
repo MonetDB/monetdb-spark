@@ -35,6 +35,10 @@ Pyspark Tutorial: Getting Started with Pyspark<br>
 https://www.datacamp.com/tutorial/pyspark-tutorial-getting-started-with-pyspark
 Also need to know more about how to do basic things with Spark.
 
+There used to be a SQL Server connector that tried to solve basically
+the same problem: faster writes.  Let's check how they did it:
+https://github.com/microsoft/sql-spark-connector
+
 
 ## Running a cluster
 

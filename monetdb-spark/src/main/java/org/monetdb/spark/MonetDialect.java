@@ -53,7 +53,7 @@ public class MonetDialect extends JdbcDialect {
 		if (dt instanceof BooleanType) {
 			type = new JdbcType("BOOLEAN", Types.BOOLEAN);
 		} else if (dt instanceof ByteType) {
-			// map into larger type because MonetDB uses the most negative to repreent NULL
+			// map into larger type because MonetDB uses the most negative to represent NULL
 			type = new JdbcType("SMALLINT", Types.SMALLINT);
 		} else if (dt instanceof ShortType) {
 			// map into larger type

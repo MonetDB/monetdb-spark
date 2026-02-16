@@ -50,7 +50,7 @@ public class MonetWrite implements Write {
 			builder = new PlanBuilder(columnDescrs, parms.isAllowOverflow());
 			builder.plan(parms.getStructType());
 
-			// Construct the SQL statement we will use, and test if the server accepts it
+			// Construct the COPY statement we will use, and test if the server accepts it
 			sqlstmt = new BinCopySql(dest.getTable(), builder.getColumns());
 			try (Connection conn = dest.connect()) {
 				// Test it without compression

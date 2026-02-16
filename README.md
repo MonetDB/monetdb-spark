@@ -25,7 +25,7 @@ It should work with monetdb-jdbc version 3.2 and later but has only been
 tested with 12.0. For example,
 
 ```shell
-» pyspark --jars $HOME/jars/monetdb-jdbc-12.0.jar,$HOME/jars/monetdb-spark-0.1.1-fat.jar
+» pyspark --jars $HOME/jars/monetdb-jdbc-12.2.jar,$HOME/jars/monetdb-spark-0.3.0-fat.jar
 ```
 
 The dialect is picked up automatically when the JDBC Data Source is used
@@ -155,6 +155,12 @@ JDBC data source. The following configuration options are supported:
 
 * **dumponserver**: use `ON SERVER` in `copy.sql` rather than `ON CLIENT`.
   Default 'false'.
+
+* **compression**: Compress data while uploading. Supported values:
+  'none', 'lz4' or 'lz4:N' where N is the compression level. Level 2 is the default.
+  Requires MonetDB Dec2025 (11.55.*) or higher. Note that the server side
+  is experimental and may be removed in later versions.
+
 
 ## Building
 
