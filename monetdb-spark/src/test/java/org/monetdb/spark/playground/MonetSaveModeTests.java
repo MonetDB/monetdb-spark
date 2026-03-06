@@ -15,13 +15,6 @@ public class MonetSaveModeTests extends AbstractSaveModeTests {
 	@Test
 	@Disabled("mode doesn't work yet")
 	@Override
-	public void testAppendWhenNotPresent() throws SQLException {
-		super.testAppendWhenNotPresent();
-	}
-
-	@Test
-	@Disabled("mode doesn't work yet")
-	@Override
 	public void testOverwriteWhenPresent() throws SQLException {
 		super.testOverwriteWhenPresent();
 	}
