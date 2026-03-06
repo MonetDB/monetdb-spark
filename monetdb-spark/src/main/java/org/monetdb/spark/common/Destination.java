@@ -4,7 +4,12 @@
 
 package org.monetdb.spark.common;
 
+import org.apache.spark.sql.execution.datasources.jdbc.JdbcUtils;
+import org.apache.spark.sql.jdbc.JdbcDialect;
+import org.apache.spark.sql.types.StructField;
+import org.apache.spark.sql.types.StructType;
 import org.monetdb.jdbc.MonetConnection;
+import org.monetdb.spark.MonetDialect;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -36,10 +41,16 @@ public class Destination implements Serializable {
 	}
 
 	public ColumnDescr[] getColumns() throws SQLException {
+        try (Connection conn = connect()) {
+			return getColumns(conn);
+		}
+	}
+
+	public ColumnDescr[] getColumns(Connection conn) throws SQLException {
 		// Connection databasemetadata is too tricky, it allows patterns,
-		// works across schemas, how do we have to quote, etc.?
+		// works across schemas, how do we quote, etc.?
 		// Instead, we just look at the types of SELECT * FROM table.
-		try (Connection conn = connect(); Statement stmt = conn.createStatement()) {
+		try (Statement stmt = conn.createStatement()) {
 			String sql = "SELECT * FROM " + table + " WHERE FALSE -- get column types";
 			try (ResultSet rs = stmt.executeQuery(sql)) {
 				ResultSetMetaData md = rs.getMetaData();
@@ -56,6 +67,37 @@ public class Destination implements Serializable {
 				return ret;
 			}
 		}
+	}
+
+	public void createTable(StructType schema) throws SQLException {
+		try (Connection conn = connect()) {
+			createTable(conn, schema);
+		}
+	}
+
+	public void createTable(Connection conn, StructType schema) throws SQLException {
+		String sql = tableDefinition(schema);
+		try (Statement stmt = conn.createStatement()) {
+			stmt.execute(sql);
+		}
+	}
+
+	public String tableDefinition(StructType schema) {
+		JdbcDialect dialect = new MonetDialect();
+		StructField[] fields = schema.fields();
+		String comma = "";
+		StringBuilder sb = new StringBuilder("CREATE TABLE " + getTable() + "(");
+		for (StructField field: fields) {
+			sb.append("\n    ");
+			sb.append(comma);
+			comma = ",";
+			sb.append(dialect.quoteIdentifier(field.name()));
+			sb.append(" ");
+			sb.append(JdbcUtils.getJdbcType(field.dataType(), dialect).databaseTypeDefinition());
+		}
+		sb.append("\n)");
+		String sql = sb.toString();
+		return sql;
 	}
 
 	public String getUrl() {

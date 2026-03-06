@@ -7,11 +7,13 @@ package org.monetdb.spark.driverside;
 import org.apache.spark.sql.connector.metric.CustomMetric;
 import org.apache.spark.sql.connector.write.BatchWrite;
 import org.apache.spark.sql.connector.write.Write;
+import org.apache.spark.sql.types.StructType;
 import org.monetdb.spark.bincopy.BinCopySql;
 import org.monetdb.spark.bincopy.PlanBuilder;
 import org.monetdb.spark.common.ColumnDescr;
 import org.monetdb.spark.common.CompressionSettings;
 import org.monetdb.spark.common.Destination;
+import org.monetdb.spark.util.HoldSavepoint;
 import org.monetdb.spark.workerside.ConversionError;
 import org.monetdb.spark.workerside.StateTrackerMetric;
 
@@ -43,35 +45,53 @@ public class MonetWrite implements Write {
 	public MonetWrite(Parms parms) {
 		this.parms = parms;
 
-		try {
-			// We assume it exists, get the column types
-			Destination dest = parms.getDestination();
-			ColumnDescr[] columnDescrs = dest.getColumns();
+		Destination dest = parms.getDestination();
+		try (Connection conn = dest.connect()) {
+			// Create or replace the table if necessary, and get the JDBC types of the columns
+			ColumnDescr[] columnDescrs = findOrCreateTable(conn, parms, dest);
+
+			// Build the conversion plan based on the schema we have and the column types
+			// in the database
+			StructType schema = parms.getStructType();
 			builder = new PlanBuilder(columnDescrs, parms.isAllowOverflow());
-			builder.plan(parms.getStructType());
+			builder.plan(schema);
 
 			// Construct the COPY statement we will use, and test if the server accepts it
 			sqlstmt = new BinCopySql(dest.getTable(), builder.getColumns());
-			try (Connection conn = dest.connect()) {
-				// Test it without compression
-				conn.prepareStatement("-- validate COPY statement\n" + sqlstmt.toString()).close();
+            // Test it without compression
+            conn.prepareStatement("-- validate COPY statement\n" + sqlstmt.toString()).close();
 
-				CompressionSettings compression = parms.getCompressionSettings();
-				if (compression.algo() != null) {
-					sqlstmt.compression(compression);
-					// Test it with compression enabledl
-					try {
-						conn.prepareStatement("-- does server support COPY statement with compression?\n" + sqlstmt.toString()).close();
-					} catch (SQLException e) {
-						throw new RuntimeException("Server does not support compression algorithm '" + compression.algo() + "'");
-					}
-				}
-			}
-		} catch (SQLException | ConversionError e) {
+            CompressionSettings compression = parms.getCompressionSettings();
+            if (compression.algo() != null) {
+                sqlstmt.compression(compression);
+                // Test it with compression enabledl
+                try {
+                    conn.prepareStatement("-- does server support COPY statement with compression?\n" + sqlstmt.toString()).close();
+                } catch (SQLException e) {
+                    throw new RuntimeException("Server does not support compression algorithm '" + compression.algo() + "'");
+                }
+            }
+        } catch (SQLException | ConversionError e) {
 			// Spark doesn't allow us to throw checked exceptions
 			throw new RuntimeException(e);
 		}
 	}
+
+	private static ColumnDescr[] findOrCreateTable(Connection conn, Parms parms, Destination dest) throws SQLException {
+		try (HoldSavepoint sp = new HoldSavepoint(conn)){
+			return dest.getColumns(conn);
+		} catch (SQLException e) {
+			// If the table does not exist we'll handle it below.
+			// All other errors must be rethrown
+			if (!e.getSQLState().equals("42S02")) {
+				throw e;
+			}
+		}
+
+        // Table doesn't exist, create it
+        dest.createTable(conn, parms.getStructType());
+        return dest.getColumns(conn);
+    }
 
 	@Override
 	public BatchWrite toBatch() {
