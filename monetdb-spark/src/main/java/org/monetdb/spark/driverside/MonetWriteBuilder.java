@@ -10,6 +10,7 @@
 
 package org.monetdb.spark.driverside;
 
+import org.apache.spark.sql.connector.write.SupportsTruncate;
 import org.apache.spark.sql.connector.write.Write;
 import org.apache.spark.sql.connector.write.WriteBuilder;
 
@@ -21,11 +22,18 @@ import org.apache.spark.sql.connector.write.WriteBuilder;
  * {@link org.apache.spark.sql.connector.write.SupportsTruncate}.
  * Right now it only implements {@link #build()} which builds a {@link Write}.
  */
-class MonetWriteBuilder implements WriteBuilder {
+class MonetWriteBuilder implements /* WriteBuilder, */ SupportsTruncate {
 	private final Parms parms;
+	private boolean dropExisting = false;
 
 	public MonetWriteBuilder(Parms parms) {
 		this.parms = parms;
+	}
+
+	@Override
+	public WriteBuilder truncate() {
+		dropExisting = true;
+		return this;
 	}
 
 	@Override
@@ -38,6 +46,7 @@ class MonetWriteBuilder implements WriteBuilder {
 		//         .option(...)
 		//         .save().
 		// We have now reached the save().
-		return new MonetWrite(parms);
+		return new MonetWrite(parms, dropExisting);
 	}
+
 }

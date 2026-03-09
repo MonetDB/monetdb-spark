@@ -56,7 +56,10 @@ public class MonetTable implements SupportsWrite {
 
 	@Override
 	public Set<TableCapability> capabilities() {
-		return Set.of(TableCapability.BATCH_WRITE);
+		return Set.of(
+				TableCapability.BATCH_WRITE,
+				TableCapability.TRUNCATE
+		);
 	}
 
 	@Override // SupportsWrite

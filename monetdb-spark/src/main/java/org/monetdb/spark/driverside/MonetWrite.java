@@ -27,10 +27,6 @@ import java.util.stream.Stream;
  * <p>
  * Constructed in the driver when save() is finally called when writing a dataframe.
  * <p>
- * When we add support for truncate and overwrite (creating a new table), we will
- * do it here. For now, we just check if the dataframe type is suitable
- * to be converted to the column types of the existing table.
- * <p>
  * If we want to support more than one way of uploading, for example COPY INTO
  * in addition to COPY BINARY INTO, this is where we'd decide what to use.
  * <p>
@@ -42,13 +38,13 @@ public class MonetWrite implements Write {
 	private final PlanBuilder builder;
 	private final BinCopySql sqlstmt;
 
-	public MonetWrite(Parms parms) {
+	public MonetWrite(Parms parms, boolean dropExisting) {
 		this.parms = parms;
 
 		Destination dest = parms.getDestination();
 		try (Connection conn = dest.connect()) {
 			// Create or replace the table if necessary, and get the JDBC types of the columns
-			ColumnDescr[] columnDescrs = findOrCreateTable(conn, parms, dest);
+			ColumnDescr[] columnDescrs = findOrCreateTable(conn, parms, dropExisting);
 
 			// Build the conversion plan based on the schema we have and the column types
 			// in the database
@@ -77,8 +73,9 @@ public class MonetWrite implements Write {
 		}
 	}
 
-	private static ColumnDescr[] findOrCreateTable(Connection conn, Parms parms, Destination dest) throws SQLException {
-		try (WithSavepoint sp = new WithSavepoint(conn)){
+	private static ColumnDescr[] findOrCreateTable(Connection conn, Parms parms, boolean dropExisting) throws SQLException {
+		Destination dest = parms.getDestination();
+		try (WithSavepoint sp = new WithSavepoint(conn)) {
 			return dest.getColumns(conn);
 		} catch (SQLException e) {
 			// If the table does not exist we'll handle it below.

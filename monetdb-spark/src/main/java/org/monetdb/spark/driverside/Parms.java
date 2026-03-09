@@ -33,6 +33,8 @@ public class Parms implements Serializable {
 	private final String dumpprefix;
 	private final boolean dumponserver;
 	private final CompressionSettings compressionSettings;
+	private final boolean truncate;
+	private final boolean cascadeTruncate;
 
 	public Parms(StructType structType, Transform[] partitioning, Map<String, String> parameterMap) {
 		this.map = parameterMap;
@@ -67,6 +69,12 @@ public class Parms implements Serializable {
 			throw new RuntimeException("dumpprefix can only be used with dumpdir");
 		if (dumponserver && dumpdir == null)
 			throw new RuntimeException("dumponserver can only be used with dumpdir");
+
+		String truncateArg = argument("truncate", "false");
+		truncate = Boolean.parseBoolean(truncateArg);
+
+		String cascadeTruncateArg = argument("cascadeTruncate", "false");
+		cascadeTruncate = Boolean.parseBoolean(cascadeTruncateArg);
 	}
 
 	public Destination getDestination() {
@@ -141,4 +149,13 @@ public class Parms implements Serializable {
 	public CompressionSettings getCompressionSettings() {
 		return compressionSettings;
 	}
+
+	public boolean isTruncate() {
+		return truncate;
+	}
+
+	public boolean isCascadeTruncate() {
+		return cascadeTruncate;
+	}
+
 }
