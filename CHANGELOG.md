@@ -4,7 +4,7 @@ New features
 
 ## Dialect
 
-no changes
+- Added TRUNCATE handling to Dialect.
 
 ## Writer
 

@@ -4,6 +4,7 @@ import org.apache.spark.sql.jdbc.JdbcDialect;
 import org.apache.spark.sql.jdbc.JdbcType;
 import org.apache.spark.sql.types.*;
 import scala.Option;
+import scala.jdk.OptionConverters;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -175,5 +176,21 @@ public class MonetDialect extends JdbcDialect {
 		// Careful, wholeSeconds may be negative
 		long sign1000 = wholeSeconds < 0 ? -1000L : 1000L;
 		return 1000_000L * wholeSeconds + sign1000 * fractionMillis;
+	}
+
+	@Override
+	public String getTruncateQuery(String table, Option<Object> cascade) {
+		// 'cascade' is of type Option<Object> here but we know it's an optional Boolean
+		String s = "TRUNCATE " + table;
+		if (cascade.isDefined()) {
+			Boolean b = (Boolean) cascade.get();
+			s += b ? " CASCADE" : " RESTRICT";
+		}
+		return s;
+	}
+
+	@Override
+	public Option<Object> isCascadingTruncateTable() {
+		return Option.apply(false);
 	}
 }
