@@ -6,10 +6,10 @@ import org.apache.spark.sql.SaveMode;
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.types.Decimal;
 import org.apache.spark.unsafe.types.UTF8String;
-import org.junit.jupiter.api.AutoClose;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.monetdb.spark.Config;
+import org.monetdb.spark.util.MyAutoClose;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -27,11 +27,11 @@ import static org.junit.jupiter.api.Assertions.*;
  * Test Spark itself, to get to know it
  */
 public class SparkTests {
-	@AutoClose
+	@MyAutoClose
 	Connection conn = null;
-	@AutoClose
+	@MyAutoClose
 	Statement stmt = null;
-	@AutoClose
+	@MyAutoClose
 	SparkSession spark = null;
 
 	@BeforeAll

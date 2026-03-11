@@ -8,7 +8,6 @@ import org.apache.spark.sql.jdbc.JdbcDialects;
 import org.apache.spark.sql.types.DataType;
 import org.apache.spark.sql.types.DecimalType;
 import org.apache.spark.sql.types.StructField;
-import org.junit.jupiter.api.AutoClose;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,6 +15,7 @@ import org.junit.jupiter.params.Parameter;
 import org.junit.jupiter.params.ParameterizedClass;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.monetdb.spark.util.MyAutoClose;
 import org.monetdb.spark.workerside.ConversionError;
 
 import java.io.IOException;
@@ -36,12 +36,12 @@ public class DataTypesTests {
 	private final String TABLE = "foo";
 	private final String OTHER_TABLE = "bar";
 
-	@AutoClose
+	@MyAutoClose
 	private Connection conn;
-	@AutoClose
+	@MyAutoClose
 	private Statement stmt;
 
-	@AutoClose
+	@MyAutoClose
 	private SparkSession spark;
 	private int nrows;
 	private String forceType;

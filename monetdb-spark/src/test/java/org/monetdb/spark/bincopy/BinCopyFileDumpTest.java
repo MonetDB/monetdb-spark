@@ -11,12 +11,12 @@
 package org.monetdb.spark.bincopy;
 
 import org.apache.spark.sql.*;
-import org.junit.jupiter.api.AutoClose;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.monetdb.jdbc.MonetConnection;
 import org.monetdb.spark.Config;
+import org.monetdb.spark.util.MyAutoClose;
 import org.monetdb.util.FileTransferHandler;
 
 import java.io.IOException;
@@ -38,9 +38,9 @@ import static org.junit.jupiter.api.Assertions.*;
 class BinCopyFileDumpTest {
 	private static Path destDir;
 	private final int NROWS = 100;
-	@AutoClose
+	@MyAutoClose
 	MonetConnection conn;
-	@AutoClose
+	@MyAutoClose
 	Statement stmt;
 
 	@BeforeEach

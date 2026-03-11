@@ -198,6 +198,7 @@ public class MonetDialectTest {
 	public void testSaveShortType() throws SQLException {
 		JDBCType sqlType = save(DataTypes.ShortType);
 		assertEquals(JDBCType.INTEGER, sqlType); // larger type!
+
 	}
 
 	@Test

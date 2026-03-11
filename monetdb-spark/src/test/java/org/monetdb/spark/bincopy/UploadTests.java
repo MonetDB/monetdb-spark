@@ -18,7 +18,6 @@ import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.Metadata;
 import org.apache.spark.sql.types.StructField;
-import org.junit.jupiter.api.AutoClose;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.monetdb.spark.Config;
@@ -26,6 +25,7 @@ import org.monetdb.spark.MockRow;
 import org.monetdb.spark.common.ColumnDescr;
 import org.monetdb.spark.common.CompressionSettings;
 import org.monetdb.spark.common.Destination;
+import org.monetdb.spark.util.MyAutoClose;
 import org.monetdb.spark.workerside.Collector;
 import org.monetdb.spark.workerside.ConversionError;
 import org.monetdb.spark.workerside.MonetDataWriter;
@@ -45,9 +45,9 @@ public class UploadTests {
 	final StructField intField = new StructField("i", DataTypes.IntegerType, false, Metadata.empty());
 	final StructField stringField = new StructField("t", DataTypes.StringType, false, Metadata.empty());
 
-	@AutoClose
+	@MyAutoClose
 	Connection conn;
-	@AutoClose
+	@MyAutoClose
 	Statement stmt;
 
 	@BeforeEach

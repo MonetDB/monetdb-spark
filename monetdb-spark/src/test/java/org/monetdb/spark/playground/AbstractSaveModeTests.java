@@ -5,10 +5,10 @@ import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.Metadata;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
-import org.junit.jupiter.api.AutoClose;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.monetdb.spark.Config;
+import org.monetdb.spark.util.MyAutoClose;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -20,11 +20,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class AbstractSaveModeTests {
 	private final StructType schema = new StructType(new StructField[]{new StructField("i", DataTypes.IntegerType, false, Metadata.empty())});
-	@AutoClose
+	@MyAutoClose
 	protected Connection conn = null;
-	@AutoClose
+	@MyAutoClose
 	protected Statement stmt = null;
-	@AutoClose
+	@MyAutoClose
 	protected SparkSession spark = null;
 
 	protected abstract String getSource();
