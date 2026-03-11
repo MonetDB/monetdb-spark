@@ -193,4 +193,15 @@ public class MonetDialect extends JdbcDialect {
 	public Option<Object> isCascadingTruncateTable() {
 		return Option.apply(false);
 	}
+
+	@Override
+	public boolean supportsLimit() {
+		return true;
+	}
+
+	@Override
+	public boolean supportsOffset() {
+		return true;
+	}
+
 }
