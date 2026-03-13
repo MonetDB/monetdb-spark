@@ -13,7 +13,7 @@ import org.monetdb.spark.bincopy.PlanBuilder;
 import org.monetdb.spark.common.ColumnDescr;
 import org.monetdb.spark.common.CompressionSettings;
 import org.monetdb.spark.common.Destination;
-import org.monetdb.spark.util.HoldSavepoint;
+import org.monetdb.spark.util.WithSavepoint;
 import org.monetdb.spark.workerside.ConversionError;
 import org.monetdb.spark.workerside.StateTrackerMetric;
 
@@ -78,7 +78,7 @@ public class MonetWrite implements Write {
 	}
 
 	private static ColumnDescr[] findOrCreateTable(Connection conn, Parms parms, Destination dest) throws SQLException {
-		try (HoldSavepoint sp = new HoldSavepoint(conn)){
+		try (WithSavepoint sp = new WithSavepoint(conn)){
 			return dest.getColumns(conn);
 		} catch (SQLException e) {
 			// If the table does not exist we'll handle it below.
