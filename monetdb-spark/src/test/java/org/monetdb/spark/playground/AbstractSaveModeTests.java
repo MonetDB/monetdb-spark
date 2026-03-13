@@ -8,6 +8,7 @@ import org.apache.spark.sql.types.StructType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 import org.monetdb.spark.Config;
 import org.monetdb.spark.util.MyAutoClose;
 
@@ -78,7 +79,7 @@ public abstract class AbstractSaveModeTests {
 				.option("url", Config.databaseUrl())
 				.option("dbtable", "foo");
 		if (opts != null)
-				writer = writer.options(opts);
+			writer = writer.options(opts);
 		writer.save();
 	}
 
@@ -155,10 +156,7 @@ public abstract class AbstractSaveModeTests {
 		setupBar(false);
 
 		// Without truncate, Overwrite cannot DROP foo
-		SQLException e = assertThrows(
-				SQLException.class,
-				() -> insertData(SaveMode.Overwrite)
-		);
+		SQLException e = assertThrowsSQLException(() -> insertData(SaveMode.Overwrite));
 		// We'd expect 23000 but we get 40000. Whatever..
 		assertEquals("40000", e.getSQLState());
 	}
@@ -172,10 +170,7 @@ public abstract class AbstractSaveModeTests {
 		// there are no rows in 'bar' that actually reference 'foo'.
 		// However, we get a different error code: 23000 instead of 40000.
 		var opts = Map.of("truncate", "true");
-		SQLException e = assertThrows(
-				SQLException.class,
-				() -> insertData(SaveMode.Overwrite, opts)
-		);
+		SQLException e = assertThrowsSQLException(() -> insertData(SaveMode.Overwrite, opts));
 		assertEquals("23000", e.getSQLState());
 	}
 
@@ -186,10 +181,7 @@ public abstract class AbstractSaveModeTests {
 
 		// The TRUNCATE fails because there's rows in bar that depend on foo.
 		var opts = Map.of("truncate", "true");
-		SQLException e = assertThrows(
-				SQLException.class,
-				() -> insertData(SaveMode.Overwrite, opts)
-		);
+		SQLException e = assertThrowsSQLException(() -> insertData(SaveMode.Overwrite, opts));
 		assertEquals("23000", e.getSQLState());
 	}
 
@@ -203,5 +195,23 @@ public abstract class AbstractSaveModeTests {
 		insertData(SaveMode.Overwrite, opts);
 		// Because of the TRUNCATE it should still be INT
 		verifyData("INT", false, true);
+	}
+
+	/**
+	 * Check that the given code throws a SQLException or at least another exception
+	 * with a SQLException in the cause chain
+	 * @param executable code to run
+	 * @return SQLException found
+	 */
+	public static SQLException assertThrowsSQLException(Executable executable) {
+		Exception exception = assertThrows(Exception.class, executable);
+		for (Throwable e = exception; e != null; e = e.getCause()) {
+			if (e instanceof SQLException se) {
+				return se;
+			}
+		}
+		fail(exception);
+		// fail() does not return
+		return null;
 	}
 }
