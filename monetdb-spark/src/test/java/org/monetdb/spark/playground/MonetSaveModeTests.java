@@ -11,7 +11,6 @@ public class MonetSaveModeTests extends AbstractSaveModeTests {
 	protected String getSource() {
 		return "org.monetdb.spark";
 	}
-
 	@Test
 	@Disabled("mode doesn't work yet")
 	@Override
@@ -24,5 +23,47 @@ public class MonetSaveModeTests extends AbstractSaveModeTests {
 	@Override
 	public void testOverwriteWhenNotPresent() throws SQLException {
 		super.testOverwriteWhenNotPresent();
+	}
+
+	@Test
+	@Disabled("mode doesn't work yet")
+	@Override
+	public void testForeignKeyWithoutTruncate() throws SQLException {
+		super.testForeignKeyWithoutTruncate();
+	}
+
+	@Test
+	@Disabled("mode doesn't work yet")
+	@Override
+	public void testForeignKeyWithTruncateCascade() throws SQLException {
+		super.testForeignKeyWithTruncateCascade();
+	}
+
+	@Test
+	@Disabled("mode doesn't work yet")
+	@Override
+	public void testForeignKeyWithTruncateNoData() throws SQLException {
+		super.testForeignKeyWithTruncateNoData();
+	}
+
+	@Test
+	@Disabled("mode doesn't work yet")
+	@Override
+	public void testForeignKeyWithTruncateWithData() throws SQLException {
+		super.testForeignKeyWithTruncateWithData();
+	}
+
+	@Test
+	@Disabled("mode doesn't work yet")
+	@Override
+	public void testOverwriteTruncateWhenNotPresent() throws SQLException {
+		super.testOverwriteTruncateWhenNotPresent();
+	}
+
+	@Test
+	@Disabled("mode doesn't work yet")
+	@Override
+	public void testOverwriteTruncateWhenPresent() throws SQLException {
+		super.testOverwriteTruncateWhenPresent();
 	}
 }

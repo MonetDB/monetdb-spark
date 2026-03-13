@@ -18,7 +18,7 @@ public class JDBCSaveModeTests extends AbstractSaveModeTests {
 
 	@Test
 	public void testErrorIfExistsWhenPresent() throws SQLException {
-		setUpTable(true);
+		setupFoo(true);
 		AnalysisException exc = assertThrows(AnalysisException.class, () -> insertData(SaveMode.ErrorIfExists));
 		String msg = exc.getMessage();
 		assertTrue(msg.matches(".*already exists.*"), msg);
@@ -28,7 +28,7 @@ public class JDBCSaveModeTests extends AbstractSaveModeTests {
 
 	@Test
 	public void testErrorIfExistsWhenNotPresent() throws SQLException {
-		setUpTable(false);
+		setupFoo(false);
 		insertData(SaveMode.ErrorIfExists);
 		// BIGINT because Spark creates the table
 		verifyData("BIGINT", false, true);
@@ -36,7 +36,7 @@ public class JDBCSaveModeTests extends AbstractSaveModeTests {
 
 	@Test
 	public void testIgnoreWhenPresent() throws SQLException {
-		setUpTable(true);
+		setupFoo(true);
 		insertData(SaveMode.Ignore);
 		// INT because Spark should leave the existing table alone
 		verifyData("INT", true, false);
@@ -44,7 +44,7 @@ public class JDBCSaveModeTests extends AbstractSaveModeTests {
 
 	@Test
 	public void testIgnoreWhenNotPresent() throws SQLException {
-		setUpTable(false);
+		setupFoo(false);
 		insertData(SaveMode.Ignore);
 		// BIGINT because Spark creates the table
 		verifyData("BIGINT", false, true);
