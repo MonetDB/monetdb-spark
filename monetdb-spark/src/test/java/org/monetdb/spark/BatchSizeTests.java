@@ -41,6 +41,7 @@ public class BatchSizeTests {
 	Path scratchDir;
 	private long maxStars;
 	private long commitCount;
+	private boolean skip;
 
 	public static boolean atLeastJdbc_12_1() throws SQLException {
 		// monetdb-jdbc 12.1 fixes a bug in the logging configuration.
@@ -115,6 +116,7 @@ public class BatchSizeTests {
 	}
 
 	private void readLog(Path logfile) throws IOException {
+		skip = false;
 		try (Stream<String> lines = Files.lines(logfile)) {
 			lines.forEach(this::readLine);
 
@@ -122,6 +124,10 @@ public class BatchSizeTests {
 	}
 
 	private void readLine(String line) {
+		if (skip)
+			return;
+		if (line.contains("-- get column types"))
+			skip = true;
 		if (line.contains("sCOMMIT"))
 			commitCount++;
 		Matcher matcher = starsPattern.matcher(line);

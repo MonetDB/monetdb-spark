@@ -69,6 +69,21 @@ public class Destination implements Serializable {
 		}
 	}
 
+	public void truncateTable(Connection conn, boolean cascade) throws SQLException {
+		String sql = "TRUNCATE " + table + " ";
+		sql += cascade ? "CASCADE" : "RESTRICT";
+		try (Statement stmt = conn.createStatement()) {
+			stmt.execute(sql);
+		}
+	}
+
+	public void dropTable(Connection conn) throws SQLException {
+		String sql = "DROP TABLE " + table;
+		try (Statement stmt = conn.createStatement()) {
+			stmt.execute(sql);
+		}
+	}
+
 	public void createTable(StructType schema) throws SQLException {
 		try (Connection conn = connect()) {
 			createTable(conn, schema);
