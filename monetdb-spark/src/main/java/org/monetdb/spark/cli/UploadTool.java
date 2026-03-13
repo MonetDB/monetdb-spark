@@ -11,12 +11,17 @@ import org.apache.spark.sql.types.StructField;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.*;
 
 public class UploadTool {
-	public static final String USAGE = "Usage: UploadTool OPTIONS\n" + "OPTIONS:\n" + "    -d JDBC_URL\n" + "    -s PATH_" + "    -t TABLENAME\n" + "    [" + "-w]                wait for keypress before and after uploading\n";
+	public static final String USAGE = """
+            Usage: UploadTool OPTIONS
+            OPTIONS:
+                -d JDBC_URL
+                -s PATH_    -t TABLENAME
+                [-w]                wait for keypress before and after uploading
+            """;
 	private final String dburl;
 	private final String tableName;
 	private final String source;
@@ -41,17 +46,13 @@ public class UploadTool {
 
 		for (int i = 0; i < args.length; i++) {
 			var arg = args[i];
-			if (arg.equals("-d")) {
-				dburl = args[++i];
-			} else if (arg.equals("-s")) {
-				source = args[++i];
-			} else if (arg.equals("-t")) {
-				table = args[++i];
-			} else if (arg.equals("-w")) {
-				waitKeyPress = true;
-			} else {
-				croak(new String[]{"Invalid option: " + arg, USAGE});
-			}
+            switch (arg) {
+                case "-d" -> dburl = args[++i];
+                case "-s" -> source = args[++i];
+                case "-t" -> table = args[++i];
+                case "-w" -> waitKeyPress = true;
+                default -> croak(new String[]{"Invalid option: " + arg, USAGE});
+            }
 		}
 		if (dburl == null)
 			croak("Database URL missing, specify with -d");
@@ -134,7 +135,6 @@ private void run() throws SQLException, IOException {
 	private String extractSchema(Dataset<Row> data) {
 		JdbcDialect dialect = JdbcDialects.get(dburl);
 		StructField[] schema = data.schema().fields();
-		String qTable = quoteId(tableName);
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < schema.length; i++) {
 			StructField field = schema[i];

@@ -3,7 +3,6 @@ package org.monetdb.spark.util;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.monetdb.spark.Config;
-import org.monetdb.spark.util.MyAutoClose;
 
 import java.sql.*;
 

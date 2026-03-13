@@ -10,7 +10,6 @@
 
 package org.monetdb.spark.bincopy;
 
-import org.apache.hadoop.shaded.org.xbill.DNS.dnssec.R;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SaveMode;

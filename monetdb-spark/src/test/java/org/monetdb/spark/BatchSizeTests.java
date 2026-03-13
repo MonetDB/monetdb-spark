@@ -22,7 +22,6 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.*;
-import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -40,7 +39,6 @@ public class BatchSizeTests {
 
 	@TempDir
 	Path scratchDir;
-	Random rng = new Random();
 	private long maxStars;
 	private long commitCount;
 

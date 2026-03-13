@@ -1,6 +1,5 @@
 package org.monetdb.spark;
 
-import org.apache.spark.internal.config.package$;
 import org.apache.spark.sql.*;
 import org.apache.spark.sql.execution.datasources.jdbc.JdbcUtils;
 import org.apache.spark.sql.jdbc.JdbcDialect;

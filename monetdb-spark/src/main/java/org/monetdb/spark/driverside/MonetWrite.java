@@ -59,14 +59,14 @@ public class MonetWrite implements Write {
 			// Construct the COPY statement we will use, and test if the server accepts it
 			sqlstmt = new BinCopySql(dest.getTable(), builder.getColumns());
             // Test it without compression
-            conn.prepareStatement("-- validate COPY statement\n" + sqlstmt.toString()).close();
+            conn.prepareStatement("-- validate COPY statement\n" + sqlstmt).close();
 
             CompressionSettings compression = parms.getCompressionSettings();
             if (compression.algo() != null) {
                 sqlstmt.compression(compression);
                 // Test it with compression enabledl
                 try {
-                    conn.prepareStatement("-- does server support COPY statement with compression?\n" + sqlstmt.toString()).close();
+                    conn.prepareStatement("-- does server support COPY statement with compression?\n" + sqlstmt).close();
                 } catch (SQLException e) {
                     throw new RuntimeException("Server does not support compression algorithm '" + compression.algo() + "'");
                 }
