@@ -9,7 +9,7 @@ import org.apache.spark.sql.connector.write.BatchWrite;
 import org.apache.spark.sql.connector.write.Write;
 import org.apache.spark.sql.types.StructType;
 import org.monetdb.spark.bincopy.BinCopySql;
-import org.monetdb.spark.bincopy.PlanBuilder;
+import org.monetdb.spark.bincopy.Plan;
 import org.monetdb.spark.common.ColumnDescr;
 import org.monetdb.spark.common.CompressionSettings;
 import org.monetdb.spark.common.Destination;
@@ -35,7 +35,7 @@ import java.util.stream.Stream;
  */
 public class MonetWrite implements Write {
 	private final Parms parms;
-	private final PlanBuilder builder;
+	private final Plan builder;
 	private final BinCopySql sqlstmt;
 
 	public MonetWrite(Parms parms, boolean dropExisting) {
@@ -49,8 +49,7 @@ public class MonetWrite implements Write {
 			// Build the conversion plan based on the schema we have and the column types
 			// in the database
 			StructType schema = parms.getStructType();
-			builder = new PlanBuilder(columnDescrs, parms.isAllowOverflow());
-			builder.plan(schema);
+			builder = new Plan(schema.fields(), columnDescrs, parms.isAllowOverflow());
 
 			// Construct the COPY statement we will use, and test if the server accepts it
 			sqlstmt = new BinCopySql(dest.getTable(), builder.getColumns());
@@ -92,7 +91,7 @@ public class MonetWrite implements Write {
 
 	@Override
 	public BatchWrite toBatch() {
-		return new MonetBatchWrite(parms, builder.getPlan(), sqlstmt);
+		return new MonetBatchWrite(parms, builder.getSteps(), sqlstmt);
 	}
 
 	@Override

@@ -23,13 +23,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 
-public class PlanBuilder {
+public class Plan {
 	private final HashMap<String, ColumnDescr> schema;
 	private final boolean allowOverflow;
 	private final ArrayList<Step> plan;
 	private final ArrayList<String> columns;
 
-	public PlanBuilder(ColumnDescr[] tableColumns, boolean allowOverflow) {
+	public Plan(StructField[] structFields, ColumnDescr[] tableColumns, boolean allowOverflow) throws ConversionError {
 		this.allowOverflow = allowOverflow;
 		schema = new HashMap<>();
 		for (var col : tableColumns) {
@@ -37,13 +37,18 @@ public class PlanBuilder {
 		}
 		plan = new ArrayList<>();
 		columns = new ArrayList<>();
+		plan(structFields);
 	}
 
-	public void plan(StructType structType) throws ConversionError {
-		plan(structType.fields());
+	public Step[] getSteps() {
+		return plan.toArray(new Step[0]);
 	}
 
-	public void plan(StructField[] fields) throws ConversionError {
+	public String[] getColumns() {
+		return columns.toArray(new String[0]);
+	}
+
+	void plan(StructField[] fields) throws ConversionError {
 		for (int i = 0; i < fields.length; i++) {
 			StructField field = fields[i];
 			String name = field.name();
@@ -55,14 +60,6 @@ public class PlanBuilder {
 			Collections.addAll(plan, steps);
 			columns.add(name);
 		}
-	}
-
-	public Step[] getPlan() {
-		return plan.toArray(new Step[0]);
-	}
-
-	public String[] getColumns() {
-		return columns.toArray(new String[0]);
 	}
 
 	/**

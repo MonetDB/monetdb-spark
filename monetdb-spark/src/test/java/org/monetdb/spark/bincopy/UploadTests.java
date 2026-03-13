@@ -81,9 +81,8 @@ public class UploadTests {
 
 		// Create the DataWriter
 		StructField[] sparkTypes = {boolField, intField, stringField};
-		PlanBuilder builder = new PlanBuilder(colTypes, false);
-		builder.plan(sparkTypes);
-		Step[] steps = builder.getPlan();
+		Plan builder = new Plan(sparkTypes, colTypes, false);
+		Step[] steps = builder.getSteps();
 		Collector collector = new Collector(compression);
 		collector.registerWithConverters(steps);
 		String identifier = "uploadtest";
