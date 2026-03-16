@@ -36,6 +36,7 @@ import static org.apache.spark.sql.functions.col;
 import static org.apache.spark.sql.functions.lit;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
+import static org.monetdb.spark.util.Assertions.assertThrowsSQLException;
 
 class BinCopyFileDumpTest {
 	private static Path destDir;
@@ -194,4 +195,14 @@ class BinCopyFileDumpTest {
 
 		uploadAndCheck();
 	}
+
+	@Test
+	public void testRefuseDumpWithOverwrite() throws SQLException, IOException {
+		DataFrameWriter<Row> writer = makeWriter();
+		RuntimeException exc = assertThrows(RuntimeException.class,
+				() -> writer.mode(SaveMode.Overwrite).option("dumpdir", destDir.toString()).save());
+		String msg = exc.getMessage();
+		assertTrue(msg.contains("Cannot use"), msg);
+	}
+
 }

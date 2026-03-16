@@ -42,6 +42,11 @@ public class MonetWrite implements Write {
 		this.parms = parms;
 		Destination dest = parms.getDestination();
 
+		if (parms.getDumpdir() != null && dropExisting) {
+			// Too complicated
+			throw new RuntimeException("Cannot use dumpdir option in overwrite mode");
+		}
+
 		// Create a connection to check the existing table and possibly modify it.
 		// Ensure everything is rolled back if something goes wrong.
 		try (Connection conn = dest.connect(); WithSavepoint sp = new WithSavepoint(conn)) {
