@@ -87,9 +87,26 @@ class BinCopyFileDumpTest {
 			stmt.execute(script);
 		}
 
-		try (ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM foo")) {
+		String sql = """
+                SELECT
+                	COUNT(i) AS nrows,
+                	COUNT(DISTINCT i) AS nunique,
+                	MIN(i) AS mini,
+                	MAX(i) AS maxi
+				FROM foo""";
+		try (ResultSet rs = stmt.executeQuery(sql)) {
 			assertTrue(rs.next());
-			int nrows = rs.getInt(1);
+			int nrows = rs.getInt("nrows");
+			int nunique = rs.getInt("nunique");
+			int mini = rs.getInt("mini");
+			int maxi = rs.getInt("maxi");
+			boolean ok = nrows == NROWS && nunique == NROWS && mini == 0 && maxi == NROWS -1;
+			String msg = "nrows is %d (expected %d), nunique is %d (%d), min is %d (%d), max is %d (%d)".formatted(
+					nrows, NROWS,
+					nunique, NROWS,
+					mini, 0,
+					maxi, NROWS - 1);
+			assertTrue(ok, msg);
 			assertEquals(NROWS, nrows);
 		}
 	}
