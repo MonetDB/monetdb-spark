@@ -8,7 +8,6 @@ import org.apache.spark.sql.types.StructType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.function.Executable;
 import org.monetdb.spark.Config;
 import org.monetdb.spark.util.MyAutoClose;
 
@@ -20,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.monetdb.spark.util.Assertions.assertThrowsSQLException;
 
 public abstract class AbstractSaveModeTests {
 	private final StructType schema = new StructType(new StructField[]{new StructField("i", DataTypes.IntegerType, false, Metadata.empty())});
@@ -197,21 +197,4 @@ public abstract class AbstractSaveModeTests {
 		verifyData("INT", false, true);
 	}
 
-	/**
-	 * Check that the given code throws a SQLException or at least another exception
-	 * with a SQLException in the cause chain
-	 * @param executable code to run
-	 * @return SQLException found
-	 */
-	public static SQLException assertThrowsSQLException(Executable executable) {
-		Exception exception = assertThrows(Exception.class, executable);
-		for (Throwable e = exception; e != null; e = e.getCause()) {
-			if (e instanceof SQLException se) {
-				return se;
-			}
-		}
-		fail(exception);
-		// fail() does not return
-		return null;
-	}
 }
