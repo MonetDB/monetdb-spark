@@ -33,7 +33,7 @@ public class CompressionSettings implements Serializable {
 		else
 			throw new IllegalArgumentException("Unsupported compression algorithm: " + parts[0]);
 
-		if (parts.length == 1) {
+		if (parts.length == 1 || algo == null) {
 			level = 0;
 			return;
 		}
@@ -74,7 +74,7 @@ public class CompressionSettings implements Serializable {
 		}
 
 		LZ4Compressor compressor = level != 0
-				? lz4factory.highCompressor()
+				? lz4factory.highCompressor(level)
 				: lz4factory.fastCompressor();
 		XXHash32 hasher = hashfactory.hash32();
 		LZ4FrameOutputStream compressed;
