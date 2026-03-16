@@ -12,7 +12,7 @@ import java.io.Serializable;
 
 /**
  * A helper class that can parse strings like "lz4:5" and can wrap
- * Outputstreams in the requested compression algorithm.
+ * Outputstreams with the requested compression algorithm.
  */
 public class CompressionSettings implements Serializable {
 	private final String algo;
