@@ -107,4 +107,8 @@ public final class Collector implements MonetConnection.UploadHandler {
 	public void setOnEndUpload(Runnable callback) {
 		onEndUpload = callback;
 	}
+
+	public CompressionSettings getCompressionSettings() {
+		return compressionSettings;
+	}
 }

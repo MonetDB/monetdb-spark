@@ -106,11 +106,11 @@ public class Config {
 		try {
 			conn.setAutoCommit(false);
 			savePoint = conn.setSavepoint();
-			String create = "DROP TABLE IF EXISTS foo; CREATE TABLE foo(i INT)";
+			String create = "DROP TABLE IF EXISTS foo; CREATE TABLE checkifcompressionsupported(i INT)";
 			try (Statement stmt = conn.createStatement()) {
 				stmt.execute(create);
 			}
-			String prepare = "COPY BINARY INTO foo FROM 'bla' ON '" + compression + "' CLIENT";
+			String prepare = "COPY BINARY INTO checkifcompressionsupported FROM 'bla' ON '" + compression + "' CLIENT";
 			try {
 				conn.prepareStatement(prepare).close();
 				return true;

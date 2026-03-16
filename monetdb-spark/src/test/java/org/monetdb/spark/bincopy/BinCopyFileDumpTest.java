@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.monetdb.jdbc.MonetConnection;
 import org.monetdb.spark.Config;
+import org.monetdb.spark.common.CompressionSettings;
 import org.monetdb.spark.util.MyAutoClose;
 import org.monetdb.util.FileTransferHandler;
 
@@ -34,6 +35,7 @@ import java.util.stream.Stream;
 import static org.apache.spark.sql.functions.col;
 import static org.apache.spark.sql.functions.lit;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 class BinCopyFileDumpTest {
 	private static Path destDir;
@@ -167,5 +169,21 @@ class BinCopyFileDumpTest {
 		writer.option("dumpdir", destDir.toString()).option("dumpprefix", "").option("dumponserver", "true").save();
 
 		checkOnClause("SERVER");
+	}
+
+	@Test
+	public void testDumpWithCompression() throws SQLException, IOException {
+		String compression = "lz4:17";
+		var cs = new CompressionSettings(compression);
+		boolean compressionSupported = Config.supportsCompression(conn, cs.algo());
+		assumeTrue(compressionSupported, "compression '" + compression + "' not supported");
+
+		DataFrameWriter<Row> writer = makeWriter();
+		writer
+				.option("dumpdir", destDir.toString())
+				.option("compression", compression)
+				.save();
+
+		uploadAndCheck();
 	}
 }
