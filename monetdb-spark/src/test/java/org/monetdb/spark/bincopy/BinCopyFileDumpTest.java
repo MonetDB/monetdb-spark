@@ -186,4 +186,12 @@ class BinCopyFileDumpTest {
 
 		uploadAndCheck();
 	}
+
+	@Test
+	public void testDumpWithBatchSize() throws SQLException, IOException {
+		DataFrameWriter<Row> writer = makeWriter();
+		writer.option("dumpdir", destDir.toString()).option("batchsize", 3).save();
+
+		uploadAndCheck();
+	}
 }
