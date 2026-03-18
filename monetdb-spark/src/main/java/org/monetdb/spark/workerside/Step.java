@@ -12,6 +12,7 @@ package org.monetdb.spark.workerside;
 
 import org.apache.spark.sql.catalyst.expressions.SpecializedGetters;
 
+import java.io.IOException;
 import java.io.Serializable;
 
 /**
@@ -31,5 +32,5 @@ public interface Step extends Serializable {
 	 *
 	 * @param row The current input row, in case this step needs it.
 	 */
-	void exec(SpecializedGetters row);
+	void exec(SpecializedGetters row) throws IOException;
 }

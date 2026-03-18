@@ -12,6 +12,7 @@ package org.monetdb.spark.bincopy.appenders;
 
 import org.apache.spark.sql.catalyst.expressions.SpecializedGetters;
 
+import java.io.IOException;
 import java.math.BigInteger;
 
 public class Int128Appender extends Appender {
@@ -20,7 +21,7 @@ public class Int128Appender extends Appender {
 	}
 
 	@Override
-	public void exec(SpecializedGetters row) {
+	public void exec(SpecializedGetters row) throws IOException {
 		BigInteger bi = collector.scratchBigInteger;
 		byte[] scratch = collector.scratchBuffer;
 
@@ -40,6 +41,6 @@ public class Int128Appender extends Appender {
 				hi >>= 8;
 			}
 		}
-		buffer.write(scratch, 0, 16);
+		stream.write(scratch, 0, 16);
 	}
 }

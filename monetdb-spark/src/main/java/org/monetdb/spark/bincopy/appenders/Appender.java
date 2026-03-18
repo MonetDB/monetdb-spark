@@ -11,14 +11,13 @@
 package org.monetdb.spark.bincopy.appenders;
 
 import org.monetdb.spark.workerside.Collector;
+import org.monetdb.spark.workerside.CollectorStream;
 import org.monetdb.spark.workerside.Step;
-
-import java.io.ByteArrayOutputStream;
 
 public abstract class Appender implements Step {
 	protected final int index;
 	protected Collector collector;
-	protected ByteArrayOutputStream buffer;
+	protected CollectorStream stream;
 
 	public Appender(int index) {
 		this.index = index;
@@ -27,6 +26,6 @@ public abstract class Appender implements Step {
 	@Override
 	public void init(Collector collector) {
 		this.collector = collector;
-		this.buffer = collector.getOrCreateBuffer(index);
+		this.stream = collector.getOrCreateStream(index);
 	}
 }

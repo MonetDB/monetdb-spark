@@ -55,7 +55,7 @@ public class MonetDataWriter implements DataWriter<InternalRow> {
 		}
 	}
 
-	private void runSteps(SpecializedGetters row) {
+	private void runSteps(SpecializedGetters row) throws IOException {
 		for (Step step : steps) {
 			step.exec(row);
 		}

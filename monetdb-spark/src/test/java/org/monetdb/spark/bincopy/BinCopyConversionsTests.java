@@ -56,7 +56,7 @@ class BinCopyConversionsTests {
 
 	private String formatCollected(int idx) throws IOException {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		col.getBuffer(idx).writeTo(out);
+		col.writeTo(idx, out);
 		byte[] bytes = out.toByteArray();
 		StringBuilder buf = new StringBuilder();
 		for (byte b : bytes) {
@@ -86,6 +86,7 @@ class BinCopyConversionsTests {
 		col = new Collector();
 		col.registerWithConverters(steps);
 
+		col.prepareUpload();
 		assertEquals("", formatCollected(0));
 		assertEquals("", formatCollected(1));
 		assertEquals("", formatCollected(2));
@@ -99,6 +100,7 @@ class BinCopyConversionsTests {
 		row = new MockRow(TRUE, 3, "three");
 		convertRow(row);
 
+		col.prepareUpload();
 		// booleans are a single byte
 		assertEquals("$01$00$01", formatCollected(0));
 		// integers are 4 bytes, little endian

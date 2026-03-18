@@ -12,6 +12,8 @@ package org.monetdb.spark.bincopy.appenders;
 
 import org.apache.spark.sql.catalyst.expressions.SpecializedGetters;
 
+import java.io.IOException;
+
 public class BinaryAppender extends Appender {
 	private final byte[] NULL_REPRESENTATION = new byte[]{ //
 			-1, -1, -1, -1, //
@@ -23,9 +25,9 @@ public class BinaryAppender extends Appender {
 	}
 
 	@Override
-	public void exec(SpecializedGetters ignored) {
+	public void exec(SpecializedGetters ignored) throws IOException {
 		if (collector.scratchNull) {
-			buffer.write(NULL_REPRESENTATION, 0, 8);
+			stream.write(NULL_REPRESENTATION, 0, 8);
 		} else {
 			byte[] value = collector.scratchByteArray;
 			byte[] scratch = collector.scratchBuffer;
@@ -38,8 +40,8 @@ public class BinaryAppender extends Appender {
 			scratch[5] = 0;
 			scratch[6] = 0;
 			scratch[7] = 0;
-			buffer.write(scratch, 0, 8);
-			buffer.write(value, 0, value.length);
+			stream.write(scratch, 0, 8);
+			stream.write(value, 0, value.length);
 		}
 	}
 }

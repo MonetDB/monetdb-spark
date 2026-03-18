@@ -12,6 +12,7 @@ package org.monetdb.spark.bincopy.appenders;
 
 import org.apache.spark.sql.catalyst.expressions.SpecializedGetters;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -22,7 +23,7 @@ public class UTCTimestampAppender extends Appender {
 	}
 
 	@Override
-	public void exec(SpecializedGetters row) {
+	public void exec(SpecializedGetters row) throws IOException {
 		byte[] scratch = collector.scratchBuffer;
 
 
@@ -64,6 +65,6 @@ public class UTCTimestampAppender extends Appender {
 			scratch[i++] = (byte) year;
 			scratch[i] = (byte) (year >> 8);
 		}
-		buffer.write(scratch, 0, 12);
+		stream.write(scratch, 0, 12);
 	}
 }

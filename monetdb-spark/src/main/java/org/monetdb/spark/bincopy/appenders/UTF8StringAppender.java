@@ -12,6 +12,7 @@ package org.monetdb.spark.bincopy.appenders;
 
 import org.apache.spark.sql.catalyst.expressions.SpecializedGetters;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 
 public class UTF8StringAppender extends Appender {
@@ -20,13 +21,13 @@ public class UTF8StringAppender extends Appender {
 	}
 
 	@Override
-	public void exec(SpecializedGetters ignored) {
+	public void exec(SpecializedGetters ignored) throws IOException {
 		if (collector.scratchNull) {
-			buffer.write(-0x80);
+			stream.write(-0x80);
 		} else {
 			ByteBuffer bb = collector.scratchUTF8String.getByteBuffer();
-			buffer.write(bb.array(), bb.arrayOffset() + bb.position(), bb.remaining());
+			stream.write(bb.array(), bb.arrayOffset() + bb.position(), bb.remaining());
 		}
-		buffer.write(0);
+		stream.write(0);
 	}
 }

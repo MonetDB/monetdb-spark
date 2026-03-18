@@ -12,13 +12,15 @@ package org.monetdb.spark.bincopy.appenders;
 
 import org.apache.spark.sql.catalyst.expressions.SpecializedGetters;
 
+import java.io.IOException;
+
 public class FloatAppender extends Appender {
 	public FloatAppender(int index) {
 		super(index);
 	}
 
 	@Override
-	public void exec(SpecializedGetters row) {
+	public void exec(SpecializedGetters row) throws IOException {
 		float f = collector.scratchNull ? Float.NaN : (float) collector.scratchDouble;
 		int n = Float.floatToIntBits(f);
 		byte[] scratch = collector.scratchBuffer;
@@ -26,6 +28,6 @@ public class FloatAppender extends Appender {
 			scratch[i] = (byte) n;
 			n >>= 8;
 		}
-		buffer.write(scratch, 0, 4);
+		stream.write(scratch, 0, 4);
 	}
 }

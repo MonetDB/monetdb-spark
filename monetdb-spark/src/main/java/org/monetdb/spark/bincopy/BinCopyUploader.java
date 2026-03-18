@@ -14,6 +14,7 @@ import org.monetdb.jdbc.MonetConnection;
 import org.monetdb.spark.common.Destination;
 import org.monetdb.spark.workerside.Collector;
 
+import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
@@ -33,15 +34,16 @@ public class BinCopyUploader implements Uploader {
 	}
 
 	@Override
-	public void uploadBatch() throws SQLException {
+	public void uploadBatch() throws SQLException, IOException {
+		collector.prepareUpload();
 		if (collector.getRowCount() == 0)
 			return;
 		stmt.execute();
-		collector.clear();
+		collector.finishUpload();
 	}
 
 	@Override
-	public void commit() throws SQLException {
+	public void commit() throws SQLException, IOException {
 		uploadBatch();
 		conn.commit();
 	}

@@ -22,6 +22,7 @@ import java.util.ArrayList;
 
 public final class Collector implements MonetConnection.UploadHandler {
 	private final CompressionSettings compressionSettings;
+	private final ArrayList<CollectorStream> collectorStreams;
 	private final ArrayList<ByteArrayOutputStream> buffers;
 	private int rowCount = 0;
 
@@ -42,6 +43,7 @@ public final class Collector implements MonetConnection.UploadHandler {
 	public Collector(CompressionSettings compressionSettings) {
 		this.compressionSettings = compressionSettings;
 		buffers = new ArrayList<>();
+		collectorStreams = new ArrayList<>();
 	}
 
 	public void registerWithConverters(Step[] steps) {
@@ -50,14 +52,21 @@ public final class Collector implements MonetConnection.UploadHandler {
 		}
 	}
 
-	public ByteArrayOutputStream getOrCreateBuffer(int idx) {
-		while (buffers.size() <= idx)
-			buffers.add(new ByteArrayOutputStream());
-		return getBuffer(idx);
+	public int getStreamCount() {
+		return buffers.size();
 	}
 
-	public ByteArrayOutputStream getBuffer(int idx) {
-		return buffers.get(idx);
+	public CollectorStream getOrCreateStream(int idx) {
+		while (buffers.size() <= idx) {
+			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+			buffers.add(buffer);
+			collectorStreams.add(new CollectorStream(buffer));
+		}
+		return getStream(idx);
+	}
+
+	public CollectorStream getStream(int idx) {
+		return collectorStreams.get(idx);
 	}
 
 	public void endRow() {
@@ -75,7 +84,13 @@ public final class Collector implements MonetConnection.UploadHandler {
 		return totalSize;
 	}
 
-	public void clear() {
+	public void prepareUpload() throws IOException {
+		for (CollectorStream s : collectorStreams) {
+			s.flush();
+		}
+	}
+
+	public void finishUpload() {
 		for (ByteArrayOutputStream buffer : buffers) {
 			buffer.reset();
 		}
@@ -88,7 +103,6 @@ public final class Collector implements MonetConnection.UploadHandler {
 		onStartUpload.run();
 		try {
 			OutputStream stream = handle.getStream();
-			stream = compressionSettings.wrap(stream);
 			writeTo(idx, stream);
 			stream.close();
 		} finally {

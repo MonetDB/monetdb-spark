@@ -12,6 +12,7 @@ package org.monetdb.spark.bincopy.appenders;
 
 import org.apache.spark.sql.catalyst.expressions.SpecializedGetters;
 
+import java.io.IOException;
 import java.time.LocalDate;
 
 public class DateAppender extends Appender {
@@ -20,7 +21,7 @@ public class DateAppender extends Appender {
 	}
 
 	@Override
-	public void exec(SpecializedGetters row) {
+	public void exec(SpecializedGetters row) throws IOException {
 		byte[] scratch = collector.scratchBuffer;
 
 		// Any invalid pattern is NULL but the documentation mentions
@@ -38,6 +39,6 @@ public class DateAppender extends Appender {
 			scratch[2] = (byte) year;
 			scratch[3] = (byte) (year >> 8);
 		}
-		buffer.write(scratch, 0, 4);
+		stream.write(scratch, 0, 4);
 	}
 }

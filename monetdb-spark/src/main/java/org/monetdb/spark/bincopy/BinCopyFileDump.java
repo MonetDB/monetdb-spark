@@ -125,10 +125,11 @@ public class BinCopyFileDump implements Uploader {
 		if (onStartUpload != null)
 			onStartUpload.run();
 		try {
+			collector.prepareUpload();
 			for (int i = 0; i < outs.size(); i++) {
 				collector.writeTo(i, outs.get(i));
 			}
-			collector.clear();
+			collector.finishUpload();
 		} finally {
 			if (onEndUpload != null)
 				onEndUpload.run();
