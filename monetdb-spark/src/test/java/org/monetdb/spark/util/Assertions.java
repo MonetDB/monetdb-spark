@@ -26,4 +26,24 @@ public class Assertions {
         // fail() does not return
         return null;
     }
+
+    public static String dollarEscape(byte[] bytes) {
+        StringBuilder buf = new StringBuilder();
+        for (byte b : bytes) {
+            if (b == '$') {
+                buf.append("$$");
+            } else if (b >= ' ' && b < 127) {
+                buf.append((char) b);
+            } else {
+                int bb = (b + 256) & 0xFF;
+                final String hex = "0123456789abcdef";
+                char hi = hex.charAt(bb / 16);
+                char lo = hex.charAt(bb % 16);
+                buf.append('$');
+                buf.append(hi);
+                buf.append(lo);
+            }
+        }
+        return buf.toString();
+    }
 }

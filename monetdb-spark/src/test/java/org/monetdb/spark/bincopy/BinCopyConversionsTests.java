@@ -16,6 +16,7 @@ import org.apache.spark.sql.types.StructField;
 import org.junit.jupiter.api.Test;
 import org.monetdb.spark.MockRow;
 import org.monetdb.spark.common.ColumnDescr;
+import org.monetdb.spark.util.Assertions;
 import org.monetdb.spark.workerside.Collector;
 import org.monetdb.spark.workerside.ConversionError;
 import org.monetdb.spark.workerside.Step;
@@ -58,22 +59,7 @@ class BinCopyConversionsTests {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		col.writeTo(idx, out);
 		byte[] bytes = out.toByteArray();
-		StringBuilder buf = new StringBuilder();
-		for (byte b : bytes) {
-			if (b == '$') {
-				buf.append("$$");
-			} else if (b >= ' ' && b < 127) {
-				buf.append((char) b);
-			} else {
-				final String hex = "0123456789abcdef";
-				char hi = hex.charAt(b / 16);
-				char lo = hex.charAt(b % 16);
-				buf.append('$');
-				buf.append(hi);
-				buf.append(lo);
-			}
-		}
-		return buf.toString();
+		return Assertions.dollarEscape(bytes);
 	}
 
 	@Test
