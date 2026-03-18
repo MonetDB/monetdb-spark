@@ -90,6 +90,7 @@ class BinCopyConversionsTests {
 		assertEquals("", formatCollected(0));
 		assertEquals("", formatCollected(1));
 		assertEquals("", formatCollected(2));
+		col.finishUpload();
 
 		MockRow row = new MockRow(TRUE, 1, "one");
 		convertRow(row);

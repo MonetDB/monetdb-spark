@@ -90,7 +90,6 @@ public class BinCopyFileDump implements Uploader {
 			while (i < n) {
 				Path p = getDataFilePath(i);
 				OutputStream s = Files.newOutputStream(p);
-				s = collector.getCompressionSettings().wrap(s);
 				outs.add(s);
 				i++;
 			}
