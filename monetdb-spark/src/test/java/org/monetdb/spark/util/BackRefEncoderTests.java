@@ -14,7 +14,7 @@ import static org.monetdb.spark.util.Assertions.dollarEscape;
 
 class BackRefEncoderTests {
     private byte[] encode(String[] inputs) throws IOException {
-        BackRefEncoder be = new BackRefEncoder();
+        BackRefEncoder be = new BackRefEncoder(1 << 20);
         ByteArrayOutputStream sink = new ByteArrayOutputStream();
         for (String input: inputs) {
             ByteBuffer buf = input != null ? ByteBuffer.wrap(input.getBytes(UTF_8)) : null;
@@ -80,7 +80,7 @@ class BackRefEncoderTests {
             builder.append(e);
         }
         String fullExpected = builder.toString();
-        assertEquals(fullExpected, qencode(inputs));
+        assertEquals(fullExpected.replace("$00", "$00\n"), qencode(inputs).replace("$00", "$00\n"));
     }
 
     private String checkDelta(byte[] bytes, long expected) {
@@ -118,5 +118,4 @@ class BackRefEncoderTests {
         // For convenience, we return the dollar encoding
         return dollarEscape(bytes);
     }
-
 }

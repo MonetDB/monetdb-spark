@@ -30,7 +30,7 @@ class BackRefVerifierStreamSelfTest {
     void feedVerifier(String... strings) throws IOException {
         ByteBuffer[] items = makeBuffers(strings);
         OutputStream vs = new BackRefVerifierStream(items);
-        BackRefEncoder enc = new BackRefEncoder();
+        BackRefEncoder enc = new BackRefEncoder( 1 << 16);
         for (int i = 0; i < items.length; i++) {
             ByteBuffer item = (i == overrideIndex) ? overrideItem : items[i];
             enc.write(item, vs);

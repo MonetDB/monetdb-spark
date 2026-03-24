@@ -108,7 +108,7 @@ public class BackRefTortureTests {
 
         // Run the test
         BackRefVerifierStream verifier = new BackRefVerifierStream(inputs);
-        BackRefEncoder enc = new BackRefEncoder();
+        BackRefEncoder enc = new BackRefEncoder(1 << 16);
         for (ByteBuffer bb : inputs) {
             enc.write(bb, verifier);
         }

@@ -3,8 +3,10 @@ package org.monetdb.spark.util;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 public class BackRefEncoder {
+    public static final int MIN_CACHE_SIZE = 8192;
     private final byte[] NILREPR = { -0x80, 0 };
     private final ByteBuffer encoded = ByteBuffer.allocate(16);
     private long itemCounter = 1; // valid values are > 0
@@ -14,17 +16,13 @@ public class BackRefEncoder {
 
     /**
      * Construct a BackRefEncoder.
-     * @param withCache if true, the backref encoder tracks multi-character strings.
      */
-    public BackRefEncoder(boolean multiChar) {
-        if (multiChar) {
-            currentCache = new Cache();
-            previousCache = new Cache();
+    public BackRefEncoder(int cacheSize) {
+        if (cacheSize > 0) {
+            cacheSize = Math.max(cacheSize, MIN_CACHE_SIZE);
+            currentCache = new Cache(cacheSize);
+            previousCache = new Cache(cacheSize);
         }
-    }
-
-    public BackRefEncoder() {
-        this(true);
     }
 
     /**
@@ -82,7 +80,7 @@ public class BackRefEncoder {
     private boolean examineLong(ByteBuffer item, long itemNr) {
         if (currentCache == null)
             return false;
-        if (item.remaining() > currentCache.MAX_ITEM_SIZE)
+        if (item.remaining() > currentCache.maxItemSize())
             return false;
         int hash = item.hashCode();
 
@@ -138,24 +136,27 @@ public class BackRefEncoder {
     }
 
     private class Cache {
-        private final int SIZE = 2 << 20;
-        private final int MAX_ITEM_SIZE = SIZE / 3;
-        private final int NSLOTS = 1 << 16;
         private final int[] offsets;
         private final long[] itemNumbers;
         private final ByteBuffer text;
 
-        private Cache() {
-            offsets = new int[NSLOTS];
-            itemNumbers = new long[NSLOTS];
-            text = ByteBuffer.allocate(SIZE);
+        private Cache(int size) {
+            // We want to use up to 10% of the size for hash slots. each slot is 4 bytes
+            int maxSlotPercentage = 10;
+            int maxSlots = size * maxSlotPercentage / (100 * 4);
+            int nslots = Integer.highestOneBit(maxSlots);
+            size = Math.max(size - 4 * nslots, size - size * maxSlotPercentage / 100);
+
+            offsets = new int[nslots];
+            itemNumbers = new long[nslots];
+            text = ByteBuffer.allocate(size);
             text.position(1); // 0 reserved for 'not present'
         }
 
         void reset() {
-            text.position(1); // 0 reserved for 'not present'
-            for (int i = 0; i < NSLOTS; i++)
-                offsets[i] = 0;  // not present anymore
+            // 0 is reserved for 'not present'
+            Arrays.fill(offsets, 0);
+            text.position(1);
         }
 
         /**
@@ -205,7 +206,11 @@ public class BackRefEncoder {
         private int hashToIndex(int hash) {
             // Hash can be negative!
             long neverNegative = (1L<<32) + hash;
-            return (int)(neverNegative % NSLOTS);
+            return (int)(neverNegative % offsets.length);
+        }
+
+        public int maxItemSize() {
+            return text.limit() / 3;
         }
     }
 }
