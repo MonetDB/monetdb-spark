@@ -23,6 +23,9 @@ public class Config {
 	private static final String VERBOSE_PROPERTY = "test.verbose";
 	private static final String VERBOSE_DEFAULT = "false";
 
+	private static final String TORTURE_DURATION_PROPERTY = "test.torture.duration";
+	private static final String TORTURE_DURATION_DEFAULT = "3.0";
+
 	private static final Properties fileProperties = new Properties();
 	private static boolean filePropertiesLoaded = false;
 
@@ -99,6 +102,16 @@ public class Config {
 		boolean b = Boolean.parseBoolean(boolval);
 		return b;
 	}
+
+	public static int tortureDurationMillis() {
+		String num = getProperty(TORTURE_DURATION_PROPERTY, TORTURE_DURATION_DEFAULT);
+		double d = Double.parseDouble(num);
+		if (d > 0)
+			return (int)(1000 * d);
+		else
+			throw new IllegalArgumentException("Torture test duration '" + TORTURE_DURATION_PROPERTY + "' must be > 0.0");
+	}
+
 
 	public static boolean supportsCompression(Connection conn, String compression) throws SQLException {
 		boolean origAutoCommit = conn.getAutoCommit();
