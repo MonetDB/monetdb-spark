@@ -7,6 +7,7 @@ import java.util.Arrays;
 
 public class BackRefEncoder {
     public static final int MIN_CACHE_SIZE = 8192;
+    public static final int MAX_CACHE_SIZE = 1 << 24;
     private final byte[] NILREPR = { -0x80, 0 };
     private final ByteBuffer encoded = ByteBuffer.allocate(16);
     private long itemCounter = 1; // valid values are > 0
@@ -133,6 +134,15 @@ public class BackRefEncoder {
 
     public ByteBuffer encoded() {
         return encoded;
+    }
+
+    public void reset() {
+        itemCounter = 1;
+        Arrays.fill(lastShort, 0);
+        if (currentCache != null) {
+            currentCache.reset();
+            previousCache.reset();
+        }
     }
 
     private class Cache {

@@ -55,7 +55,7 @@ public class MonetWrite implements Write {
 
 			// Build the conversion plan based on the schema we have and the column types
 			// in the database
-            plan = new Plan(parms.getStructType().fields(), columnDescrs, parms.isAllowOverflow());
+            plan = new Plan(parms.getStructType().fields(), columnDescrs, parms.isAllowOverflow(), parms.backrefSize());
 
 			// Construct the COPY statement we will use, and test if the server accepts it
 			sqlstmt = new BinCopySql(dest.getTable(), plan.getColumns());

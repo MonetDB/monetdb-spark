@@ -35,6 +35,7 @@ public class Parms implements Serializable {
 	private final CompressionSettings compressionSettings;
 	private final boolean truncate;
 	private final boolean cascadeTruncate;
+	private final long backrefSize;
 
 	public Parms(StructType structType, Transform[] partitioning, Map<String, String> parameterMap) {
 		this.map = parameterMap;
@@ -75,6 +76,9 @@ public class Parms implements Serializable {
 
 		String cascadeTruncateArg = argument("cascadeTruncate", "false");
 		cascadeTruncate = Boolean.parseBoolean(cascadeTruncateArg);
+
+		String backrefSizeArg = argument("backrefsize", "0");
+		backrefSize = parseSize(backrefSizeArg);
 	}
 
 	public Destination getDestination() {
@@ -93,6 +97,18 @@ public class Parms implements Serializable {
 		return x == null ? null : x.toString();
 	}
 
+	private long parseSize(String s) {
+		long unit = 1;
+		if (s.endsWith("k") || s.endsWith("K")) {
+			unit = 1024;
+			s = s.substring(0, s.length() - 1);
+		} else if (s.endsWith("m") || s.endsWith("M")) {
+			unit = 1024 * 1024;
+			s = s.substring(0, s.length() - 1);
+		}
+		long value = Long.parseLong(s);
+		return value * unit;
+	}
 
 	public Map<String, String> getMap() {
 		return map;
@@ -158,4 +174,7 @@ public class Parms implements Serializable {
 		return cascadeTruncate;
 	}
 
+    public long backrefSize() {
+        return backrefSize;
+    }
 }

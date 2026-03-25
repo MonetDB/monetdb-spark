@@ -45,14 +45,14 @@ class BinCopyConversionsTests {
 	public void testLengthMismatch() {
 		StructField[] sparkTypes = {boolField, intField, stringField};
 		ColumnDescr[] colTypes = {boolCol, intCol};
-		assertThrows(ConversionError.class, () -> new Plan(sparkTypes, colTypes, false));
+		assertThrows(ConversionError.class, () -> new Plan(sparkTypes, colTypes));
 	}
 
 	@Test
 	public void testTypeMismatch() {
 		StructField[] sparkTypes = {boolField, intField, stringField};
 		ColumnDescr[] colTypes = {boolCol, stringCol, stringCol};
-		assertThrows(ConversionError.class, () -> new Plan(sparkTypes, colTypes, false));
+		assertThrows(ConversionError.class, () -> new Plan(sparkTypes, colTypes));
 	}
 
 	private String formatCollected(int idx) throws IOException {
@@ -66,7 +66,7 @@ class BinCopyConversionsTests {
 	public void testCollector() throws ConversionError, IOException {
 		StructField[] sparkTypes = {boolField, intField, stringField};
 		ColumnDescr[] colTypes = {boolCol, intCol, stringCol};
-		Plan builder = new Plan(sparkTypes, colTypes, false);
+		Plan builder = new Plan(sparkTypes, colTypes);
 
 		steps = builder.getSteps();
 		col = new Collector();

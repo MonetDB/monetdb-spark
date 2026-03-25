@@ -14,6 +14,7 @@ import org.apache.spark.sql.types.*;
 import org.monetdb.spark.bincopy.appenders.*;
 import org.monetdb.spark.common.ColumnDescr;
 import org.monetdb.spark.common.steps.*;
+import org.monetdb.spark.util.BackRefEncoder;
 import org.monetdb.spark.workerside.ConversionError;
 import org.monetdb.spark.workerside.Step;
 
@@ -26,18 +27,24 @@ import java.util.HashMap;
 public class Plan {
 	private final HashMap<String, ColumnDescr> schema;
 	private final boolean allowOverflow;
+	private final int backrefSize;
 	private final ArrayList<Step> plan;
 	private final ArrayList<String> columns;
 
-	public Plan(StructField[] structFields, ColumnDescr[] tableColumns, boolean allowOverflow) throws ConversionError {
+	public Plan(StructField[] structFields, ColumnDescr[] tableColumns, boolean allowOverflow, long backrefSize) throws ConversionError {
 		this.allowOverflow = allowOverflow;
-		schema = new HashMap<>();
+        this.backrefSize = (int) Math.min(backrefSize, BackRefEncoder.MAX_CACHE_SIZE);
+        schema = new HashMap<>();
 		for (var col : tableColumns) {
 			schema.put(col.name(), col);
 		}
 		plan = new ArrayList<>();
 		columns = new ArrayList<>();
 		plan(structFields);
+	}
+
+	public Plan(StructField[] structFields, ColumnDescr[] tableColumns) throws ConversionError {
+		this(structFields, tableColumns, false, 0);
 	}
 
 	public Step[] getSteps() {
@@ -138,7 +145,7 @@ public class Plan {
 
 	private Step[] planStringTypes(int i, StructField sparkField, ColumnDescr columnDescr) {
 		final StringExtractor extractor;
-		final UTF8StringAppender appender;
+		final Appender appender;
 
 		DataType sparkType = sparkField.dataType();
 		// VarcharType and CharType are subclasses of StringType so we don't have to check them
@@ -149,7 +156,12 @@ public class Plan {
 			return null;
 
 		switch (columnDescr.type()) {
-			case VARCHAR, CLOB, CHAR -> appender = new UTF8StringAppender(i);
+			case VARCHAR, CLOB, CHAR -> {
+                if (backrefSize >= 0)
+					appender = new UTF8StringBackRefAppender(i, backrefSize);
+                else
+					appender = new UTF8StringAppender(i);
+            } // todo
 			default -> {
 				return null;
 			}

@@ -166,6 +166,15 @@ JDBC data source. The following configuration options are supported:
   Requires MonetDB Dec2025 (11.55.*) or higher. Note that the server side
   is experimental and may be removed in later versions.
 
+* **backrefsize**: With recent MonetDB versions, [repeated strings can be
+  encoded more efficiently][backref]. This option configures the size of the
+  buffers used to look for such repetitions. Every string column gets its own
+  buffer. The size can be written with a k/M suffix to indicate kilo- and
+  megabytes. The value 0 means to track only the NULL string, the empty string
+  and single ASCII character strings. The value -1 means not to encode any
+  duplicates at all. The default is 0. This option is automatically disabled
+  when the server does not support it.
+
 * **truncate**: in overwrite mode, use `TRUNCATE` to empty the existing table instead
   of DROP TABLE followed by CREATE TABLE.
 
@@ -219,3 +228,5 @@ if 'make' is invoked as `make test TESTDB=demo`, 'make' will run
 [COPY BINARY]: https://www.monetdb.org/documentation/user-guide/sql-manual/data-loading/binary-loading/
 
 [Speculative Execution]: https://kb.databricks.com/scala/understanding-speculative-execution
+
+[backref]: https://www.monetdb.org/documentation/user-guide/sql-manual/data-loading/binary-loading/#encoding-repeated-strings
