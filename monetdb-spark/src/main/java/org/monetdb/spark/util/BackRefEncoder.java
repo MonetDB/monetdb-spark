@@ -57,10 +57,10 @@ public class BackRefEncoder {
 
         if (item == null) {
             return examineShort(128, itemNr);
-        } else if (item.limit() == 0) {
+        } else if (item.remaining() == 0) {
             return examineShort(0, itemNr);
-        } else if (item.position() == 0 && item.limit() == 1 && item.get(0) >= 0) {
-            return examineShort(item.get(0), itemNr);
+        } else if (item.remaining() == 1 && item.get(item.position()) >= 0) {
+            return examineShort(item.get(item.position()), itemNr);
         } else {
             return examineLong(item, itemNr);
         }
