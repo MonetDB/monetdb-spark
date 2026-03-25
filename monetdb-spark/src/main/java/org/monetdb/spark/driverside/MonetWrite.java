@@ -17,6 +17,7 @@ import org.monetdb.spark.workerside.ConversionError;
 import org.monetdb.spark.workerside.StateTrackerMetric;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -53,9 +54,13 @@ public class MonetWrite implements Write {
 			// Create or replace the table if necessary, and get the JDBC types of the columns
 			ColumnDescr[] columnDescrs = findOrCreateTable(conn, parms, dropExisting);
 
+			DatabaseMetaData metaData = conn.getMetaData();
+			boolean supportsBackRef = (metaData.getDatabaseMajorVersion() > 11 || metaData.getDatabaseMinorVersion() >= 55);
+			long backrefSize = supportsBackRef ? parms.backrefSize() : -1;
+
 			// Build the conversion plan based on the schema we have and the column types
 			// in the database
-            plan = new Plan(parms.getStructType().fields(), columnDescrs, parms.isAllowOverflow(), parms.backrefSize());
+            plan = new Plan(parms.getStructType().fields(), columnDescrs, parms.isAllowOverflow(), backrefSize);
 
 			// Construct the COPY statement we will use, and test if the server accepts it
 			sqlstmt = new BinCopySql(dest.getTable(), plan.getColumns());
