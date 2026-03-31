@@ -14,20 +14,22 @@
 - The **compression** option allows on-the-fly compression of the uploaded data,
   which can be much faster if the network is the bottleneck. In this version
   only the value `lz4` is supported. This option needs (and first checks for)
-  experimental support in the server.
+  experimental support in the server. Optionally, a compression level can be
+  set: `lz4:9`.
 
 - The options **dumpdir**, **dumpprefix** and **dumponserver** allow writing the
-  data to file instead of directly to the server. Still needs to connect to the
-  server to determine the exact column types.
+  data to file instead of directly to the server. Spark still needs to connect
+  to the server to determine the exact column types.
 
 - A new option **immediatecommit** allows you to force a commit after each batch
   (see **batchsize**).
 
 - [Backref encoding](https://www.monetdb.org/documentation/user-guide/sql-manual/data-loading/binary-loading/#encoding-repeated-strings)
-  can be used to transfer repeating strings more efficiently. The option **backrefsize**
-  specifies the size of the buffer used to look for repeated strings. Each string column
-  gets its own buffer. The size can be given with a k- or M suffix to indicate kilo-
-  or megabytes. Backref encoding is supported by MonetDB 11.55.1 (Dec2025) and later.
+  can be used to transfer repeating strings more efficiently. The option
+  **backrefsize** specifies the size of the buffer used to look for repeated
+  strings. Each string column gets at most two of these buffers. The size can be
+  given with a k- or M suffix to indicate kilo- or megabytes. Backref encoding
+  is supported by MonetDB 11.55.1 (Dec2025) and later.
 
 
 # v0.2.0 - 2025-09-03
