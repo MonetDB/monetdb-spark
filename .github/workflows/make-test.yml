@@ -10,9 +10,15 @@ jobs:
 
     make_test:
         runs-on: ubuntu-latest
+        strategy:
+          matrix:
+            monetdbversion:
+              - "monetdb/monetdb:Dec2025-SP1"
+              - "monetdb/monetdb:Mar2025-SP3"
+              - "monetdb/dev-builds:default"
         services:
             monetdb:
-                image: monetdb/monetdb:Dec2025
+                image: "${{ matrix.monetdbversion }}"
                 env:
                     MDB_CREATE_DBS: demo
                     MDB_DB_ADMIN_PASS: monetdb
