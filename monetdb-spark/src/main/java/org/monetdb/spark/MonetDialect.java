@@ -4,7 +4,6 @@ import org.apache.spark.sql.jdbc.JdbcDialect;
 import org.apache.spark.sql.jdbc.JdbcType;
 import org.apache.spark.sql.types.*;
 import scala.Option;
-import scala.jdk.OptionConverters;
 
 import java.io.IOException;
 import java.io.InputStream;

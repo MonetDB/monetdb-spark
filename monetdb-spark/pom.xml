@@ -127,6 +127,9 @@
                             <generateGitPropertiesFile>true</generateGitPropertiesFile>
                             <generateGitPropertiesFilename>${project.build.outputDirectory}/org/monetdb/spark/git.properties</generateGitPropertiesFilename>
                             <commitIdGenerationMode>full</commitIdGenerationMode>
+                            <includeOnlyProperties>
+                                <property>git.commit.id.describe</property>
+                            </includeOnlyProperties>
                         </configuration>
                     </execution>
                 </executions>
