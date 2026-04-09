@@ -10,12 +10,19 @@ import java.io.InputStream;
 import java.sql.JDBCType;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Properties;
 
 public class MonetDialect extends JdbcDialect {
 	private final static String DIALECT_PROPERTIES_RESOURCE = "dialect.properties";
 	private final static String GIT_PROPERTIES_RESOURCE = "git.properties";
+
+	public MonetDialect() {
+		LocalDate cutOff = LocalDate.of(2026, 6, 10);
+		if (LocalDate.now().isAfter(cutOff))
+			throw new RuntimeException("monetdb-spark beta version " + getVersion() + " has expired");
+	}
 
 	public static String getVersion() {
 		Properties props;

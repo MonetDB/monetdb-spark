@@ -16,6 +16,11 @@ import java.util.Map;
  * Only used in the driver.
  */
 public class DefaultSource implements TableProvider {
+
+	public DefaultSource() {
+		new MonetDialect();
+	}
+
 	@Override
 	public StructType inferSchema(CaseInsensitiveStringMap caseInsensitiveStringMap) {
 		// Method supportsExternalMetadata() returns 'true' so this method won't be called.
