@@ -10,52 +10,62 @@
 
 package org.monetdb.spark.bincopy;
 
+import org.apache.spark.sql.types.StructType;
 import org.jetbrains.annotations.NotNull;
+import org.monetdb.spark.common.Destination;
 import org.monetdb.spark.workerside.Collector;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.FileAlreadyExistsException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class BinCopyFileDump implements Uploader {
-	private final Path destDir;
+	private final Path topDir;
+	private final Path partDir;
 	private final String copyFileName;
 	private final String dataFilePrefix;
 	private final String dataFileSuffix;
-	private final Collector collector;
+    private final Destination dest;
+    private final StructType schema;
+    private final Collector collector;
 	private final BinCopySql sqlstmt;
 	private final ArrayList<OutputStream> outs;
 	private boolean closed;
 	private Runnable onStartUpload;
 	private Runnable onEndUpload;
 
-	public BinCopyFileDump(String dumpdir, String dumpPrefix, Collector collector, BinCopySql sqlstmt, int partitionId, long taskId) throws IOException {
+	public BinCopyFileDump(Destination dest, StructType schema, String dumpdir, String dumpPrefix, Collector collector, BinCopySql sqlstmt, int partitionId, long taskId) throws IOException {
+        this.dest = dest;
+        this.schema = schema;
 		this.collector = collector;
 		this.sqlstmt = sqlstmt;
-		String part = "part" + partitionId;
-
-		Path topDir = Paths.get(dumpdir);
-		destDir = topDir.resolve(part);
+		topDir = Paths.get(dumpdir);
+		String relPartDir = "part" + partitionId;
+		partDir = topDir.resolve(relPartDir);
 		copyFileName = "copy.sql";
 		dataFilePrefix = "col";
 		dataFileSuffix = ".bin";
 
 		boolean haveDumpPrefix = dumpPrefix != null && !dumpPrefix.isEmpty();
-		String prefix = (haveDumpPrefix ? dumpPrefix : ".") + File.separator + part + File.separator + dataFilePrefix;
+		String prefix = (haveDumpPrefix ? dumpPrefix : ".") + File.separator + relPartDir + File.separator + dataFilePrefix;
 		sqlstmt.nameMapper(i -> getDataFileName(i, prefix, dataFileSuffix));
 
+		// Always create the top dir, we may be writing to local file systems on the worker nodes
 		try {
 			Files.createDirectory(topDir);
 		} catch (FileAlreadyExistsException ignored) {
 		}
-		Files.createDirectory(destDir);
+		if (partitionId == 0) {
+			// Create helper scripts only once, we don't want race conditions
+            createHelperScripts();
+        }
+
+		Files.createDirectory(partDir);
 		String sql = sqlstmt.toString();
 		Files.writeString(getCopyFilePath(), sql + ";", StandardCharsets.UTF_8);
 
@@ -63,13 +73,30 @@ public class BinCopyFileDump implements Uploader {
 		openOutFiles();
 	}
 
+	private void createHelperScripts() throws IOException {
+		String tableName = dest.getTable();
+		createHelperScript("drop.sql", "DROP TABLE " + tableName + ";");
+		createHelperScript("dropifexists.sql", "DROP TABLE IF EXISTS " + tableName + ";");
+		createHelperScript("truncate.sql", "TRUNCATE RESTRICT " + tableName + ";");
+		createHelperScript("truncatecascade.sql", "TRUNCATE CASCADE " + tableName + ";");
+		createHelperScript("create.sql", dest.tableDefinition(schema, "CREATE TABLE") + ";");
+		createHelperScript("createifnotexists.sql", dest.tableDefinition(schema, "CREATE TABLE IF NOT EXISTS") + ";");
+	}
+
+	private void createHelperScript(String name, String contents) throws IOException {
+		Path fileName = topDir.resolve(name);
+		try (OutputStream s = Files.newOutputStream(fileName, StandardOpenOption.CREATE_NEW); PrintWriter wr = new PrintWriter(s)) {
+			wr.write(contents);
+		} catch (FileAlreadyExistsException ignored) {}
+	}
+
 	private @NotNull Path getCopyFilePath() {
-		return destDir.resolve(copyFileName);
+		return partDir.resolve(copyFileName);
 	}
 
 	private @NotNull Path getDataFilePath(int i) {
 		String name = getDataFileName(i, dataFilePrefix, dataFileSuffix);
-		return destDir.resolve(name);
+		return partDir.resolve(name);
 	}
 
 	private @NotNull String getDataFileName(int i, String prefix, String suffix) {
@@ -151,7 +178,7 @@ public class BinCopyFileDump implements Uploader {
 		silentDeleteFile(getCopyFilePath());
 		for (int i = 0; i < sqlstmt.getColumnCount(); i++)
 			silentDeleteFile(getDataFilePath(i));
-		Files.delete(destDir);
+		Files.delete(partDir);
 	}
 
 	private void silentDeleteFile(@NotNull Path p) {

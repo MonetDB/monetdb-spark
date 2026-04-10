@@ -98,10 +98,14 @@ public class Destination implements Serializable {
 	}
 
 	public String tableDefinition(StructType schema) {
+		return tableDefinition(schema, "CREATE TABLE");
+	}
+
+	public String tableDefinition(StructType schema, String createTable) {
 		JdbcDialect dialect = new MonetDialect();
 		StructField[] fields = schema.fields();
 		String comma = "";
-		StringBuilder sb = new StringBuilder("CREATE TABLE " + getTable() + "(");
+		StringBuilder sb = new StringBuilder(createTable + " " + getTable() + "(");
 		for (StructField field: fields) {
 			sb.append("\n    ");
 			sb.append(comma);

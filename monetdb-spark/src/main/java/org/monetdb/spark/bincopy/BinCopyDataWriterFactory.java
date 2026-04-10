@@ -17,6 +17,7 @@ package org.monetdb.spark.bincopy;
 import org.apache.spark.sql.catalyst.InternalRow;
 import org.apache.spark.sql.connector.write.DataWriter;
 import org.apache.spark.sql.connector.write.DataWriterFactory;
+import org.monetdb.spark.common.Destination;
 import org.monetdb.spark.driverside.Parms;
 import org.monetdb.spark.workerside.Collector;
 import org.monetdb.spark.workerside.MonetDataWriter;
@@ -41,7 +42,7 @@ public class BinCopyDataWriterFactory implements DataWriterFactory {
 		this.parms = parms;
 		this.steps = steps;
 		this.sqlstmt = sqlstmt;
-	}
+   }
 
 	@Override
 	public DataWriter<InternalRow> createWriter(int partitionId, long taskId) {
@@ -52,10 +53,11 @@ public class BinCopyDataWriterFactory implements DataWriterFactory {
 			if (parms.isDumpOnServer())
 				sqlstmt.onServer(true);
  			Uploader uploader;
- 			if (parms.getDumpdir() == null)
- 				uploader = new BinCopyUploader(parms.getDestination(), collector, sqlstmt);
+			Destination dest = parms.getDestination();
+			if (parms.getDumpdir() == null)
+ 				uploader = new BinCopyUploader(dest, collector, sqlstmt);
  			else
- 				uploader = new BinCopyFileDump(parms.getDumpdir(), parms.getDumpPrefix(), collector, sqlstmt, partitionId, taskId);
+ 				uploader = new BinCopyFileDump(dest, parms.getStructType(), parms.getDumpdir(), parms.getDumpPrefix(), collector, sqlstmt, partitionId, taskId);
 			collector.registerWithConverters(steps);
 			return new MonetDataWriter(collector, steps, uploader, parms.isImmediateCommit(), identifier, parms.getBatchSize());
 		} catch (SQLException | IOException e) {
