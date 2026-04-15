@@ -79,7 +79,7 @@ public class CompressionSettings implements Serializable {
 		XXHash32 hasher = hashfactory.hash32();
 		LZ4FrameOutputStream compressed;
 		try {
-			compressed = new LZ4FrameOutputStream(inner, LZ4FrameOutputStream.BLOCKSIZE.SIZE_4MB, 0, compressor, hasher, LZ4FrameOutputStream.FLG.Bits.BLOCK_INDEPENDENCE);
+			compressed = new LZ4FrameOutputStream(inner, LZ4FrameOutputStream.BLOCKSIZE.SIZE_64KB, 0, compressor, hasher, LZ4FrameOutputStream.FLG.Bits.BLOCK_INDEPENDENCE);
 		} catch (IOException e) {
 			throw new RuntimeException("Could not wrap compression", e);
 		}
