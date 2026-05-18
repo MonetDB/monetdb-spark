@@ -252,3 +252,4 @@ if 'make' is invoked as `make test TESTDB=demo`, 'make' will run
 [Spark performance metrics]: https://spark.apache.org/docs/latest/monitoring.html
 
 [SparkMeasure]: https://github.com/cerndb/sparkMeasure
+

@@ -1,5 +1,8 @@
 # Unreleased
 
+
+# v0.3.0 - 2026-05-18
+
 ## Dialect
 
 - Added TRUNCATE, LIMIT and OFFSET handling to the Monet Dialect.
@@ -29,9 +32,7 @@
 - [Backref encoding](https://www.monetdb.org/documentation/user-guide/sql-manual/data-loading/binary-loading/#encoding-repeated-strings)
   can be used to transfer repeating strings more efficiently. The option
   **backrefsize** specifies the size of the buffer used to look for repeated
-  strings. Each string column gets at most two of these buffers. The size can be
-  given with a k- or M suffix to indicate kilo- or megabytes. Backref encoding
-  is supported by MonetDB 11.55.1 (Dec2025) and later.
+  strings.  Backref encoding requires MonetDB 11.55.1 (Dec2025) or later.
 
 - The Writer gathers some custom performance metrics:
   *monet.uploadCount*, *monet.rowCount*, *monet.millisInitializing*,
