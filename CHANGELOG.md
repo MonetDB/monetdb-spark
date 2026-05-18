@@ -33,6 +33,13 @@
   given with a k- or M suffix to indicate kilo- or megabytes. Backref encoding
   is supported by MonetDB 11.55.1 (Dec2025) and later.
 
+- The Writer gathers some custom performance metrics:
+  *monet.uploadCount*, *monet.rowCount*, *monet.millisInitializing*,
+  *monet.millisCollecting*, *monet.millisUploading*, *monet.millisServer*,
+  *monet.millisCommitting* and *monet.millisTotal*.
+
+  Note: the custom metrics do not work properly when Spark is running in local mode.
+
 
 # v0.2.0 - 2025-09-03
 

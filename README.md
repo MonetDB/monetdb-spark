@@ -179,6 +179,25 @@ JDBC data source. The following configuration options are supported:
 
 * **cascadeTruncate**: when **truncate** is set, use the `CASCADE` option to `TRUNCATE`.
 
+The custom writer gathers some additional [Spark performance metrics].
+In particular,
+
+* *monet.uploadCount*: the number of COPY INTO statements executed
+* *monet.rowCount*: the number of rows processed so far
+* *monet.millisInitializing*: the nummer of milliseconds spent initializing the job
+* *monet.millisCollecting*: the number of milliseconds spent converting Spark data to 
+  COPY BINARY format
+* *monet.millisUploading*: the number of milliseconds spent uploading the binary data
+* *monet.millisServer*: the number of milliseconds spent waiting for the server during
+  the upload.
+* *monet.millisCommitting*: the number of milliseconds spent on COMMIT statements.
+* *monet.millisTotal*: the sum of the above.
+
+Unfortunately, Spark does not show these metrics in its web UI by default.
+They can be accessed using the SparkListerer API and for example using
+[SparkMeasure].
+
+
 
 ## Building
 
@@ -229,3 +248,7 @@ if 'make' is invoked as `make test TESTDB=demo`, 'make' will run
 [Speculative Execution]: https://kb.databricks.com/scala/understanding-speculative-execution
 
 [backref]: https://www.monetdb.org/documentation/user-guide/sql-manual/data-loading/binary-loading/#encoding-repeated-strings
+
+[Spark performance metrics]: https://spark.apache.org/docs/latest/monitoring.html
+
+[SparkMeasure]: https://github.com/cerndb/sparkMeasure
