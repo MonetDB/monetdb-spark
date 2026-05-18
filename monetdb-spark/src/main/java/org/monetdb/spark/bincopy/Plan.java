@@ -85,7 +85,7 @@ public class Plan {
 		// Are they at least somewhat integer-shaped?
 		SizeRange src = new SizeRange(sparkType);
 		SizeRange dst = new SizeRange(columnDescr);
-		if (!src.valid() || !dst.valid())
+		if (src.invalid() || dst.invalid())
 			return null;
 
 		// The scales must match

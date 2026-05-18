@@ -11,7 +11,6 @@
 package org.monetdb.spark.bincopy;
 
 import org.apache.spark.sql.types.StructType;
-import org.jetbrains.annotations.NotNull;
 import org.monetdb.spark.common.Destination;
 import org.monetdb.spark.workerside.Collector;
 
@@ -36,8 +35,6 @@ public class BinCopyFileDump implements Uploader {
 	private final BinCopySql sqlstmt;
 	private final ArrayList<OutputStream> outs;
 	private boolean closed;
-	private Runnable onStartUpload;
-	private Runnable onEndUpload;
 
 	public BinCopyFileDump(Destination dest, StructType schema, String dumpdir, String dumpPrefix, Collector collector, BinCopySql sqlstmt, int partitionId, long taskId) throws IOException {
         this.dest = dest;
@@ -90,16 +87,16 @@ public class BinCopyFileDump implements Uploader {
 		} catch (FileAlreadyExistsException ignored) {}
 	}
 
-	private @NotNull Path getCopyFilePath() {
+	private Path getCopyFilePath() {
 		return partDir.resolve(copyFileName);
 	}
 
-	private @NotNull Path getDataFilePath(int i) {
+	private Path getDataFilePath(int i) {
 		String name = getDataFileName(i, dataFilePrefix, dataFileSuffix);
 		return partDir.resolve(name);
 	}
 
-	private @NotNull String getDataFileName(int i, String prefix, String suffix) {
+	private String getDataFileName(int i, String prefix, String suffix) {
 		StringBuilder builder = new StringBuilder(prefix).append(i).append(".");
 		for (char c : sqlstmt.getColumnName(i).toCharArray()) {
 			if (!Character.isAlphabetic(c) && !Character.isDigit(c) && c != '_')
@@ -148,22 +145,15 @@ public class BinCopyFileDump implements Uploader {
 
 	@Override
 	public void uploadBatch() throws SQLException, IOException {
-		if (onStartUpload != null)
-			onStartUpload.run();
-		try {
-			collector.prepareUpload();
-			for (int i = 0; i < outs.size(); i++) {
-				collector.writeTo(i, outs.get(i));
-			}
-			collector.finishUpload();
-		} finally {
-			if (onEndUpload != null)
-				onEndUpload.run();
+		collector.prepareUpload();
+		for (int i = 0; i < outs.size(); i++) {
+			collector.writeTo(i, outs.get(i));
 		}
+		collector.finishUpload();
 	}
 
 	@Override
-	public void commit() throws SQLException, IOException {
+	public void commit() throws IOException {
 		for (OutputStream s : outs) {
 			s.flush();
 		}
@@ -181,21 +171,10 @@ public class BinCopyFileDump implements Uploader {
 		Files.delete(partDir);
 	}
 
-	private void silentDeleteFile(@NotNull Path p) {
+	private void silentDeleteFile(Path p) {
 		try {
 			Files.delete(p);
 		} catch (IOException ignored) {
 		}
-	}
-
-	@Override
-	public void setOnStartUpload(Runnable callback) {
-		onStartUpload = callback;
-	}
-
-	@Override
-	public void setOnEndUpload(Runnable callback) {
-		onEndUpload = callback;
-
 	}
 }

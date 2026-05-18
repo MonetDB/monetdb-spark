@@ -19,11 +19,10 @@ public final class CollectorStream extends BufferedOutputStream {
         return out;
     }
 
-    OutputStream setInner(OutputStream newInner) {
+    void setInner(OutputStream newInner) {
         OutputStream prevInner = out;
         out = newInner;
         if (onResetCallback != null)
             onResetCallback.run();
-        return prevInner;
     }
 }

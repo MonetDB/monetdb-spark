@@ -10,7 +10,7 @@ import java.util.Random;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class BackRefTortureTests {
-    // For reproducibility we use our own simple RNG here.
+    // For reproducibility, we use our own simple RNG here.
     // It's xorshift32, translated to Java from the C code on Wikipedia.
     // We use long because Java has no unsigned types.
     // The value will always be 0 <= n < (1<<32)
@@ -83,10 +83,8 @@ public class BackRefTortureTests {
                 vocabulary[i] = nextStr();
 
             int nullFraction = switch (nextRand(10)) {
-                case 0 -> 0;
-                case 1 -> 0;
-                case 2 -> 0;
-                case 3 -> nextRand(nitems);
+                case 0, 1, 2 -> 0;
+				case 3 -> nextRand(nitems);
                 default -> nextRand(nitems / 10);
             };
             nvocnul = nvoc + nullFraction;

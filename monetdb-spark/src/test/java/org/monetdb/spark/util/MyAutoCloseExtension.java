@@ -1,6 +1,7 @@
 package org.monetdb.spark.util;
 
 
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.TestWatcher;
@@ -10,30 +11,30 @@ import java.util.Optional;
 
 public class MyAutoCloseExtension implements TestWatcher {
     @Override
-    public void testDisabled(ExtensionContext context, Optional<String> reason) {
+    public void testDisabled(@NonNull ExtensionContext context, @NonNull Optional<String> reason) {
         closeAnnotatedFields(context);
         TestWatcher.super.testDisabled(context, reason);
     }
 
     @Override
-    public void testSuccessful(ExtensionContext context) {
+    public void testSuccessful(@NonNull ExtensionContext context) {
         closeAnnotatedFields(context);
         TestWatcher.super.testSuccessful(context);
     }
 
     @Override
-    public void testAborted(ExtensionContext context, @Nullable Throwable cause) {
+    public void testAborted(@NonNull ExtensionContext context, @Nullable Throwable cause) {
         closeAnnotatedFields(context);
         TestWatcher.super.testAborted(context, cause);
     }
 
     @Override
-    public void testFailed(ExtensionContext context, @Nullable Throwable cause) {
+    public void testFailed(@NonNull ExtensionContext context, @Nullable Throwable cause) {
         closeAnnotatedFields(context);
         TestWatcher.super.testFailed(context, cause);
     }
 
-    private void closeAnnotatedFields(ExtensionContext context) {
+    private void closeAnnotatedFields(@NonNull ExtensionContext context) {
         Object instance = context.getRequiredTestInstance();
         Class<?> instanceClass = instance.getClass();
         do {

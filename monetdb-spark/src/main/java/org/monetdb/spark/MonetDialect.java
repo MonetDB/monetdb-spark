@@ -179,7 +179,7 @@ public class MonetDialect extends JdbcDialect {
 
 	@Override
 	public String getTruncateQuery(String table, Option<Object> cascade) {
-		// 'cascade' is of type Option<Object> here but we know it's an optional Boolean
+		// 'cascade' is of type Option<Object> here, but we know it's an optional Boolean
 		String s = "TRUNCATE " + table;
 		if (cascade.isDefined()) {
 			Boolean b = (Boolean) cascade.get();

@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -91,7 +90,7 @@ class BackRefEncoderTests {
             byte lo = -0x80 + 1;
             byte hi = -0x80 + 63;
             assertTrue(lo <= b && b <= hi, "lo=" + lo + " b=" + b + " hi=" + hi);
-            assertEquals(expected, (long)(b & 0x7F));
+            assertEquals(expected, b & 0x7F);
         } else {
 
             // Long.

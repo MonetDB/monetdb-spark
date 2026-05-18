@@ -44,7 +44,7 @@ public class SparkSQLTests {
                 .config("spark.master", "local[1]")
                 .config(Map.of(
                         "spark.sql.catalog.testdb", JDBCTableCatalog.class.getName(),
-                        "spark.sql.catalog.testdb.url", Config.databaseUrl()
+                        "spark.sql.catalog.testdb.url", sparkDbUrl
                 ))
                 .config(options)
                 .getOrCreate();

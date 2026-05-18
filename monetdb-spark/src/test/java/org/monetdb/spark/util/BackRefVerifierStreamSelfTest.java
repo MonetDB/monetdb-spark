@@ -54,7 +54,7 @@ class BackRefVerifierStreamSelfTest {
     }
 
     @Test
-    public void testWrongItem() throws IOException {
+    public void testWrongItem() {
         setupOverride(1, "b");
         AssertionError exc = assertThrows(
                 AssertionError.class,
@@ -64,7 +64,7 @@ class BackRefVerifierStreamSelfTest {
     }
 
     @Test
-    public void testUnexpectedNull() throws IOException {
+    public void testUnexpectedNull() {
         setupOverride(1, null);
         AssertionError exc = assertThrows(
                 AssertionError.class,
@@ -74,7 +74,7 @@ class BackRefVerifierStreamSelfTest {
     }
 
     @Test
-    public void testUnexpectedNonnull() throws IOException {
+    public void testUnexpectedNonnull() {
         setupOverride(2, "x");
         AssertionError exc = assertThrows(
                 AssertionError.class,

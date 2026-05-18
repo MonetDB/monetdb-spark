@@ -361,7 +361,7 @@ public class MonetDialectTest {
 	public void testLoadTIMESTAMPTZ() throws SQLException {
 		// SQL TIMESTAMPTZ maps to Spark TimeStamp, so it's session time zone aware.
 
-		// timestamp including time zone. In Berlin it was 23:52:00+01:00.
+		// timestamp including time zone. It was 23:52:00+01:00 in Berlin.
 		String original = "1989-11-09 22:52:00+00:00";
 		Instant originalInstant = Instant.parse(original.replace(' ', 'T'));
 		assertEquals(626655120_000L, originalInstant.toEpochMilli());

@@ -80,7 +80,7 @@ public class UploadTool {
 		return "\"" + id.replace("\"", "\"\"") + "\"";
 	}
 
-	private double measureTime(String phase) {
+	private void measureTime(String phase) {
 		double duration = 0.0;
 		long now = System.currentTimeMillis();
 		if (startTime != 0 && phase != null) {
@@ -89,7 +89,6 @@ public class UploadTool {
 			System.out.println();
 		}
 		startTime = now;
-		return duration;
 	}
 
 private void run() throws SQLException, IOException {

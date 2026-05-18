@@ -157,7 +157,7 @@ public abstract class AbstractSaveModeTests {
 
 		// Without truncate, Overwrite cannot DROP foo
 		SQLException e = assertThrowsSQLException(() -> insertData(SaveMode.Overwrite));
-		// We'd expect 23000 but we get 40000. Whatever..
+		// We'd expect 23000 but we get 40000. Whatever...
 		assertEquals("40000", e.getSQLState());
 	}
 

@@ -36,7 +36,6 @@ import static org.apache.spark.sql.functions.col;
 import static org.apache.spark.sql.functions.lit;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
-import static org.monetdb.spark.util.Assertions.assertThrowsSQLException;
 
 class BinCopyFileDumpTest {
 	private static Path destDir;
@@ -96,7 +95,7 @@ class BinCopyFileDumpTest {
                 	COUNT(DISTINCT i) AS nunique,
                 	MIN(i) AS mini,
                 	MAX(i) AS maxi
-				FROM foo""";
+                FROM foo""";
 		try (ResultSet rs = stmt.executeQuery(sql)) {
 			assertTrue(rs.next());
 			int nrows = rs.getInt("nrows");
@@ -197,7 +196,7 @@ class BinCopyFileDumpTest {
 	}
 
 	@Test
-	public void testRefuseDumpWithOverwrite() throws SQLException, IOException {
+	public void testRefuseDumpWithOverwrite() {
 		DataFrameWriter<Row> writer = makeWriter();
 		RuntimeException exc = assertThrows(RuntimeException.class,
 				() -> writer.mode(SaveMode.Overwrite).option("dumpdir", destDir.toString()).save());

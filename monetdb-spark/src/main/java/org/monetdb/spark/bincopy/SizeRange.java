@@ -101,8 +101,8 @@ public class SizeRange {
 		}
 	}
 
-	public boolean valid() {
-		return size > 0;
+	public boolean invalid() {
+		return size <= 0;
 	}
 
 	public Extractor getExtractor(int index) throws ConversionError {

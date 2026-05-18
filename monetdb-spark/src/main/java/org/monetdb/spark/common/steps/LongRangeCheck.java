@@ -23,9 +23,7 @@ public class LongRangeCheck extends RangeCheck {
 	}
 
 	public LongRangeCheck(boolean allowOverflow, Range range) {
-		super(allowOverflow);
-		this.lo = range.lo;
-		this.hi = range.hi;
+		this(allowOverflow, range.lo, range.hi);
 	}
 
 	@Override

@@ -49,8 +49,8 @@ public class BackRefEncoder {
     /**
      * Return whether the item has been seem before. If so,
      * {@link #encoded()} can be used to retrieve the encoding.
-     * @param item
-     * @return
+     * @param item item to check and encode
+     * @return true if seen before
      */
     public boolean examine(ByteBuffer item) {
         long itemNr = itemCounter++;
@@ -145,7 +145,7 @@ public class BackRefEncoder {
         }
     }
 
-    private class Cache {
+    private static class Cache {
         private final int[] offsets;
         private final long[] itemNumbers;
         private final ByteBuffer text;

@@ -53,14 +53,4 @@ public class BinCopyUploader implements Uploader {
 		stmt.close();
 		conn.close();
 	}
-
-	@Override
-	public void setOnStartUpload(Runnable callback) {
-		collector.setOnStartUpload(callback);
-	}
-
-	@Override
-	public void setOnEndUpload(Runnable callback) {
-		collector.setOnEndUpload(callback);
-	}
 }

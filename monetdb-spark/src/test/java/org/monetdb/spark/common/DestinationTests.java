@@ -130,7 +130,7 @@ class DestinationTests {
 	private void testGetColumns(String table, ColumnDescr[] expected) throws URISyntaxException, ValidationError, SQLException {
 		Destination dest = new Destination(userUrl(true), null, null, table);
 		try (Connection conn = dest.connect()) {
-			ColumnDescr[] colTypes = dest.getColumns();
+			ColumnDescr[] colTypes = dest.getColumns(conn);
 			assertArrayEquals(expected, colTypes);
 		}
 	}

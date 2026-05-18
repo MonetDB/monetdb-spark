@@ -108,7 +108,7 @@ public class BackRefVerifierStream extends OutputStream {
         assertEquals(bytesSeen, bytesAccepted);
     }
 
-    static enum State {
+    enum State {
         Starting,
         InString,
         NullOrLongBackRef,

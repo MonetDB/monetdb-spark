@@ -30,6 +30,7 @@ public abstract class StateTrackerMetric implements CustomMetric {
 			new MillisCollecting(), //
 			new MillisUploading(), //
 			new MillisServer(), //
+			new MillisCommitting(), //
 			new MillisTotal(), //
 			new UploadCount(), //
 			new RowCount(), //

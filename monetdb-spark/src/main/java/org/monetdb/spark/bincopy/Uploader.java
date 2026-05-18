@@ -19,8 +19,4 @@ public interface Uploader {
 	void commit() throws SQLException, IOException;
 
 	void close() throws SQLException, IOException;
-
-	void setOnStartUpload(Runnable callback);
-
-	void setOnEndUpload(Runnable callback);
 }
