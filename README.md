@@ -130,8 +130,7 @@ JDBC data source. The following configuration options are supported:
 * **batchsize**: monetdb-spark will issue one COPY BINARY INTO
   statement per **batchsize** rows. Large batch sizes are generally more
   efficient but require more memory in the Spark nodes to accumulate
-  the data. For now the default is to issue one COPY BINARY per
-  partition but this may change in the future.
+  the data. The default is 100000.
 
 * **allowoverflow**: determines what happens if a value is outside the range
   of the destination column. If true, overflowing values are replaced with

@@ -43,8 +43,8 @@ public class Parms implements Serializable {
 		this.partitioning = partitioning;
 		tableName = argument("dbtable");
 
-		String batchSizeArg = argument("batchsize", null);
-		batchSize = batchSizeArg != null ? Long.parseLong(batchSizeArg) : Long.MAX_VALUE;
+		String batchSizeArg = argument("batchsize", "100000");
+		batchSize = Long.parseLong(batchSizeArg);
 
 		String allowOverflowArg = argument("allowoverflow", "true");
 		allowOverflow = Boolean.parseBoolean(allowOverflowArg);

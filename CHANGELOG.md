@@ -24,6 +24,8 @@
 - A new option **immediatecommit** allows you to force a commit after each batch
   (see **batchsize**).
 
+- The default **batchsize** has changed from unlimited to 100000 rows.
+
 - [Backref encoding](https://www.monetdb.org/documentation/user-guide/sql-manual/data-loading/binary-loading/#encoding-repeated-strings)
   can be used to transfer repeating strings more efficiently. The option
   **backrefsize** specifies the size of the buffer used to look for repeated
