@@ -77,7 +77,7 @@ public class Parms implements Serializable {
 		String cascadeTruncateArg = argument("cascadeTruncate", "false");
 		cascadeTruncate = Boolean.parseBoolean(cascadeTruncateArg);
 
-		String backrefSizeArg = argument("backrefsize", "0");
+		String backrefSizeArg = argument("backrefsize", "-1");
 		backrefSize = parseSize(backrefSizeArg);
 	}
 

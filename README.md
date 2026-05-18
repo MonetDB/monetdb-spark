@@ -171,7 +171,7 @@ JDBC data source. The following configuration options are supported:
   buffer. The size can be written with a k/M suffix to indicate kilo- and
   megabytes. The value 0 means to track only the NULL string, the empty string
   and single ASCII character strings. The value -1 means not to encode any
-  duplicates at all. The default is 0. This option is automatically disabled
+  duplicates at all. The default is -1. This option is automatically disabled
   when the server does not support it.
 
 * **truncate**: in overwrite mode, use `TRUNCATE` to empty the existing table instead
